@@ -1,4 +1,5 @@
 # Python version managed with pyenv
+
 Set the global version to 3.6.5
 python --version should output 3.6.5
 
@@ -8,6 +9,12 @@ To install a version
     pyenv install 3.6.5
 To set the global version
     pyenv global 3.6.5
+    
+# Automatic version management
+I've added at the beginning of the bin/activate script
+    pyenv global 3.6.5
+and in the deactivate function
+    pyenv global system
 
 # Python virtual environment
 Environment created with
