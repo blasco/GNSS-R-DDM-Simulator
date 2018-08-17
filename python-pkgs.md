@@ -1,0 +1,3 @@
+jupyterlab
+netcdf4
+matplotlib
