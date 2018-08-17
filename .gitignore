@@ -4,6 +4,7 @@ include/
 lib/
 lib64
 share/
+.ipynb_checkpoints
 pip-selfcheck.json
 pyvenv.cfg
 *.nc
