@@ -21,8 +21,14 @@ Environment created with
     python -m venv env_name
 To activate the environment:
     source /path/to/venv/bin/activate
-To deactiva the environment:
+To deactivate environment:
     deactivate
 
-once the right version of python is set and the environment is activated we can install packages with:
+Once the right version of python is set and the environment is activated we can install packages with:
     pip install pkg_name
+
+# TDS-1 Data FTP access
+ftp://ftp.merrbys.co.uk
+
+Username:     jblasco
+Password:      @jYhr=M4rF
