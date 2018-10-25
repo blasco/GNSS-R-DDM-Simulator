@@ -1,0 +1,112 @@
+#!/usr/bin/env python
+
+from zipfile import ZipFile
+from lxml import html
+import os
+import concurrent.futures
+import time
+from tqdm import tqdm
+
+def process_file(filename):
+    results=[]
+    lat = 0
+    lon = 0
+    saved_file=False;
+    kmz = ZipFile(filename, 'r')
+    for kml_name in kmz.namelist():
+        if 'doc.kml' in kml_name:
+            continue
+        kml = kmz.open(kml_name, 'r').read()
+        doc = html.fromstring(kml)
+        for pm in doc.cssselect('Document Placemark'):
+            tmp = pm.cssselect('track')
+            if len(tmp):
+                # Track Placemark
+                tmp = tmp[0]  # always one element by definition
+
+                skip = 20 
+                skip_count = 0
+                for desc in tmp.iterdescendants():
+
+                    # Skip some placemarks to speed up
+                    if skip_count < skip:
+                        skip_count = skip_count + 1
+                        continue
+                    skip_count = 0
+
+                    content = desc.text_content()
+                    if desc.tag == 'coord':
+                        lon = float(content.split()[0])
+                        lat = float(content.split()[1])
+
+                        # Di Simone
+                        # Found in Sentinel 2
+                        search_lat = 46.75009
+                        search_lon = -48.78161
+
+                        # Petronius
+                        # Found in Sentinel 2
+                        #search_lat = 29.10793
+                        #search_lon = -87.94369
+
+                        # Atlantis PQ
+                        # Found in Sentinel 2
+                        #search_lat = 27.195278 
+                        #search_lon = -90.026944
+
+                        # Songa Mercur
+                        # Found in Sentinel 2
+                        #search_lat = 8.48863 
+                        #search_lon = 108.67737
+
+                        # Devils's Tower
+                        # Found in Sentinel 2
+                        #search_lat = 28.19013
+                        #search_lon = -88.49552
+
+                        # Statfjord oil field
+                        # Found in Sentinel 2
+                        #search_lat = 61.255556 
+                        #search_lon = 1.853889
+
+                        # 0.5 deg error approx 55 km error
+                        search_error = 0.18
+                        if (abs((lat%360) - (search_lat%360)) <= search_error) and (abs((lon%360) - (search_lon%360)) <= search_error):
+                            if not saved_file:
+                                results.append('\nFile: ' + filename + '\n')
+                                saved_file=True
+                            results.append(content + '\n')
+    return results
+
+def main():
+    print('searching oil platform')
+
+    # Search all files
+    kmz_files = []
+    for root, subdirs, files in os.walk(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B_Catalogue')):
+        for file in files:
+            if '.kmz' in file:
+                filename = os.path.join(root,file)
+                kmz_files.append(filename)
+
+    # Single execution
+    #for file in kmz_files:
+    #    print(file)
+    #    process_file(file)
+
+    # Parallel execution
+    catalog_path = os.path.join(os.environ['TDS_ROOT'],'lat_lon_search/catalog_output.txt')
+    open(catalog_path, 'wt').close() # Clear file
+    progress_bar = tqdm(total=len(kmz_files), unit_scale=False, unit='Files')
+    with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+        for results in executor.map(process_file, kmz_files, chunksize=1):
+            progress_bar.update()
+            with open(catalog_path, 'at') as f:
+                for line in results:
+                    f.write(line);
+                    print(line)
+    print('\n%s: Download finished\n' % time.ctime())
+
+if __name__ == '__main__':
+    main()
+

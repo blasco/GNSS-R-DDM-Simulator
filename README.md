@@ -32,3 +32,13 @@ ftp://ftp.merrbys.co.uk
 
 Username:     jblasco
 Password:      @jYhr=M4rF
+
+# CYGNSS Data
+ftp://podaac-ftp.jpl.nasa.gov/allData/cygnss/L1/v2.0
+
+
+# Sentinel 2 Data
+EO Browser:
+
+https://apps.sentinel-hub.com/eo-browser/?lat=28.18924&lng=-88.49811&zoom=16&time=2018-06-27&preset=1_TRUE_COLOR&datasource=Sentinel-2%20L1C
+

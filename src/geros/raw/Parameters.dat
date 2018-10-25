@@ -1,0 +1,11 @@
+Sim_Mode_Signal 1122
+Rx_Altitude 400
+Surf_Height_Offset 0
+Spec_ElvAng_CE 65
+AlphaTx 70
+AlphaRx 120
+U10 12
+Phi_wind 22
+vTEC 35
+Trop_Offset 0
+FocusingErr 0

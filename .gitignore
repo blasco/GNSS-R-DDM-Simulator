@@ -8,3 +8,4 @@ share/
 pip-selfcheck.json
 pyvenv.cfg
 *.nc
+src/tds/raw
