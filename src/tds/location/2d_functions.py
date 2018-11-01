@@ -1,22 +1,21 @@
 #!/usr/bin/env python
 
 import numpy as np
+import os
 from shapely import geometry
 import matplotlib.pyplot as plt
+from netCDF4 import Dataset
 
-def find_intersection(contour1,contour2):
-  p1 = contour1.collections[0].get_paths()[0]
-  v1 = p1.vertices
+from find_sp import *
+from find_index_meta import * 
+from find_contour_intersections import *
 
-  p2 = contour2.collections[0].get_paths()[0]
-  v2 = p2.vertices
-
-  poly1 = geometry.LineString(v1)
-  poly2 = geometry.LineString(v2)
-
-  intersection = poly1.intersection(poly2)
-
-  return intersection
+file_root_name = 'raw/L1B/2018-07-29-H18'
+rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], file_root_name+'-DDMs.nc') , "r", format="NETCDF4")
+metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], file_root_name+'-metadata.nc') , "r", format="NETCDF4")
+group = '000050'
+index = 380
+index_meta = find_index_meta(rootgrp, metagrp, group, index)
 
 h = 500
 elev = 60*np.pi/180
