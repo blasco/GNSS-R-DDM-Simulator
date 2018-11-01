@@ -21,10 +21,11 @@ from datetime import *
 #group = '000095'
 #start_0 = 525
 
-rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-DDMs.nc') , "r", format="NETCDF4")
-metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-metadata.nc') , "r", format="NETCDF4")
-group = '000021'
-start_0 = 430
+file_root_name = 'raw/L1B/2018-07-29-H18'
+rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], file_root_name+'-DDMs.nc') , "r", format="NETCDF4")
+metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], file_root_name+'-metadata.nc') , "r", format="NETCDF4")
+group = '000050'
+start_0 = 380
 
 # Di Simone Oil Platform
 #filename = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-11-H18-DDMs.nc')
@@ -104,7 +105,7 @@ def next_max(ddm,col):
                     next_max = ddm[row_i][col_i] 
     return next_max
 
-for start in range(start_0,start_0+10):
+for start in range(start_0,start_0+20):
     # original
     ddm_original = np.array(rootgrp.groups[group].variables['DDM'][start].data)
 
@@ -205,12 +206,12 @@ for start in range(start_0,start_0+10):
     #    rect = mpatches.Rectangle((minc-l, minr-l), maxc - minc + 2*l-1, maxr - minr + 2*l - 1, fill=False, edgecolor='red', linewidth=2)
     #    ax_labels.add_patch(rect)
 
-    #datenum = metagrp.groups[group].variables['IntegrationMidPointTime'][start]
-    #lat = metagrp.groups[group].variables['SpecularPointLat'][start]
-    #lon = metagrp.groups[group].variables['SpecularPointLon'][start]
-    #string = 'G: ' + group + ' I: ' + str(start) + ' - ' + \
-    #        str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
-    #        str(lat) + ' Lon: ' + str(lon) + '\n'
-    #t = plt.text(5, 5, string, {'color': 'w', 'fontsize': 12})
+    datenum = metagrp.groups[group].variables['IntegrationMidPointTime'][start]
+    lat = metagrp.groups[group].variables['SpecularPointLat'][start]
+    lon = metagrp.groups[group].variables['SpecularPointLon'][start]
+    string = 'G: ' + group + ' I: ' + str(start) + ' - ' + \
+            str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
+            str(lat) + ' Lon: ' + str(lon) + '\n'
+    t = plt.text(5, 5, string, {'color': 'w', 'fontsize': 12})
 
 plt.show()

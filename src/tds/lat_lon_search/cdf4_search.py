@@ -22,7 +22,7 @@ def search_lat_lon(filename, search_lat, search_lon):
             lat = metagrp.groups[group].variables['SpecularPointLat'][index]
             lon = metagrp.groups[group].variables['SpecularPointLon'][index]
             # 0.5 deg error approx 55 km error
-            search_error = 0.5
+            search_error = 0.18
             if (abs((lat%360) - (search_lat%360)) <= search_error and abs((lon%360) - (search_lon%360)) <= search_error):
                 string = 'G: ' + group + ' I: ' + str(index) + ' - ' + \
                         str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
@@ -36,7 +36,8 @@ with open(os.path.join(os.environ['TDS_ROOT'],'lat_lon_search/cdf4_output.txt'),
 
     # Di Simone
     #filename = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-metadata.nc')
-    filename = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-metadata.nc')
+    file_root_name = 'raw/L1B/2018-07-29-H18'
+    filename = os.path.join(os.environ['TDS_ROOT'], file_root_name+'-metadata.nc')
     search_lat = 46.75009
     search_lon = -48.78161
 
