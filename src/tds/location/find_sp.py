@@ -2,6 +2,8 @@ import numpy as np
 from netCDF4 import Dataset
 
 def find_sp(r_sp_estimate):
+    a = 6378137 #m
+    b = 6356752.314245 #m
 
     def ellip_norm(r):
         x,y,z = r
