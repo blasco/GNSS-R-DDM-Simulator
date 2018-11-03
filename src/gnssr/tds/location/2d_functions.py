@@ -17,7 +17,7 @@ index = 375
 search_lat_deg = 28.19013
 search_lon_deg = -88.49552
 
-time_delay = 3.3e-5
+time_delay = 5e-6
 doppler_delay = 1300
 
 earth_a = 6378137 # meters
@@ -45,6 +45,9 @@ def time_eq(x, y):
            (x**2 + (y+h/np.tan(elev))**2   + h**2  )**(1/2) \
            )
     #return (1/c)*((x**2 +(y+h/np.tan(elev))**2 + h**2)**(1/2) - h/np.sin(elev) - y*np.cos(elev))
+
+def time_inc_eq(x,y):
+    return time_eq(x,y) - time_eq(0,0)
 
 def doppler_eq(x, y):
     # GPS L1 center frequency
@@ -75,7 +78,7 @@ X, Y = np.meshgrid(
         np.linspace(extent_x0, extent_x1, linsapce_delta), 
         np.linspace(extent_y0, extent_y1, linsapce_delta)
         )
-Z_time = time_eq(X,Y)
+Z_time = time_inc_eq(X,Y)
 Z_doppler = doppler_inc_eq(X,Y)
 
 # Iso-Delay Contour
