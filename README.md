@@ -27,6 +27,12 @@ To deactivate environment:
 Once the right version of python is set and the environment is activated we can install packages with:
     pip install pkg_name
 
+# Installing the project module
+Based on [this answer](https://stackoverflow.com/questions/714063/importing-modules-from-parent-folder)
+
+Install the module in editable state:
+    pip install -e .
+
 # TDS-1 Data FTP access
 ftp://ftp.merrbys.co.uk
 
