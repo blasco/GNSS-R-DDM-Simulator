@@ -1,0 +1,3 @@
+
+File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2015-12/04/H18/2015-12.04.H18.kmz
+-88.411827 28.089811 0
