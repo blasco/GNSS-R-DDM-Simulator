@@ -6,36 +6,11 @@ import os
 import concurrent.futures
 import time
 from tqdm import tqdm
+from gnssr.targets import *
 
-# Di Simone
-# Found in Sentinel 2
-#search_lat = 46.75009
-#search_lon = -48.78161
-
-# Petronius
-# Found in Sentinel 2
-search_lat = 29.10793
-search_lon = -87.94369
-
-# Atlantis PQ
-# Found in Sentinel 2
-#search_lat = 27.195278 
-#search_lon = -90.026944
-
-# Songa Mercur
-# Found in Sentinel 2
-#search_lat = 8.48863 
-#search_lon = 108.67737
-
-# Devils's Tower
-# Found in Sentinel 2
-#search_lat = 28.19013
-#search_lon = -88.49552
-
-# Statfjord oil field
-# Found in Sentinel 2
-#search_lat = 61.255556 
-#search_lon = 1.853889
+target = targets['petronius']
+# 0.5 deg error approx 55 km error
+search_error = 0.2
 
 def process_file(filename):
     results=[]
@@ -53,25 +28,19 @@ def process_file(filename):
             if len(tmp):
                 # Track Placemark
                 tmp = tmp[0]  # always one element by definition
-
                 skip = 20 
                 skip_count = 0
                 for desc in tmp.iterdescendants():
-
                     # Skip some placemarks to speed up
                     if skip_count < skip:
                         skip_count = skip_count + 1
                         continue
                     skip_count = 0
-
                     content = desc.text_content()
                     if desc.tag == 'coord':
                         lon = float(content.split()[0])
                         lat = float(content.split()[1])
-
-                        # 0.5 deg error approx 55 km error
-                        search_error = 0.2
-                        if (abs((lat%360) - (search_lat%360)) <= search_error) and (abs((lon%360) - (search_lon%360)) <= search_error):
+                        if (abs((lat%360) - (target.lat%360)) <= search_error) and (abs((lon%360) - (target.lon%360)) <= search_error):
                             if not saved_file:
                                 results.append('\nFile: ' + filename + '\n')
                                 saved_file=True
@@ -109,4 +78,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

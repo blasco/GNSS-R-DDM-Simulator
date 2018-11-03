@@ -8,26 +8,22 @@ from netCDF4 import Dataset
 
 from find_contour_intersections import *
 from tds_problem import *
-from gnssr.math_lib.utils import *
+from gnssr.utils import *
 
-file_root_path = 'raw/L1B/2015-12-04-H18'
+file_root_path = 'raw/L1B/2017-11-13-H18'
 group = '000066'
 index = 375
 
-search_lat_deg = 28.19013
-search_lon_deg = -88.49552
+search_lat_deg = 29.10793
+search_lon_deg = -87.94369
 
 time_delay = 5e-6
 doppler_delay = 1300
-
-earth_a = 6378137 # meters
-earth_b = 6356752.314245 # meters
 
 tds = tds_problem(file_root_path)
 tds.set_group_index(group, index)
 tds.show_ddm()
 
-ellip_norm = lambda r: np.array([2*r[0]/earth_a**2,2*r[1]/earth_a**2,2*r[2]/earth_b**2])
 n_z = unit_vector(ellip_norm(tds.r_sp))
 n_x = unit_vector(np.cross(n_z, tds.r_sp-tds.r_t))
 n_y = unit_vector(np.cross(n_z, n_x))
@@ -38,15 +34,19 @@ elev = angle_between(n_y, tds.r_t-tds.r_sp)
 print("elve: {0} elev: {1}".format(elev,  angle_between(-n_y, tds.r_r-tds.r_sp)))
 print("h: {0} h_0: {1}".format(h, h_0))
 
+def z_sp(x, y):
+    R = np.linalg.norm(tds.r_sp)
+    return (R**2 -x**2 -y**2 )**(1/2) - R
+
 def time_eq(x, y):
     c = 299792458 # m/s
     return (1/c)*( \
-           (x**2 + (y-h_0/np.tan(elev))**2 + h_0**2)**(1/2) + \
-           (x**2 + (y+h/np.tan(elev))**2   + h**2  )**(1/2) \
+           (x**2 + (y-h_0/np.tan(elev))**2 + (z_sp(x,y)-h_0)**2)**(1/2) + \
+           (x**2 + (-h/np.tan(elev) -y)**2 + (h - z_sp(x,y))**2)**(1/2) \
            )
     #return (1/c)*((x**2 +(y+h/np.tan(elev))**2 + h**2)**(1/2) - h/np.sin(elev) - y*np.cos(elev))
 
-def time_inc_eq(x,y):
+def time_inc_eq(x, y):
     return time_eq(x,y) - time_eq(0,0)
 
 def doppler_eq(x, y):
@@ -60,8 +60,8 @@ def doppler_eq(x, y):
     v_ry = np.dot(tds.v_r, n_y)
     v_rz = np.dot(tds.v_r, n_z)
     return (f_c/c)*( \
-            (v_tx*(x)  + v_ty*(y-h_0/np.tan(elev)) + v_tz*(-h_0)) / (x**2 + (y-h_0/np.tan(elev))**2 + h_0**2)**(1/2) \
-           -(v_rx*(-x) + v_ry*(-y-h/np.tan(elev))  + v_rz*(h)   ) / (x**2 + (y+h/np.tan(elev))**2   + h**2  )**(1/2) \
+            (v_tx*(x)  + v_ty*(y-h_0/np.tan(elev)) + v_tz*(z_sp(x,y)-h_0))  / (x**2 + (y-h_0/np.tan(elev))**2 + (z_sp(x,y)-h_0)**2)**(1/2) \
+           -(v_rx*(-x) + v_ry*(-h/np.tan(elev)-y)  + v_rz*(h-z_sp(x,y))   ) / (x**2 + (-h/np.tan(elev) -y)**2 + (h - z_sp(x,y))**2)**(1/2) \
             )
     #return (-f_c/c)*(-v_ty*np.cos(elev) - v_tz*np.sin(elev) + (v_rx*x + v_ry*(y+h/np.tan(elev)) - v_rz*h)/(x**2 + (y+h/np.tan(elev))**2 + h**2)**(1/2))
 
