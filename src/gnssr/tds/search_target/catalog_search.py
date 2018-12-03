@@ -8,11 +8,41 @@ import time
 from tqdm import tqdm
 from gnssr.targets import *
 
-target = targets['petronius']
-# 0.5 deg error approx 55 km error
-search_error = 0.2
+def main():
+    print('Searching oil platform')
 
-def process_file(filename):
+    # Search all files
+    kmz_files = []
+    for root, subdirs, files in os.walk(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B_Catalogue')):
+        for file in files:
+            if '.kmz' in file:
+                filename = os.path.join(root,file)
+                kmz_files.append(filename)
+
+    # Single execution
+    #for file in kmz_files:
+    #    print(file)
+    #    catalog_search(file)
+
+    # Parallel execution
+    catalog_path = os.path.join(os.environ['TDS_ROOT'],'search_target/catalog_search_output.txt')
+    open(catalog_path, 'wt').close() # Clear file
+    progress_bar = tqdm(total=len(kmz_files), unit_scale=False, unit='Files')
+    with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+        for results in executor.map(catalog_search, kmz_files, chunksize=1):
+            progress_bar.update()
+            with open(catalog_path, 'at') as f:
+                for line in results:
+                    f.write(line);
+                    print(line)
+    print('\n%s: Download finished\n' % time.ctime())
+
+
+def catalog_search(filename):
+    target = targets['atlantis_pq']
+    # 0.5 deg error approx 55 km error
+    search_error = 0.18
+
     results=[]
     lat = 0
     lon = 0
@@ -46,35 +76,6 @@ def process_file(filename):
                                 saved_file=True
                             results.append(content + '\n')
     return results
-
-def main():
-    print('searching oil platform')
-
-    # Search all files
-    kmz_files = []
-    for root, subdirs, files in os.walk(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B_Catalogue')):
-        for file in files:
-            if '.kmz' in file:
-                filename = os.path.join(root,file)
-                kmz_files.append(filename)
-
-    # Single execution
-    #for file in kmz_files:
-    #    print(file)
-    #    process_file(file)
-
-    # Parallel execution
-    catalog_path = os.path.join(os.environ['TDS_ROOT'],'lat_lon_search/catalog_search_output.txt')
-    open(catalog_path, 'wt').close() # Clear file
-    progress_bar = tqdm(total=len(kmz_files), unit_scale=False, unit='Files')
-    with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
-        for results in executor.map(process_file, kmz_files, chunksize=1):
-            progress_bar.update()
-            with open(catalog_path, 'at') as f:
-                for line in results:
-                    f.write(line);
-                    print(line)
-    print('\n%s: Download finished\n' % time.ctime())
 
 if __name__ == '__main__':
     main()
