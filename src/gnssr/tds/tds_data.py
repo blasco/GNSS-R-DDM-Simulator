@@ -62,6 +62,21 @@ class tds_data:
 
         self.sp_incidence_tds = self.metagrp.groups[group].variables['SPIncidenceAngle'][index].data
 
+        # Compute resolution
+        self.update_time_delay_resolution()
+        self.update_doppler_resolution()
+
+    def update_doppler_resolution(self):
+        doppler_resolution = self.metagrp.groups[self.group].DopplerResolution
+        self.doppler_resolution = doppler_resolution
+
+    def update_time_delay_resolution(self):
+        code_delay_spacing_samples_between_pixels = self.metagrp.groups[self.group].CodeDelaySpacingSamplesBetweenPixels
+        sampling_frequency = self.metagrp.groups[self.group].SamplingFrequency
+        tracking_offset_delay_ns = self.metagrp.groups[self.group].TrackingOffsetDelayNs
+        specular_path_range_offset = self.metagrp.groups[self.group].variables['SpecularPathRangeOffset'][self.index]
+        self.time_delay_resolution = code_delay_spacing_samples_between_pixels/sampling_frequency
+
     def find_sp(self):
         r_sp_estimate = self.r_sp_tds
         for it in range(4):
@@ -101,7 +116,7 @@ class tds_data:
 
     def calculate_delay_increment_chips(self, delay_pixel):
         chips_per_second = 1.023e6
-        return calculate_delay_increment_seconds(delay_pixel)*chips_per_second
+        return self.calculate_delay_increment_seconds(delay_pixel)*chips_per_second
 
     def calculate_doppler_increment(self, doppler_pixel):
         doppler_resolution = self.metagrp.groups[self.group].DopplerResolution

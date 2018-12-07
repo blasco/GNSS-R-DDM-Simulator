@@ -39,6 +39,8 @@ tds = tds_data(file_root_name)
 tds.set_group_index(group, index)
 tds.show_ddm()
 
+print("t vel: {}".format(np.linalg.norm(tds.v_t)))
+
 r_sp, lat_sp, lon_sp = tds.find_sp();
 n_z = unit_vector(ellip_norm(r_sp))
 n_x = unit_vector(np.cross(n_z, r_sp-tds.r_t))
@@ -46,8 +48,11 @@ n_y = unit_vector(np.cross(n_z, n_x))
 
 #TODO: imporve sp auto calculation
 h = np.dot((tds.r_r - r_sp), n_z)
+print("h: {}".format(h))
 h_0 = np.dot((tds.r_t - r_sp), n_z)
+print("h_0: {}".format(h_0))
 elev = angle_between(n_y, tds.r_t-r_sp)
+print("elev: {}".format(elev))
 
 print("elev tds: {}".format(90 -tds.sp_incidence_tds))
 print("elve: {0} elev: {1}".format(elev*180/np.pi,  angle_between(-n_y, tds.r_r-r_sp)*180/np.pi))
@@ -55,6 +60,7 @@ print("h: {0} h_0: {1}".format(h, h_0))
 
 def z_sp(x, y):
     R = np.linalg.norm(r_sp)
+    print("r: {}".format(R))
     return (R**2 -x**2 -y**2 )**(1/2) - R
 
 def time_eq(x, y):
@@ -80,6 +86,7 @@ def doppler_eq(x, y):
     v_rx = np.dot(tds.v_r, n_x)
     v_ry = np.dot(tds.v_r, n_y)
     v_rz = np.dot(tds.v_r, n_z)
+    print("v: {0}, {1}, {2}".format(v_rx,v_ry,v_rz))
     return (f_c/c)*( \
             (v_tx*(x)  + v_ty*(y-h_0/np.tan(elev)) + v_tz*(z_sp(x,y)-h_0))  / (x**2 + (y-h_0/np.tan(elev))**2 + (z_sp(x,y)-h_0)**2)**(1/2) \
            -(v_rx*(-x) + v_ry*(-h/np.tan(elev)-y)  + v_rz*(h-z_sp(x,y))   ) / (x**2 + (-h/np.tan(elev) -y)**2 + (h - z_sp(x,y))**2)**(1/2) \
@@ -127,6 +134,10 @@ fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
 ax_lines.set_title('Iso-Delay and Iso-Doppler Lines')
 plt.xlabel('[m]')
 plt.ylabel('[m]')
+
+print("res t: {}".format(tds.time_delay_resolution))
+print("res h: {}".format(tds.doppler_resolution))
+
 iso_delay_values = list(np.arange(0,tds.time_delay_resolution*50,tds.time_delay_resolution))
 c_time = ax_lines.contour(X, Y, Z_time, iso_delay_values, cmap='winter')
 fig_lines.colorbar(c_time, label='seconds')

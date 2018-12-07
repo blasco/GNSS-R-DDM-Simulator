@@ -24,7 +24,8 @@ class target_processor:
 
     def __init__(self):
         self.min_col = 60
-        self.max_col = 85
+        #self.max_col = 85
+        self.max_col = 95
         self.ddm_list = []
 
         self.fig_labels, self.ax_labels = plt.subplots(1,figsize=(10, 4))
@@ -101,7 +102,8 @@ class target_processor:
 
         # 3. Over threshold detection
         ddm_detections = np.zeros(ddm_diff.shape)
-        threshold = 0.38
+        #threshold = 0.38
+        threshold = 0.5
         print(np.max(ddm_diff))
         print(threshold)
         for row_i, row in enumerate(ddm_diff):
