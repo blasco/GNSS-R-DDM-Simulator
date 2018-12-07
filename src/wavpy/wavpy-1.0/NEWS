@@ -1,0 +1,9 @@
+Note #1
+27 Jan 2014
+Presenly works with 64 or 320 lags. There are oyher cases. A temporary solution is to cut the arrays
+
+FF -> Done! Now it works with any other lag dimension.
+
+Note#2
+27 Jan 2014
+perhaps we could consider to perform coherent and incoherent integrations using the "cluster approach". 

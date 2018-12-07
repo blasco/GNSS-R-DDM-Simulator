@@ -1,0 +1,100 @@
+---------------------------------------------------------------------------
+-------------------------------| WAVPY v1 |--------------------------------
+---------------------------------------------------------------------------
+
+    Copyright (C) 2017  Fran Fabra
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details at:
+
+    <http://www.gnu.org/licenses/>
+
+===========================================================================
+
+--REQUIRED LIBRARIES AND PROGRAMS--
+
+- Autotools: autotools-dev (autoconf, automake, libtool, and m4)
+- GFotran: gfortran
+- GCC: gcc
+- GSL version 2.0 or newer (GNU Scientific Library)
+- Simplified Wrapper and Interface Generator: swig
+- FFTW3: libfftw3-dev
+- Python development: python-dev
+
+== Python 2.7
+
+- numpy
+
+but also recommended
+
+- scipy
+- matplotlib
+
+===========================================================================
+
+--GENERATING THE MAKEFILE--
+
+The first time or when a new program is added, the procedure to follow is:
+
+autoreconf -i -I m4
+./configure
+
+then, if no error missage appears, the code can be compiled with:
+
+make
+
+===========================================================================
+
+--PYTHON--
+
+After a successful "make", in order to do not need a "make install", a softlink
+of _wavpy.so has to be done at wavpy folder:
+
+cd wavpy
+ln -s .libs/_wavpy.so .
+
+This is needed to have both wavpy.py and _wavpy.so at the same place
+
+Then, to make an import of "wavpy" from anywhere, you can add in your .py script:
+
+-------------------------------------------------------------------
+import sys
+import os
+HOME = os.getenv("HOME")
+wavpyDIR = HOME + "/wavpy-1.0/wavpy/"
+sys.path.insert(1,wavpyDIR)
+import wavpy
+-------------------------------------------------------------------
+
+===========================================================================
+
+--TEST--
+
+It is highly recommended to run the python script available at:
+
+wavpy-1.0/wavpy/test/Test_model_TDS1case.py
+
+and then compare the outputs generated with the reference ones at the same folder.
+
+===========================================================================
+
+------ DISCLAIMER:
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. USE IT AT YOUR OWN RISK.
+------
+
+Fran Fabra
+fabra@ieec.cat
+
+GNSS-R Development Team
+ICE-CSIC/IEEC
+
+Version 1.0
+23 May 2017
+
