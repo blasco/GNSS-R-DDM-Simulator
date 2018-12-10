@@ -47,11 +47,11 @@ class target_processor:
         return ddm_cut
 
     def process_ddm(self, ddm_raw):
-        this.ddm_original = normalize(ddm_raw)
+        self.ddm_original = normalize(ddm_raw)
 
         n = 200
         if len(self.ddm_list) < n :
-            self.ddm_list.insert(0, this.ddm_original)
+            self.ddm_list.insert(0, self.ddm_original)
             return
 
         # 1. Sea clutter estimation. 
@@ -90,10 +90,10 @@ class target_processor:
         # Only the region of the wake is relevant for detection, so we cut the 
         # irrelevant region
         sea_clutter_cut = self.cut_noise_region(sea_clutter, sea_clutter)
-        this.ddm_original_cut = self.cut_noise_region(ddm_original, sea_clutter)
+        self.ddm_original_cut = self.cut_noise_region(self.ddm_original, sea_clutter)
 
         # 2. Sea clutter substracted Difference Map
-        ddm_diff = this.ddm_original_cut - 0.85*sea_clutter_cut
+        ddm_diff = self.ddm_original_cut - 0.85*sea_clutter_cut
         if (np.min(ddm_diff) < 0):
             ddm_diff = ddm_diff - np.min(ddm_diff)
         cut_value_fig = np.min(ddm_diff)
@@ -115,7 +115,7 @@ class target_processor:
         # Plotting
         '''
         fig_original = plt.figure(figsize=(10, 4))
-        im_original = plt.imshow(this.ddm_original, cmap='viridis', extent=(0,127,-10,9))
+        im_original = plt.imshow(self.ddm_original, cmap='viridis', extent=(0,127,-10,9))
         plt.show(block=False)
 
         fig_sea_clutter = plt.figure(figsize=(10, 4))
@@ -155,10 +155,10 @@ class target_processor:
 
     def plot_targets():
         [p.remove() for p in reversed(self.ax_labels.patches)] # Clear previous patches
-        this.all_labels = label(ddm_detections)
-        self.ax_labels.imshow(this.ddm_original, cmap='viridis')
+        selfall_labels = label(ddm_detections)
+        self.ax_labels.imshow(self.ddm_original, cmap='viridis')
         target_flag = False
-        for region in regionprops(this.all_labels):
+        for region in regionprops(selfall_labels):
             target_flag = True
             minr, minc, maxr, maxc = region.bbox
             l = 1 
