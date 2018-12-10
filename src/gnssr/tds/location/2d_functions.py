@@ -3,6 +3,7 @@
 import numpy as np
 import os
 from shapely import geometry
+import tkinter
 import matplotlib.pyplot as plt
 from netCDF4 import Dataset
 
@@ -13,16 +14,10 @@ from gnssr.targets import *
 from gnssr.tds.search_target.cdf4_search import *
 
 # Di Simone
-#file_root_name = 'raw/L1B/2015-04-01-H00'
-#target = targets['hibernia']
-#group = '000095'
-#index = 525
-
-# Nice one, only one pass
-file_root_name = 'raw/L1B/2017-11-13-H18'
-target = targets['devils_tower']
-group = '000057'
-index = 426
+file_root_name = 'raw/L1B/2015-04-01-H00'
+target = targets['hibernia']
+group = '000095'
+index = 525
 
 # 0.5 deg error approx 55 km error
 if index == 0:

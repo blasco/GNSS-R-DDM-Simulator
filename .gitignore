@@ -10,3 +10,5 @@ pyvenv.cfg
 *.nc
 src/gnssr/tds/raw
 __pycache__/
+man/
+src/gnssr.egg-info/
