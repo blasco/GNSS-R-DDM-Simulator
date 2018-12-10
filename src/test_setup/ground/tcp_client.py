@@ -6,7 +6,7 @@ import pickle
 import sys
 from time import sleep
 
-from gnssr.tds.detection.find_targets import *
+import telemetry
 
 def recvall(sock, n):
     # Helper function to recv n bytes or return None if EOF is hit
@@ -28,7 +28,7 @@ def recv_msg(sock):
     return recvall(sock, msglen)
 
 def main():
-    processor = target_processor()
+    telemetry_processor = telemetry.processor()
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = "127.0.0.1"
@@ -51,9 +51,9 @@ def main():
                 res = soc.recv(5120).decode("utf8")
                 if res == 'NEW_DATA':
                     data = recv_msg(soc)
-                    telemetry = pickle.loads(data)
-                    for line in telemetry:
-                        print(line)
+                    tm = pickle.loads(data)
+                    telemetry_processor.load_telemetry(tm)
+                    telemetry_processor.plot_telemetry()
                 elif res == 'NO_NEW_DATA':
                     pass
                 sleep(0.5)

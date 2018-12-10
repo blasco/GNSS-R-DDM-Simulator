@@ -45,7 +45,7 @@ def main():
     while command != 'quit':
 
         if command == "START":
-            for index in range(0,500):
+            for index in range(0, 97):
                 print(index)
                 soc.sendall("GET_DDM".encode("utf8"))
                 data = recv_msg(soc)

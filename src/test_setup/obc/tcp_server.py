@@ -69,12 +69,10 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
             index = tm_processor.find_new_data()
             if index > 0:
                 connection.sendall("NEW_DATA".encode("utf8"))
-                filename = os.path.join(os.environ['PROJECT_SRC_ROOT'],'test_setup/obc/fs/ddm___{0}'.format(index))
-                with open(filename, 'rt') as f:
-                    data = []
-                    for line in f:
-                        data.append(line)
-                    send_msg(connection, pickle.dumps(data))
+                filename = os.path.join(os.environ['PROJECT_SRC_ROOT'],'test_setup/obc/fs/results___{0}'.format(index))
+                with open(filename, 'rb') as f:
+                    tm = pickle.load(f)
+                    send_msg(connection, pickle.dumps(tm))
             else:
                 connection.sendall("NO_NEW_DATA".encode("utf8"))
 

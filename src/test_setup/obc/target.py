@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from skimage.measure import label, regionprops
 import matplotlib.patches as mpatches
 from datetime import *
+import pickle
 
 from gnssr.tds.tds_data import *
 from gnssr.utils import *
@@ -24,16 +25,13 @@ class processor:
 
     def __init__(self):
         self.min_col = 60
-        self.max_col = 95
+        self.max_col = 105
         self.ddm_buffer = []
-        self.ddm_buffer_size = 200
+        self.ddm_buffer_size = 50
         self.fig_labels, self.ax_labels = plt.subplots(1,figsize=(10, 4))
         self.integration_finished_flag = False
 
-        self.fs_path = os.path.join(os.environ['PROJECT_SRC_ROOT'],'test_setup/obc/fs')
-        for filename in os.listdir(self.fs_path):
-            os.remove(filename)
-
+        self.fs_path = os.path.join(os.environ['PROJECT_SRC_ROOT'], 'test_setup/obc/fs')
 
     def cut_noise_region(self, ddm,ddm_ref,new_value=0):
         '''
@@ -110,7 +108,7 @@ class processor:
         # 3. Over threshold detection
         self.ddm_detections = np.zeros(ddm_diff.shape)
         #threshold = 0.38
-        threshold = 0.5
+        threshold = 0.625
         print(np.max(ddm_diff))
         print(threshold)
         for row_i, row in enumerate(ddm_diff):
@@ -118,15 +116,15 @@ class processor:
                 if(col_i >= self.min_col and col_i <= self.max_col):
                     if(ddm_diff[row_i][col_i] >= threshold):
                         self.ddm_detections[row_i][col_i] = 1
+        self.all_labels = label(self.ddm_detections)
 
-        self.save_targets("ddm___{0}".format(index - self.ddm_buffer_size))
+        self.save_targets(index - self.ddm_buffer_size)
 
     def plot_targets(self):
         if self.integration_finished_flag == False:
             return
 
         [p.remove() for p in reversed(self.ax_labels.patches)] # Clear previous patches
-        self.all_labels = label(self.ddm_detections)
         self.ax_labels.imshow(self.ddm_original, cmap='viridis')
         target_flag = False
         for region in regionprops(self.all_labels):
@@ -138,10 +136,17 @@ class processor:
         plt.draw()
         plt.pause(0.0001)
 
-    def save_targets(self, filename):
-        new_file = os.path.join(os.environ['PROJECT_SRC_ROOT'], 'test_setup/obc/fs/' + filename)
-        with open(new_file, 'wt') as f:
-            f.write(self.metadata)
+    def save_targets(self, index):
+        if self.integration_finished_flag == False:
+            return
+
+        new_file = os.path.join(os.environ['PROJECT_SRC_ROOT'], 'test_setup/obc/fs/results___{0}'.format(index))
+        with open(new_file, 'wb') as f:
+            results = {}
+            results['metadata'] = self.metadata
+            results['ddm_original'] = self.ddm_original
+            results['all_labels'] = self.all_labels
+            pickle.dump(results, f);
 
 def main():
     # Di Simone Oil Platform Data

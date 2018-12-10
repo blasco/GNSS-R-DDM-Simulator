@@ -17,7 +17,7 @@ class instrument:
         self.file_root_name = 'raw/L1B/2015-04-01-H00'
         self.group = '000095'
         index_0 = 525
-        self.index = index_0 - 200 - 15
+        self.index = index_0 - 50
         self.tds = tds_data(self.file_root_name)
 
     def get_ddm(self):
