@@ -12,13 +12,17 @@ sudo apt-get install tk-dev
 sudo apt-get install python3-tk
 # Then install with pyenv
 pyenv install 3.6.5
-# Set python version
-pyenv global 3.6.5
 
 # --- Create Python Virtual Environment with venv module --- 
+
 python -m venv py_venv_gnssr
 
-# --- Activate environment ---
+# Add the following lines to py_venv_gnssr/bin/activate
+    pyenv shell 3.6.5 # Set python version
+    export TDS_ROOT='/home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds'
+    export CYGNSS_ROOT='/home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/cygnss'
+
+# Activate enviornment 
 source py_venv_gnssr/bin/activate
 
 # --- Install packages ---
