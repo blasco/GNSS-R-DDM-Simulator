@@ -31,6 +31,7 @@ Once the right version of python is set and the environment is activated we can 
 Based on [this answer](https://stackoverflow.com/questions/714063/importing-modules-from-parent-folder)
 
 Install the module in editable state:
+    cd src
     pip install -e .
 
 # TDS-1 Data FTP access
@@ -45,4 +46,20 @@ Install the module in editable state:
 
 # Sentinel 2 Data
 [Sentinel 2 Data explorer](https://apps.sentinel-hub.com/eo-browser/?lat=28.18924&lng=-88.49811&zoom=16&time=2018-06-27&preset=1_TRUE_COLOR&datasource=Sentinel-2%20L1C)
+
+# Python Libraries
+
+## Jupyter Lab
+    pip install jupyterlab
+
+## NetCDF
+    pip install netcdf4
+
+## Matplotlib
+    pip install matplotlib
+
+## Basemap
+Instructions on [Github](https://github.com/matplotlib/basemap)
+I had to fix the include paths:
+    geos_include_dirs=[os.path.join(GEOS_dir,'include'),'/home/woowapdabug/projects/thesis/python/lib/python3.6/site-packages/numpy/core/include']
 
