@@ -6,6 +6,7 @@ curl -L https://github.com/pyenv/pyenv-installer/raw/master/bin/pyenv-installer 
 # First install dependencies 
 sudo apt-get install libbz2-dev
 sudo apt-get install libssl-dev
+sudo apt-get install libreadline-dev
 sudo apt-get install libsqlite3-dev
 sudo apt-get install tk-dev 
 sudo apt-get install python3-tk
