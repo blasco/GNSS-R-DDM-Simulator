@@ -20,15 +20,20 @@ def datenum_to_pytime(matlab_datenum):
 def normalize(mat):
     return (mat - np.min(mat))/(np.max(mat)-np.min(mat))
 
-class target_processor:
+class processor:
 
     def __init__(self):
         self.min_col = 60
-        #self.max_col = 85
         self.max_col = 95
-        self.ddm_list = []
-
+        self.ddm_buffer = []
+        self.ddm_buffer_size = 200
         self.fig_labels, self.ax_labels = plt.subplots(1,figsize=(10, 4))
+        self.integration_finished_flag = False
+
+        self.fs_path = os.path.join(os.environ['PROJECT_SRC_ROOT'],'test_setup/obc/fs')
+        for filename in os.listdir(self.fs_path):
+            os.remove(filename)
+
 
     def cut_noise_region(self, ddm,ddm_ref,new_value=0):
         '''
@@ -46,22 +51,24 @@ class target_processor:
                         ddm_cut[row_i][col_i] = ddm[row_i][col_i]
         return ddm_cut
 
-    def load_ddm(self, ddm_raw):
-        this.ddm_original = normalize(ddm_raw) 
+    def load_ddm(self, ddm_raw, metadata):
+        self.ddm_original = normalize(ddm_raw) 
+        self.metadata = metadata
 
-    def find_targets(self):
-        n = 200
-        if len(self.ddm_list) < n :
-            self.ddm_list.insert(0, self.ddm_original)
+    def process_ddm(self, index):
+        if len(self.ddm_buffer) < self.ddm_buffer_size :
+            self.ddm_buffer.insert(0, self.ddm_original)
             return
+
+        self.integration_finished_flag = True
 
         # 1. Sea clutter estimation. 
         # As target appear as bright spots, the initial estimation is based of the 
         # composition of the minimum values for each pixel for the last n measurements
-        n = 10
-        sea_clutter_0 = self.ddm_list[0]
+        n = int(self.ddm_buffer_size/10)
+        sea_clutter_0 = self.ddm_buffer[0]
         for i in range(1, n):
-            ddm_i = normalize(self.ddm_list[i])
+            ddm_i = normalize(self.ddm_buffer[i])
             sea_clutter_0 = normalize(sea_clutter_0)
             for row_i, row in enumerate(sea_clutter_0):
                 for col_i, val in enumerate(row):
@@ -73,11 +80,10 @@ class target_processor:
 
         # Using the sea_clutter_0 as initial estimation a low pass filter that gives 
         # more weight to the lower values is applied 
-        n = 200
         tau = 0.08
         sea_clutter = np.array(sea_clutter_0)
-        for i in range(1, n):
-            ddm_i = normalize(self.ddm_list[i])
+        for i in range(1, self.ddm_buffer_size):
+            ddm_i = normalize(self.ddm_buffer[i])
             sea_clutter = normalize(sea_clutter)
             for row_i, row in enumerate(sea_clutter):
                 for col_i, val in enumerate(row):
@@ -91,10 +97,10 @@ class target_processor:
         # Only the region of the wake is relevant for detection, so we cut the 
         # irrelevant region
         sea_clutter_cut = self.cut_noise_region(sea_clutter, sea_clutter)
-        self.ddm_original_cut = self.cut_noise_region(self.ddm_original, sea_clutter)
+        ddm_original_cut = self.cut_noise_region(self.ddm_original, sea_clutter)
 
         # 2. Sea clutter substracted Difference Map
-        ddm_diff = self.ddm_original_cut - 0.85*sea_clutter_cut
+        ddm_diff = ddm_original_cut - 0.85*sea_clutter_cut
         if (np.min(ddm_diff) < 0):
             ddm_diff = ddm_diff - np.min(ddm_diff)
         cut_value_fig = np.min(ddm_diff)
@@ -102,7 +108,7 @@ class target_processor:
         ddm_diff = self.cut_noise_region(ddm_diff,sea_clutter)
 
         # 3. Over threshold detection
-        ddm_detections = np.zeros(ddm_diff.shape)
+        self.ddm_detections = np.zeros(ddm_diff.shape)
         #threshold = 0.38
         threshold = 0.5
         print(np.max(ddm_diff))
@@ -111,64 +117,31 @@ class target_processor:
             for col_i, val in enumerate(row):
                 if(col_i >= self.min_col and col_i <= self.max_col):
                     if(ddm_diff[row_i][col_i] >= threshold):
-                        ddm_detections[row_i][col_i] = 1
+                        self.ddm_detections[row_i][col_i] = 1
 
-        # Plotting
-        '''
-        fig_original = plt.figure(figsize=(10, 4))
-        im_original = plt.imshow(self.ddm_original, cmap='viridis', extent=(0,127,-10,9))
-        plt.show(block=False)
+        self.save_targets("ddm___{0}".format(index - self.ddm_buffer_size))
 
-        fig_sea_clutter = plt.figure(figsize=(10, 4))
-        im_sea_clutter = plt.imshow(sea_clutter, cmap='viridis', extent=(0,127,-10,9))    
-        plt.show(block=False)
+    def plot_targets(self):
+        if self.integration_finished_flag == False:
+            return
 
-        fig_sub = plt.figure(figsize=(10, 4))
-        im_sub = plt.imshow(ddm_diff, cmap='viridis', extent=(0,127,-10,9))
-        plt.show(block=False)
-
-        fig_detections = plt.figure(figsize=(10, 4))
-        im_detections = plt.imshow(ddm_detections, cmap='viridis', extent=(0,127,-10,9))
-        plt.show(block=False)
-        '''
-
-        '''
-        datenum = metagrp.groups[group].variables['IntegrationMidPointTime'][index]
-        lat = metagrp.groups[group].variables['SpecularPointLat'][index]
-        lon = metagrp.groups[group].variables['SpecularPointLon'][index]
-        string = 'G: ' + group + ' I: ' + str(index) + ' - ' + \
-                str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
-                str(lat) + ' Lon: ' + str(lon) + '\n'
-        t = plt.text(5, 5, string, {'color': 'w', 'fontsize': 12})
-        '''
-
-        '''
-        # Plot with pause
-        plt.draw()
-        plt.pause(1) 
-        input("<Hit Enter To Continue>")
-        plt.close(fig_original)
-        plt.close(fig_sea_clutter)
-        plt.close(fig_sub)
-        plt.close(fig_detections)
-        plt.close(fig_labels)
-        '''
-
-    def plot_targets():
         [p.remove() for p in reversed(self.ax_labels.patches)] # Clear previous patches
-        selfall_labels = label(ddm_detections)
+        self.all_labels = label(self.ddm_detections)
         self.ax_labels.imshow(self.ddm_original, cmap='viridis')
         target_flag = False
-        for region in regionprops(selfall_labels):
+        for region in regionprops(self.all_labels):
             target_flag = True
             minr, minc, maxr, maxc = region.bbox
             l = 1 
             rect = mpatches.Rectangle((minc-l, minr-l), maxc - minc + 2*l-1, maxr - minr + 2*l - 1, fill=False, edgecolor='red', linewidth=2)
             self.ax_labels.add_patch(rect)
-
         plt.draw()
         plt.pause(0.0001)
 
+    def save_targets(self, filename):
+        new_file = os.path.join(os.environ['PROJECT_SRC_ROOT'], 'test_setup/obc/fs/' + filename)
+        with open(new_file, 'wt') as f:
+            f.write(self.metadata)
 
 def main():
     # Di Simone Oil Platform Data

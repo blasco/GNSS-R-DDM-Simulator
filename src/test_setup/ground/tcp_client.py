@@ -4,6 +4,7 @@ import struct
 import socket
 import pickle
 import sys
+from time import sleep
 
 from gnssr.tds.detection.find_targets import *
 
@@ -31,7 +32,7 @@ def main():
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = "127.0.0.1"
-    port = 8889
+    port = 8888
 
     try:
         soc.connect((host, port))
@@ -45,12 +46,17 @@ def main():
     while message != 'quit':
 
         if message == "START":
-            for i in range(0,500):
-                print(i)
+            while True:
                 soc.sendall("GET_TM".encode("utf8"))
-                data = recv_msg(soc)
-                ddm = pickle.loads(data)
-                processor.process_ddm(ddm)
+                res = soc.recv(5120).decode("utf8")
+                if res == 'NEW_DATA':
+                    data = recv_msg(soc)
+                    telemetry = pickle.loads(data)
+                    for line in telemetry:
+                        print(line)
+                elif res == 'NO_NEW_DATA':
+                    pass
+                sleep(0.5)
 
         else:
             soc.sendall(message.encode("utf8"))

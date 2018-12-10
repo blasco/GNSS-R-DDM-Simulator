@@ -9,6 +9,7 @@ from threading import Thread
 
 from gnssr.tds.tds_data import *
 from gnssr.targets import *
+from gnssr.utils import *
 
 class instrument:
     def __init__(self):
@@ -21,6 +22,15 @@ class instrument:
 
     def get_ddm(self):
         return self.tds.rootgrp.groups[self.group].variables['DDM'][self.index].data
+
+    def get_metadata(self):
+        datenum = self.tds.metagrp.groups[self.group].variables['IntegrationMidPointTime'][self.index]
+        lat = self.tds.metagrp.groups[self.group].variables['SpecularPointLat'][self.index]
+        lon = self.tds.metagrp.groups[self.group].variables['SpecularPointLon'][self.index]
+        string = 'G: ' + self.group + ' I: ' + str(self.index) + ' - ' + \
+                str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
+                str(lat) + ' Lon: ' + str(lon) + '\n'
+        return string
 
     def next_ddm(self):
         self.index = self.index + 1
@@ -77,10 +87,18 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
             connection.close()
             print("Connection " + ip + ":" + port + " closed")
             is_active = False
-        elif client_input == 'GET_TM':
+
+        elif client_input == 'GET_DDM':
             ddm = inst.get_ddm()
-            inst.next_ddm()
             send_msg(connection, pickle.dumps(ddm))
+
+        elif client_input == 'GET_METADATA':
+            metadata = inst.get_metadata()
+            send_msg(connection, pickle.dumps(metadata))
+
+        elif client_input == 'NEXT_DDM':
+            inst.next_ddm()
+
         else:
             print("Unknown command: {}".format(client_input))
             connection.sendall("-".encode("utf8"))

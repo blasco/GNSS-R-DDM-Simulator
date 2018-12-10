@@ -10,22 +10,9 @@ from threading import Thread
 from gnssr.tds.tds_data import *
 from gnssr.targets import *
 
-class instrument:
-    def __init__(self):
-        # Di Simone Oil Platform Data
-        self.file_root_name = 'raw/L1B/2015-04-01-H00'
-        self.group = '000095'
-        index_0 = 525
-        self.index = index_0 - 200 - 15
-        self.tds = tds_data(self.file_root_name)
+import tm
 
-    def get_ddm(self):
-        return self.tds.rootgrp.groups[self.group].variables['DDM'][self.index].data
-
-    def next_ddm(self):
-        self.index = self.index + 1
-
-inst = instrument()
+tm_processor = tm.processor()
 
 def send_msg(sock, msg):
     # Prefix each message with a 4-byte length (network byte order)
@@ -37,7 +24,7 @@ def main():
 
 def start_server():
     host = "127.0.0.1"
-    port = 8889         # arbitrary non-privileged port
+    port = 8888         # arbitrary non-privileged port
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)   # SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state, without waiting for its natural timeout to expire
@@ -77,12 +64,22 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
             connection.close()
             print("Connection " + ip + ":" + port + " closed")
             is_active = False
+
         elif client_input == 'GET_TM':
-            ddm = inst.get_ddm()
-            inst.next_ddm()
-            send_msg(connection, pickle.dumps(ddm))
+            index = tm_processor.find_new_data()
+            if index > 0:
+                connection.sendall("NEW_DATA".encode("utf8"))
+                filename = os.path.join(os.environ['PROJECT_SRC_ROOT'],'test_setup/obc/fs/ddm___{0}'.format(index))
+                with open(filename, 'rt') as f:
+                    data = []
+                    for line in f:
+                        data.append(line)
+                    send_msg(connection, pickle.dumps(data))
+            else:
+                connection.sendall("NO_NEW_DATA".encode("utf8"))
+
         else:
-            print("Unknown command: {}".format(client_input))
+            print("Unknown command: {0}".format(client_input))
             connection.sendall("-".encode("utf8"))
 
 def receive_input(connection, max_buffer_size):

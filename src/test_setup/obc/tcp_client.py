@@ -5,7 +5,7 @@ import socket
 import pickle
 import sys
 
-from gnssr.tds.detection.find_targets import *
+import target
 
 def recvall(sock, n):
     # Helper function to recv n bytes or return None if EOF is hit
@@ -27,7 +27,7 @@ def recv_msg(sock):
     return recvall(sock, msglen)
 
 def main():
-    processor = target_processor()
+    target_processor = target.processor()
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     host = "127.0.0.1"
@@ -40,25 +40,34 @@ def main():
         sys.exit()
 
     print("Enter 'quit' to exit")
-    message = input(" -> ")
+    command = input(" -> ")
 
-    while message != 'quit':
+    while command != 'quit':
 
-        if message == "START":
-            for i in range(0,500):
-                print(i)
-                soc.sendall("GET_TM".encode("utf8"))
+        if command == "START":
+            for index in range(0,500):
+                print(index)
+                soc.sendall("GET_DDM".encode("utf8"))
                 data = recv_msg(soc)
                 ddm = pickle.loads(data)
-                processor.process_ddm(ddm)
 
+                soc.sendall("GET_METADATA".encode("utf8"))
+                data = recv_msg(soc)
+                metadata = pickle.loads(data)
+
+                soc.sendall("NEXT_DDM".encode("utf8"))
+
+                target_processor.load_ddm(ddm, metadata)
+                target_processor.process_ddm(index)
+
+                #target_processor.plot_targets()
         else:
-            soc.sendall(message.encode("utf8"))
+            soc.sendall(command.encode("utf8"))
             res = soc.recv(5120).decode("utf8")
             if res == "-":
                 pass        # null operation
 
-        message = input(" -> ")
+        command = input(" -> ")
 
     soc.send(b'--QUIT--')
 

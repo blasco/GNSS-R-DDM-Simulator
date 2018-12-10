@@ -19,6 +19,7 @@ python -m venv py_venv_gnssr
 
 # Add the following lines to py_venv_gnssr/bin/activate
     pyenv shell 3.6.5 # Set python version
+    export PROJECT_SRC_ROOT='/home/woowapdabug/projects/thesis/py_venv_gnssr/src'
     export TDS_ROOT='/home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds'
     export CYGNSS_ROOT='/home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/cygnss'
 
@@ -27,6 +28,9 @@ source py_venv_gnssr/bin/activate
 
 # --- Install packages ---
 pip install -r src/python_packages.txt
+
+# Additional libraries
+sudo apt-get install libgeos-dev
 
 
 
