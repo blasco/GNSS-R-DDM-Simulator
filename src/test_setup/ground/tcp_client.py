@@ -31,8 +31,8 @@ def main():
     telemetry_processor = telemetry.processor()
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = "127.0.0.1"
-    port = 8888
+    host = "192.168.60.82"
+    port = 8887
 
     try:
         soc.connect((host, port))
@@ -56,7 +56,7 @@ def main():
                     telemetry_processor.plot_telemetry()
                 elif res == 'NO_NEW_DATA':
                     pass
-                sleep(0.5)
+                    sleep(0.4)
 
         else:
             soc.sendall(message.encode("utf8"))

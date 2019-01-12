@@ -8,10 +8,16 @@ from skimage.measure import label, regionprops
 import matplotlib.patches as mpatches
 from datetime import *
 
-rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-DDMs.nc') , "r", format="NETCDF4")
-metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-07-H06-metadata.nc') , "r", format="NETCDF4")
-group = '000021'
-index = 430
+# Petronius Oil Platform
+#file_dir = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2017-11-26-H06-')
+#rootgrp = Dataset(file_dir+"DDMs.nc", "r", format="NETCDF4")
+#metagrp = Dataset(file_dir+"metadata.nc", "r", format="NETCDF4")
+#group = '000047'
+#start_0 = 590
+rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2015-04-01-H00-DDMs.nc') , "r", format="NETCDF4")
+metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2015-04-01-H00-metadata.nc') , "r", format="NETCDF4")
+group = '000095'
+index = 525
 
 # The region of interest lies between delay column 60 and delay column 80
 min_col = 60
@@ -64,7 +70,7 @@ sea_clutter_0 = normalize(sea_clutter_0)
 
 # Using the sea_clutter_0 as initial estimation a low pass filter that gives 
 # more weight to the lower values is applied 
-n = 100
+n = 200
 tau = 0.08
 sea_clutter = np.array(sea_clutter_0)
 for i in range(n):
@@ -103,7 +109,6 @@ for row_i, row in enumerate(ddm_diff):
         if(col_i >= min_col and col_i <= max_col):
             if(ddm_diff[row_i][col_i] >= threshold):
                 ddm_detections[row_i][col_i] = 1
-
 
 # Plotting
 fig_original = plt.figure(figsize=(10, 4))
