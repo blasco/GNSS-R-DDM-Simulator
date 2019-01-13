@@ -19,6 +19,9 @@ def ellip_norm(r):
     return np.array([2*r[0]/earth_a**2,2*r[1]/earth_a**2,2*r[2]/earth_b**2])
 
 def datenum_to_pytime(matlab_datenum):
+    '''
+        Formated using ISO 8601
+    '''
     python_datetime = datetime.fromordinal(int(matlab_datenum)) + timedelta(days=matlab_datenum%1) - timedelta(days = 366)
-    #return python_datetime.strftime('%Y-%m-%d %H:%M:%S')
-    return python_datetime
+    return str(python_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]) + 'Z'
+    #return python_datetime

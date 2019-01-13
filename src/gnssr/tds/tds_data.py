@@ -15,6 +15,11 @@ class tds_data:
         self.metagrp = Dataset(metagrp_path, "r", format="NETCDF4")
 
     def find_index_meta(self):
+        '''
+            The rootgrp index and the metagrp index do not match, the matching 
+            key is the IntegrationMidPointTime. This function finds the 
+            corresponding meta_index
+        '''
         datenum = self.rootgrp.groups[self.group].variables['IntegrationMidPointTime'][self.index]
         datenums_meta = np.array(self.metagrp.variables['IntegrationMidPointTime'])
         for i, datenum_meta in enumerate(datenums_meta):
@@ -24,6 +29,9 @@ class tds_data:
                 break
 
     def set_group_index(self, group, index):
+        '''
+            Configugres the problem associated to the specified group an index
+        '''
         self.group = group
         self.index = index
         self.index_meta = self.find_index_meta()
@@ -62,22 +70,11 @@ class tds_data:
 
         self.sp_incidence_tds = self.metagrp.groups[group].variables['SPIncidenceAngle'][index].data
 
-        # Compute resolution
-        self.update_time_delay_resolution()
-        self.update_doppler_resolution()
-
-    def update_doppler_resolution(self):
-        doppler_resolution = self.metagrp.groups[self.group].DopplerResolution
-        self.doppler_resolution = doppler_resolution
-
-    def update_time_delay_resolution(self):
-        code_delay_spacing_samples_between_pixels = self.metagrp.groups[self.group].CodeDelaySpacingSamplesBetweenPixels
-        sampling_frequency = self.metagrp.groups[self.group].SamplingFrequency
-        tracking_offset_delay_ns = self.metagrp.groups[self.group].TrackingOffsetDelayNs
-        specular_path_range_offset = self.metagrp.groups[self.group].variables['SpecularPathRangeOffset'][self.index]
-        self.time_delay_resolution = code_delay_spacing_samples_between_pixels/sampling_frequency
-
     def find_sp(self):
+        '''
+            Computes a more precise specular point location using the WGS-84 based on the TDS 
+            estimation
+        '''
         r_sp_estimate = self.r_sp_tds
         for it in range(4):
             r_center = np.array(r_sp_estimate)
@@ -102,6 +99,9 @@ class tds_data:
         return r_sp, lat_sp, lon_sp
 
     def calculate_delay_increment_seconds(self, delay_pixel):
+        '''
+            Calculates the delay increment in seconds of the specified pixel
+        '''
         code_delay_spacing_samples_between_pixels = self.metagrp.groups[self.group].CodeDelaySpacingSamplesBetweenPixels
         sampling_frequency = self.metagrp.groups[self.group].SamplingFrequency
         tracking_offset_delay_ns = self.metagrp.groups[self.group].TrackingOffsetDelayNs
@@ -115,28 +115,45 @@ class tds_data:
         return delay_increment_seconds
 
     def calculate_delay_increment_chips(self, delay_pixel):
+        '''
+            Calculates the delay increment in chips of the specified pixel
+        '''
+        # From https://en.wikipedia.org/wiki/GPS_signals
+        #The C/A code, for civilian use, transmits data at 1.023 million chips per 
+        #second, whereas the P code, for U.S. military use, transmits at 10.23 million 
+        #chips per second.  
+        
         chips_per_second = 1.023e6
         return self.calculate_delay_increment_seconds(delay_pixel)*chips_per_second
 
     def calculate_doppler_increment(self, doppler_pixel):
+        '''
+            Calculates the doppler increment in HZ of the specified pixel
+        '''
         doppler_resolution = self.metagrp.groups[self.group].DopplerResolution
         self.doppler_resolution = doppler_resolution
         tracking_offset_doppler_hz = self.metagrp.groups[self.group].TrackingOffsetDopplerHz
         return doppler_pixel*doppler_resolution - tracking_offset_doppler_hz
 
-    def show_ddm(self):
+    def plot_ddm(self):
+        '''
+            Plots DDM
+        '''
         datenum = self.rootgrp.groups[self.group].variables['IntegrationMidPointTime'][self.index]
         ddm = self.rootgrp.groups[self.group].variables['DDM'][self.index].data
         string = str(datenum_to_pytime(float(datenum))) \
             + ' Lat: ' + "{0:.2f}".format(self.lat_sp_tds) \
             + ' Lon: ' + "{0:.2f}".format(self.lon_sp_tds)
-        delay_0 = self.calculate_delay_increment_seconds(0)
-        delay_1 = self.calculate_delay_increment_seconds(127)
+        delay_0 = self.calculate_delay_increment_chips(0)
+        delay_1 = self.calculate_delay_increment_chips(127)
         doppler_0 = self.calculate_doppler_increment(-10)
         doppler_1 = self.calculate_doppler_increment(10)
         fig, ax = plt.subplots(1,figsize=(10, 4))
+        ax.set_ylabel('Hz')
+        ax.set_xlabel('C/A chips')
         im = ax.imshow(ddm, cmap='viridis', 
                 extent=(delay_0, delay_1, doppler_0, doppler_1), 
                 aspect=(20/128)/np.abs(doppler_0/delay_0)
                 )
+        t = plt.text(0.01, 0.80, string, {'color': 'w', 'fontsize': 12}, transform=ax.transAxes)
         plt.show(block=False)

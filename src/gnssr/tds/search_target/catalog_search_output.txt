@@ -1,3 +1,4 @@
 
-File: /home/woowapdabug/projects/thesis/python/src/gnssr/tds/raw/L1B_Catalogue/2015-04/01/H00/2015-04.01.H00.kmz
+File: /home/woowapdabug/projects/thesis/python/src/gnssr/tds/raw/L1B_Catalogue/2015-04/01/H00/2015-02.11.H21.kmz
+file_root_name = 'raw/L1B/2015-02-11-H18'
 

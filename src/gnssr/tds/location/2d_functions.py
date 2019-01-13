@@ -27,12 +27,14 @@ if index == 0:
 search_lat_deg = target.lat
 search_lon_deg = target.lon
 
-time_delay = 2.7e-6
-doppler_delay = 1000
+time_delay = 3.910308326579947e-0620/1.023e6
+doppler_delay = 1500
 
 tds = tds_data(file_root_name)
 tds.set_group_index(group, index)
-tds.show_ddm()
+tds.plot_ddm()
+
+print("delay feature: {0}".format(tds.calculate_delay_increment_seconds(80)))
 
 print("t vel: {}".format(np.linalg.norm(tds.v_t)))
 
@@ -52,6 +54,14 @@ print("elev: {}".format(elev))
 print("elev tds: {}".format(90 -tds.sp_incidence_tds))
 print("elve: {0} elev: {1}".format(elev*180/np.pi,  angle_between(-n_y, tds.r_r-r_sp)*180/np.pi))
 print("h: {0} h_0: {1}".format(h, h_0))
+
+print("Transmitter: ")
+print("r_tx: {0} \nr_ty: {1} \nr_tz: {2}".format(tds.r_t[0], tds.r_t[1], tds.r_t[2]))
+print("v_tx: {0} \nv_ty: {1} \nv_tz: {2}".format(tds.v_t[0], tds.v_t[1], tds.v_t[2]))
+
+print("Receiver: ")
+print("r_rx: {0} \nr_ry: {1} \nr_rz: {2}".format(tds.r_r[0], tds.r_r[1], tds.r_r[2]))
+print("v_rx: {0} \nv_ry: {1} \nv_rz: {2}".format(tds.v_r[0], tds.v_r[1], tds.v_r[2]))
 
 def z_sp(x, y):
     R = np.linalg.norm(r_sp)
