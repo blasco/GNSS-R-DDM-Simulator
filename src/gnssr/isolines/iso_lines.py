@@ -2,6 +2,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+from gnssr.utils import *
 
 class iso_lines:
 
@@ -61,6 +63,9 @@ class iso_lines:
     def time_inc_eq_usec(self, x, y):
         return (self.time_eq(x,y) - self.time_eq(0,0))*1e6
 
+    def time_inc_eq_chips(self, x, y):
+        return (self.time_eq(x,y) - self.time_eq(0,0))*chips_per_second
+
     def doppler_eq(self, x, y):
         self.elev = self.elev_deg*np.pi/180
         h_t = self.h_t 
@@ -92,19 +97,25 @@ class iso_lines:
                 np.linspace(self.extent_x0, self.extent_x1, self.linsapce_delta), 
                 np.linspace(self.extent_y0, self.extent_y1, self.linsapce_delta)
                 )
-        self.Z_time = self.time_inc_eq_usec(self.X,self.Y)
+        self.Z_time = self.time_inc_eq_chips(self.X,self.Y)
         self.Z_doppler = self.doppler_inc_eq(self.X,self.Y)
 
         self.fig_lines, self.ax_lines = plt.subplots(1,figsize=(10, 4))
-        self.ax_lines.set_title('TDS | Iso-Delay and Iso-Doppler Lines')
-        plt.xlabel('[m]')
-        plt.ylabel('[m]')
+        self.ax_lines.set_title('Iso-Delay and Iso-Doppler Lines')
+
+        ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
+        ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
+        self.ax_lines.xaxis.set_major_formatter(ticks_x)
+        self.ax_lines.yaxis.set_major_formatter(ticks_y)
+
+        plt.xlabel('[km]')
+        plt.ylabel('[km]')
 
     def plot(self):
         self.prepare_plot()
         # Iso-Delay
         c_time = self.ax_lines.contour(self.X, self.Y, self.Z_time, cmap='winter')  # Use this if no countours where found 
-        self.fig_lines.colorbar(c_time, label='micro seconds', )
+        self.fig_lines.colorbar(c_time, label='C/A chips', )
         # Iso-Doppler
         c_doppler = self.ax_lines.contour(self.X, self.Y, self.Z_doppler, cmap='autumn') # Use this if no countours where found 
         self.fig_lines.colorbar(c_doppler, label='Hz')
@@ -118,7 +129,7 @@ class iso_lines:
         # Iso-Delay
         iso_delay_values = list(np.arange(delay_start, delay_end, delay_increment))
         c_time = self.ax_lines.contour(self.X, self.Y, self.Z_time, iso_delay_values, cmap='winter')
-        self.fig_lines.colorbar(c_time, label='micro seconds', )
+        self.fig_lines.colorbar(c_time, label='C/A chips', )
         # Iso-Doppler
         iso_doppler_values = list(np.arange(doppler_start, doppler_end, doppler_increment))
         c_doppler = self.ax_lines.contour(self.X, self.Y, self.Z_doppler, iso_doppler_values, cmap='autumn')
