@@ -5,6 +5,8 @@ from dateutil import tz
 earth_a = 6378137 # meters
 earth_b = 6356752.314245 # meters
 w_earth = np.array([0, 0, 7.2921158553e-5]) # rad/sec
+        
+chips_per_second = 1.023e6
 
 def unit_vector(r):
     return r/np.linalg.norm(r)

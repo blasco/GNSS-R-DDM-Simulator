@@ -2,7 +2,7 @@ import numpy as np
 from shapely import geometry
 import matplotlib.pyplot as plt
 
-def find_intersection(contour1,contour2):
+def find_contour_intersection(contour1,contour2):
   p1 = contour1.collections[0].get_paths()[0]
   v1 = p1.vertices
 

@@ -122,8 +122,6 @@ class tds_data:
         #The C/A code, for civilian use, transmits data at 1.023 million chips per 
         #second, whereas the P code, for U.S. military use, transmits at 10.23 million 
         #chips per second.  
-        
-        chips_per_second = 1.023e6
         return self.calculate_delay_increment_seconds(delay_pixel)*chips_per_second
 
     def calculate_doppler_increment(self, doppler_pixel):

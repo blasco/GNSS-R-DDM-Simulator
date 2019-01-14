@@ -41,7 +41,7 @@ def main():
 def catalog_search(filename):
     target = targets['atlantis_pq']
     # 0.5 deg error approx 55 km error
-    search_error = 0.18
+    search_error = 0.
 
     results=[]
     lat = 0

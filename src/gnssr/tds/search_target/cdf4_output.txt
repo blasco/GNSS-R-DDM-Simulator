@@ -1,2 +1,0 @@
-/home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B/2015-02-11-H18-metadata.nc
-G: 000139 I: 840 - 736006.8554860764 - 2015-02-11 20:31:53.997005 - Lat: 16.946207 Lon: -157.40823

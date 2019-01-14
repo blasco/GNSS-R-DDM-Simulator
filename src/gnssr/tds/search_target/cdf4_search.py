@@ -7,11 +7,10 @@ from gnssr.targets import *
 
 # Example usage
 def main():
-    file_root_name = 'raw/L1B/2015-02-11-H18'
-    #target = targets['petronius']
-    target = Target(17.0015, -157.3958)
+    file_root_name = 'raw/L1B/2015-06-12-H00'
+    target = targets['hibernia']
     # 0.5 deg error approx 55 km error
-    search_error = 0.1
+    search_error = 0.5
     with open(os.path.join(os.environ['TDS_ROOT'],'search_target/cdf4_output.txt'),'wt') as file:
         file.write(cdf4_search(file_root_name, target, search_error))
 
