@@ -1,4 +1,49 @@
 
-File: /home/woowapdabug/projects/thesis/python/src/gnssr/tds/raw/L1B_Catalogue/2015-04/01/H00/2015-02.11.H21.kmz
-file_root_name = 'raw/L1B/2015-02-11-H18'
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-01/25/H06/2017-01.25.H06.kmz
+-90.203392 27.032812 0
+-89.729378 27.161196 0
 
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/08/H18/2015-09.08.H18.kmz
+-90.140533 27.128517 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/01/H06/2015-09.01.H06.kmz
+-90.101166 27.406591 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-07/03/H06/2018-07.03.H06.kmz
+-90.179970 26.922499 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-02/23/H18/2016-02.23.H18.kmz
+-89.847466 27.395401 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-02/10/H06/2017-02.10.H06.kmz
+-90.313652 27.078947 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-08/23/H18/2015-08.23.H18.kmz
+-90.003250 27.191704 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/23/H06/2018-02.23.H06.kmz
+-90.179039 27.105198 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-07/31/H18/2016-07.31.H18.kmz
+-89.788727 27.379162 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-05/25/H18/2018-05.25.H18.kmz
+-90.076035 27.321642 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-06/09/H06/2017-06.09.H06.kmz
+-89.893356 27.286419 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-06/25/H06/2017-06.25.H06.kmz
+-89.790215 27.046495 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-08/09/H06/2016-08.09.H06.kmz
+-90.045525 27.204107 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-03/04/H18/2017-03.04.H18.kmz
+-89.759865 27.450405 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/20/H06/2018-03.20.H06.kmz
+-89.853691 27.153006 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/10/H06/2018-03.10.H06.kmz
+-90.032372 27.476448 0

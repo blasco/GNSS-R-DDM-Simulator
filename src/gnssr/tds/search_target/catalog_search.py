@@ -37,11 +37,10 @@ def main():
                     print(line)
     print('\n%s: Download finished\n' % time.ctime())
 
-
 def catalog_search(filename):
     target = targets['atlantis_pq']
     # 0.5 deg error approx 55 km error
-    search_error = 0.
+    search_error = 0.3
 
     results=[]
     lat = 0

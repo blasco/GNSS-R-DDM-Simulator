@@ -24,19 +24,19 @@ tds_iso_lines.v_ry = 7299
 tds_iso_lines.v_rz = 199
 
 # Plotting Area
-tds_iso_lines.extent_x0 =  -20e3 # meters
-tds_iso_lines.extent_x1 =  20e3 # meters
-tds_iso_lines.extent_y0 =  -20e3 # meters
-tds_iso_lines.extent_y1 =  20e3 # meters
+tds_iso_lines.extent_x0 =  -120e3 # meters
+tds_iso_lines.extent_x1 =  120e3 # meters
+tds_iso_lines.extent_y0 =  -120e3 # meters
+tds_iso_lines.extent_y1 =  120e3 # meters
 
 tds_iso_lines.linsapce_delta = 500
 
 # -----------------
 
 # Iso Delay values 
-delay_start = 0 # micro secs
-delay_increment = 2.44e-7*1e6 # micro secs
-delay_end = 2.44e-7*1e6*15 # micro secs
+delay_start = 0 # C/A chips
+delay_increment = 0.5 # C/A chips
+delay_end = 15 # C/A chips
 delay_range = [delay_start, delay_increment, delay_end]
 
 # Iso Doppler values

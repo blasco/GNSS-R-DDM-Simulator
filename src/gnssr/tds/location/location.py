@@ -22,10 +22,16 @@ from gnssr.tds.search_target.cdf4_search import *
 
 # Hibernia
 # Really good detection
-file_root_name = 'raw/L1B/2017-03-12-H18'
-target = targets['hibernia']
-group = '000035'
-index = 677 
+#file_root_name = 'raw/L1B/2017-03-12-H18'
+#target = targets['hibernia']
+#group = '000035'
+#index = 677 
+
+# Devils Tower
+file_root_name = 'raw/L1B/2015-12-04-H18'
+target = targets['devils_tower']
+group = '000066'
+index =  376
 
 # 0.5 deg error approx 55 km error
 if index == 0:
@@ -148,7 +154,7 @@ print("res h: {}".format(tds.doppler_resolution))
 iso_delay_values = list(np.arange(0,25,1))
 c_time = ax_lines.contour(X, Y, Z_time, iso_delay_values, cmap='winter')
 fig_lines.colorbar(c_time, label='C/A chips')
-iso_doppler_values = list(np.arange(-6000,8000,tds.doppler_resolution))
+iso_doppler_values = list(np.arange(-6000,8000, tds.doppler_resolution))
 c_doppler = ax_lines.contour(X, Y, Z_doppler, iso_doppler_values, cmap='autumn')
 fig_lines.colorbar(c_doppler, label='Hz')
 

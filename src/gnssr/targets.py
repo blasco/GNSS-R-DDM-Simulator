@@ -1,4 +1,4 @@
-class Target:
+lass Target:
     def __init__(self,lat,lon):
         self.lat = lat
         self.lon = lon
