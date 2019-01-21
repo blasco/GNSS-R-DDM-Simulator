@@ -57,9 +57,9 @@ n_y = unit_vector(np.cross(n_z, n_x))
 
 #TODO: imporve sp auto calculation
 h = np.dot((tds.r_r - r_sp), n_z)
-print("h: {}".format(h))
+print("h_r: {}".format(h))
 h_0 = np.dot((tds.r_t - r_sp), n_z)
-print("h_0: {}".format(h_0))
+print("h_t: {}".format(h_0))
 elev = angle_between(n_y, tds.r_t-r_sp)
 print("elev: {}".format(elev))
 
@@ -95,7 +95,8 @@ def doppler_eq(x, y):
     v_rx = np.dot(tds.v_r, n_x)
     v_ry = np.dot(tds.v_r, n_y)
     v_rz = np.dot(tds.v_r, n_z)
-    print("v: {0}, {1}, {2}".format(v_rx,v_ry,v_rz))
+    print("v_t: {0}, {1}, {2}".format(v_tx,v_ty,v_tz))
+    print("v_r: {0}, {1}, {2}".format(v_rx,v_ry,v_rz))
     return (f_c/c)*( \
             (v_tx*(x)  + v_ty*(y-h_0/np.tan(elev)) + v_tz*(z_sp(x,y)-h_0))  / (x**2 + (y-h_0/np.tan(elev))**2 + (z_sp(x,y)-h_0)**2)**(1/2) \
            -(v_rx*(-x) + v_ry*(-h/np.tan(elev)-y)  + v_rz*(h-z_sp(x,y))   ) / (x**2 + (-h/np.tan(elev) -y)**2 + (h - z_sp(x,y))**2)**(1/2) \

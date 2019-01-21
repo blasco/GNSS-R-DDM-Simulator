@@ -4,77 +4,28 @@ import scipy.integrate as integrate
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
-h_t = 20000e3 # meters
-h_r = 500e3 # meters
-elevation = 60*np.pi/180 # rad
-
-# Coordinate Frame as defined in Figure 2
-#      J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X. 
-#      Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the Simulation of 
-#      Delay–Doppler Maps of Reflected Global Navigation Satellite System Signals,” 
-#      IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 8, pp. 
-#      2733–2740, Aug. 2009.  
-r_t = np.array([0,h_t/np.tan(elevation),h_t])
-r_r = np.array([0,-h_r/np.tan(elevation),h_r])
-
-# Velocity
-v_t = np.array([2121, 2121, 5]) # m/s
-v_r = np.array([2210, 7299, 199]) # m/s
-
-light_speed = 299792458 # m/s
-
-# GPS L1 center frequency is defined in relation to a reference frequency 
-# f_0 = 10.23e6, so that f_carrier = 154*f_0 = 1575.42e6 # Hz 
-# Explained in section 'DESCRIPTION OF THE EMITTED GPS SIGNAL' in Zarotny 
-# and Voronovich 2000
-f_0 = 10.23e6 # Hz
-f_carrier = 154*f_0
-
-fresnel_coefficient = 1 # TODO
-
-integration_time = 1e-3 # seconds
-delay_chip =  1/1.023e6 # seconds
-
-u_10 =  200 # m/s Wind speed at 10 meters above sea surface
+from scipy import signal
+from delay_doppler_jacobian import *
+from problem_definition import *
 
 # -----------------------
 # Bistatic radar equation
 # ----------------------
 
-def reflected_power_dxdy(r, differential_area, delay, frequency):
-    delay_increment = delay - time_delay(r) # seconds
-    frequency_increment = frequency - doppler_shift(r) # Hz
-    #out = integration_time**2 * \
-    #        waf_squared(delay_increment, frequency_increment) * \
-    #        radar_cross_section(r) / \
-    #        np.linalg.norm(r - r_t)**2 / \
-    #        np.linalg.norm(r_r - r)**2 * \
-    #        differential_area
-    a0 = integration_time**2 
-    a1 = waf_squared(delay_increment, frequency_increment) 
-    a2 = radar_cross_section(r)
-    a3 = np.linalg.norm(r - r_t)**2
-    a4 = np.linalg.norm(r_r - r)**2
-    a5 = differential_area
-    a = a0*a1*a2/a3/a4*a5
-    #import pdb; pdb.set_trace() # break
-    return a.sum()
-
-def waf_squared(delay_increment, frequency_increment): 
+def waf_squared(delay, f_doppler): 
     ''' 
     The Woodward Ambiguity Function (waf) squared can be approximated by the 
     product of a function dependent on the delay and a function dependent on the 
     frequency. 
 
-    Implements Equation 3
+    Implements Equation 3.
         J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X. 
         Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the Simulation 
         of Delay–Doppler Maps of Reflected Global Navigation Satellite System 
         Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
         8, pp. 2733–2740, Aug. 2009.  
     ''' 
-    return waf_delay(delay_increment)**2 * abs_waf_frequency(frequency_increment)**2
+    return waf_delay(delay)**2 * abs_waf_frequency(f_doppler)**2
 
 #def waf_delay(delay):
 #    ''' 
@@ -86,11 +37,12 @@ def waf_squared(delay_increment, frequency_increment):
 
 def waf_delay(delay):
     '''
-    J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X. 
-    Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the Simulation 
-    of Delay–Doppler Maps of Reflected Global Navigation Satellite System 
-    Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
-    8, pp. 2733–2740, Aug. 2009.  
+    Defined in the text after Equation 1.
+        J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
+        Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the 
+        Simulation of Delay–Doppler Maps of Reflected Global Navigation 
+        Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
+        Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
     '''
     t = np.where(np.abs(delay) <= delay_chip, 1 - np.abs(delay)/delay_chip, 0)
     return t
@@ -105,13 +57,49 @@ def waf_delay(delay):
 
 def abs_waf_frequency(frequency):
     '''
-    J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X. 
-    Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the Simulation 
-    of Delay–Doppler Maps of Reflected Global Navigation Satellite System 
-    Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
-    8, pp. 2733–2740, Aug. 2009.  
+    Defined in the text after Equation 1.
+        J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
+        Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the 
+        Simulation of Delay–Doppler Maps of Reflected Global Navigation 
+        Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
+        Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
     '''
     return np.abs(np.sin(np.pi*frequency)/(np.pi*frequency))
+
+def sigma(delay, f_doppler):
+    '''
+    Implements Equation 10.
+        J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
+        Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the 
+        Simulation of Delay–Doppler Maps of Reflected Global Navigation 
+        Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
+        Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
+    '''
+    try:
+        x_1 = x_delay_doppler_1(delay, f_doppler)
+        y_1 = y_delay_doppler_1(delay, f_doppler)
+        r_1 = np.array([x_1,y_1,0])
+
+        x_2 = x_delay_doppler_2(delay, f_doppler)
+        y_2 = y_delay_doppler_2(delay, f_doppler)
+        r_2 = np.array([x_2,y_2,0])
+
+    except RuntimeWarning:
+        return 0
+
+    result =  integration_time**2/(4*np.pi)*( \
+            radar_cross_section(r_1)/ \
+            np.linalg.norm(r_1-r_t)**2/ \
+            np.linalg.norm(r_r-r_1)**2* \
+            delay_doppler_jacobian_1(delay, f_doppler) \
+            + 
+            radar_cross_section(r_2)/ \
+            np.linalg.norm(r_2-r_t)**2/ \
+            np.linalg.norm(r_r-r_2)**2* \
+            delay_doppler_jacobian_2(delay, f_doppler) \
+            )
+    print("{0}, d={1} , f={2}".format(result, delay/delay_chip, f_doppler))
+    return result
 
 def doppler_shift(r):
     ''' 
@@ -123,16 +111,17 @@ def doppler_shift(r):
         the ocean with wind remote sensing application,” IEEE Transactions on 
         Geoscience and Remote Sensing, vol. 38, no. 2, pp. 951–964, Mar. 2000.  
     '''
-    wavelength = light_speed/f_carrier
-    f_D_0 = (1/wavelength)*(
-                np.inner(v_t, incident_vector(r)) \
-               -np.inner(v_r, reflection_vector(r))
-            )
-    #f_surface = scattering_vector(r)*v_surface(r)/2*pi
-    f_surface = 0
-    return f_D_0 + f_surface
+    #wavelength = light_speed/f_carrier
+    #f_D_0 = (1/wavelength)*( \
+    #           -np.inner(v_t, incident_vector(r)) \
+    #           +np.inner(v_r, reflection_vector(r))
+    #        )
+    ##f_surface = scattering_vector(r)*v_surface(r)/2*pi
+    #f_surface = 0
+    #return f_D_0 + f_surface
+    return -v_t[1] * np.cos(elevation) - v_t[2] * np.sin(elevation) + (v_r[0] * r[0] + v_r[1] * (r[1] + h_r / np.tan(elevation)) - v_r[2] * h_r) * (r[0] ** 2 + (r[1] + h_r / np.tan(elevation)) ** 2 + h_r ** 2) ** (-0.1e1 / 0.2e1)
 
-def doppler_increment(r):
+def doppler_shift_increment(r):
     return doppler_shift(r) - doppler_shift(np.array([0,0,0]))
 
 def scattering_vector(r):
@@ -165,9 +154,10 @@ def incident_vector(r):
     return  incident_vector
 
 def time_delay(r):
-    path_r = np.linalg.norm(r-r_t) + np.linalg.norm(r_r-r)
-    path_specular = np.linalg.norm(r_t) + np.linalg.norm(r_r)
-    return (1/light_speed)*(path_r - path_specular)
+    #path_r = np.linalg.norm(r-r_t) + np.linalg.norm(r_r-r)
+    #path_specular = np.linalg.norm(r_t) + np.linalg.norm(r_r)
+    #return (1/light_speed)*(path_r - path_specular)
+    return 0.1e1 / light_speed * (np.sqrt(r[0] ** 2 + (r[1] + h_r / np.tan(elevation)) ** 2 + h_r ** 2) - h_r / np.sin(elevation) - r[1] * np.cos(elevation))
 
 def radar_cross_section(r):
     return rcs_sea(r)
@@ -268,13 +258,11 @@ def variance_crosswind(wind_speed_10m_above_sea):
 
 x_0 =  -200e3 # meters
 x_1 =  200e3 # meters
-n_x = 50
+n_x = 500
 
 y_0 =  -200e3 # meters
 y_1 =  200e3 # meters
-n_y = 50
-
-differential_area = (x_1-x_0)/n_x * (y_1-y_0)/n_y 
+n_y = 500
 
 x_grid, y_grid = np.meshgrid(
    np.linspace(x_0, x_1, n_x), 
@@ -283,23 +271,16 @@ x_grid, y_grid = np.meshgrid(
 
 r = [x_grid, y_grid, 0]
 z_grid_delay = time_delay(r)/delay_chip
-z_grid_doppler = doppler_increment(r)
+z_grid_doppler = doppler_shift(r)
 
-delay_start = -1 # C/A chips
-delay_increment = 0.1 # C/A chips
-delay_end = 3 # C/A chips
-iso_delay_values = list(np.arange(delay_start, delay_end, delay_increment))
-
-doppler_start = -5000 # Hz
-doppler_increment = 500 # Hz
-doppler_end = 5000 # Hz
-iso_doppler_values = list(np.arange(doppler_start, doppler_end, doppler_increment))
+delay_values = list(np.arange(delay_start, delay_end, delay_resolution))
+doppler_values = list(np.arange(doppler_start, doppler_end, doppler_resolution))
 
 fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
-contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, iso_delay_values, cmap='winter')
+contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, [i/delay_chip for i in delay_values], cmap='winter')
 fig_lines.colorbar(contour_delay, label='C/A chips', )
 
-contour_doppler = ax_lines.contour(x_grid, y_grid, z_grid_doppler, iso_doppler_values, cmap='winter')
+contour_doppler = ax_lines.contour(x_grid, y_grid, z_grid_doppler, doppler_values, cmap='winter')
 fig_lines.colorbar(contour_doppler, label='Hz', )
 
 ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
@@ -309,18 +290,24 @@ ax_lines.yaxis.set_major_formatter(ticks_y)
 plt.xlabel('[km]')
 plt.ylabel('[km]')
 
-#plt.show()
+waf_matrix = np.zeros([len(delay_values), len(doppler_values)])
+sigma_matrix = np.zeros([len(delay_values), len(doppler_values)])
+for i, delay in enumerate(delay_values):
+    for j, f_doppler in enumerate(doppler_values):
+        print("{0}/{1} d={2} , f={3}".format(i, len(delay_values), delay/delay_chip, f_doppler))
+        print("{0}/{1} d={2} , f={3}".format(j, len(doppler_values), delay/delay_chip, f_doppler))
+        #waf_matrix[i][j] = waf_squared(delay, f_doppler)
+        #sigma_matrix[i][j] = sigma(delay, f_doppler)
+        x_1 = x_delay_doppler_1(delay, f_doppler)
+        if (x_1 != 0):
+            sigma_matrix[i,j] = 1
 
-ddm = np.zeros([len(iso_delay_values), len(iso_doppler_values)])
-for i, delay_ca_chips in enumerate(iso_delay_values):
-    for j, frequency in enumerate(iso_doppler_values):
-        print("{0}/{1}".format(i, len(iso_delay_values)))
-        print("{0}/{1}".format(j, len(iso_doppler_values)))
-        ddm[i,j] = reflected_power_dxdy(r, differential_area, delay_ca_chips*delay_chip, frequency)
-
+#ddm = signal.convolve2d(waf_matrix, sigma_matrix)
 
 fig, ax = plt.subplots(1,figsize=(10, 4))
-im = ax.imshow(ddm, cmap='viridis')
+im = ax.imshow(sigma_matrix, cmap='viridis', 
+        extent=(doppler_start,doppler_end,delay_start,delay_end),
+        aspect="auto"
+    )
 
 plt.show()
-
