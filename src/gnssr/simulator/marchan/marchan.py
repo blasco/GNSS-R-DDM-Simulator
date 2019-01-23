@@ -69,7 +69,8 @@ def waf_frequency(f):
     f = f
     sol =  np.where(np.abs(f) <= 0.5, 
             np.abs(1-(np.pi**2*f**2)/6+(np.pi**4*f**4)/120), # Taylor expansion around 0
-            np.abs(np.sin(np.pi*f)/(np.pi*f))
+            #np.abs(np.sin(np.pi*f)/(np.pi*f)) #TODO
+            0
             )
     return sol
 
@@ -93,7 +94,7 @@ def sigma(delay, f_doppler):
     #result = delay_doppler_jacobian_1(delay, f_doppler) + delay_doppler_jacobian_2(delay, f_doppler) \
     #result = radar_cross_section(r_1) + radar_cross_section(r_2)
 
-    result =  integration_time**2/(4*np.pi) * ( \
+    result =  2e19*integration_time**2/(4*np.pi) * ( \
                 radar_cross_section(r_1)/( \
                     np.linalg.norm(r_1-r_t)**2* \
                     np.linalg.norm(r_r-r_1)**2 \
@@ -138,6 +139,7 @@ def scattering_vector(r):
         the ocean with wind remote sensing application,” IEEE Transactions on 
         Geoscience and Remote Sensing, vol. 38, no. 2, pp. 951–964, Mar. 2000.  
     '''
+    #K = 2*np.pi*f_carrier/light_speed #TODO
     return (scattered_direction(r) - incident_direction(r))
 
 def scattered_direction(r):
@@ -235,6 +237,7 @@ def variance_upwind(u_10):
         [
             lambda x: x,
             lambda x: 6*np.log(x),
+            #lambda x: 6*np.log(x) - 4, #TODO
             lambda x: 0.411*x
         ])
     return 0.45*(3.16e-3*f)
@@ -278,9 +281,6 @@ z_grid_doppler = doppler_shift(r)
 
 delay_sp =  time_delay(np.array([0,0,0]))
 f_doppler_sp = doppler_shift(np.array([0,0,0]))
-print(f_doppler_sp)
-print(f_doppler_sp + doppler_start)
-print(f_doppler_sp + doppler_end)
 
 delay_values = list(np.arange(delay_start, delay_end, delay_resolution))
 doppler_values = list(np.arange(
@@ -303,13 +303,13 @@ ax_lines.yaxis.set_major_formatter(ticks_y)
 plt.xlabel('[km]')
 plt.ylabel('[km]')
 
-print('Finding intersection for d:{0}, f:{1}'.format(delay_values[4], doppler_values[2]))
-x_s_1 = x_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
-y_s_1 = y_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
-x_s_2 = x_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
-y_s_2 = y_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
-ax_lines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
-ax_lines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
+#print('Finding intersection for d:{0}, f:{1}'.format(delay_values[4], doppler_values[2]))
+#x_s_1 = x_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
+#y_s_1 = y_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
+#x_s_2 = x_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
+#y_s_2 = y_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
+#ax_lines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
+#ax_lines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
 
 # Jacobian Mask
 jacobian_mask = np.zeros([len(delay_values), len(doppler_values)])
@@ -352,7 +352,7 @@ im = ax_waf.imshow(waf_matrix, cmap='viridis',
 fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
 ax_sigma.set_title('Sigma')
 im = ax_sigma.imshow(sigma_matrix, cmap='viridis', 
-        extent=(f_doppler_sp + doppler_start,doppler_end,f_doppler_sp + delay_end/delay_chip,delay_start/delay_chip),
+        extent=(f_doppler_sp + doppler_start,f_doppler_sp + doppler_end,delay_end/delay_chip,delay_start/delay_chip),
         aspect="auto"
     )
 

@@ -33,16 +33,16 @@ fresnel_coefficient = 1 # TODO
 integration_time = 1e-3 # seconds
 delay_chip =  1/1.023e6 # seconds
 # Wind speed at 10 meters above sea surface
-u_10 =  5.0 # m/s 
+u_10 =  15.0 # m/s 
 # Angle between the up-down wind direction and the x-axis
-phi_0 = 25*np.pi/180 # rad 
+phi_0 = 85*np.pi/180 # rad 
 
-delay_start = -2*delay_chip # seconds
-delay_end = 10*delay_chip # seconds
-delay_resolution = 0.1*delay_chip # seconds
+delay_start = -3*delay_chip # seconds
+delay_end = 15*delay_chip # seconds
+delay_resolution = 0.2*delay_chip # seconds
 
-doppler_start = -1800 # Hz
-doppler_end = 1800 # Hz
+doppler_start = -1200 # Hz
+doppler_end = 1200 # Hz
 #doppler_start = -2500 # Hz
 #doppler_end = -1200 # Hz
-doppler_resolution = 20.0 # Hz
+doppler_resolution = 10.0 # Hz
