@@ -25,7 +25,9 @@ def waf_squared(delay, f_doppler):
         Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
         8, pp. 2733–2740, Aug. 2009.  
     ''' 
-    return waf_delay(delay)**2 * abs_waf_frequency(f_doppler)**2
+    delay_sp =  time_delay(np.array([0,0,0]))
+    f_doppler_sp = doppler_shift(np.array([0,0,0]))
+    return waf_delay(delay)**2 * np.abs(waf_frequency(f_doppler_sp - f_doppler))**2
 
 #def waf_delay(delay):
 #    ''' 
@@ -55,7 +57,7 @@ def waf_delay(delay):
 #                 (np.pi*frequency_increment*integration_time) * \
 #                 np.exp(-np.pi*1j*frequency_increment*integration_time)
 
-def abs_waf_frequency(frequency):
+def waf_frequency(f):
     '''
     Defined in the text after Equation 1.
         J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
@@ -64,7 +66,12 @@ def abs_waf_frequency(frequency):
         Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
         Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
     '''
-    return np.abs(np.sin(np.pi*frequency)/(np.pi*frequency))
+    f = f
+    sol =  np.where(np.abs(f) <= 0.5, 
+            np.abs(1-(np.pi**2*f**2)/6+(np.pi**4*f**4)/120), # Taylor expansion around 0
+            np.abs(np.sin(np.pi*f)/(np.pi*f))
+            )
+    return sol
 
 def sigma(delay, f_doppler):
     '''
@@ -75,31 +82,31 @@ def sigma(delay, f_doppler):
         Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
         Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
     '''
-    try:
-        x_1 = x_delay_doppler_1(delay, f_doppler)
-        y_1 = y_delay_doppler_1(delay, f_doppler)
-        r_1 = np.array([x_1,y_1,0])
+    x_1 = x_delay_doppler_1(delay, f_doppler).real
+    y_1 = y_delay_doppler_1(delay, f_doppler).real
+    r_1 = np.array([x_1,y_1,0])
 
-        x_2 = x_delay_doppler_2(delay, f_doppler)
-        y_2 = y_delay_doppler_2(delay, f_doppler)
-        r_2 = np.array([x_2,y_2,0])
+    x_2 = x_delay_doppler_2(delay, f_doppler).real
+    y_2 = y_delay_doppler_2(delay, f_doppler).real
+    r_2 = np.array([x_2,y_2,0])
 
-    except RuntimeWarning:
-        return 0
+    #result = delay_doppler_jacobian_1(delay, f_doppler) + delay_doppler_jacobian_2(delay, f_doppler) \
+    #result = radar_cross_section(r_1) + radar_cross_section(r_2)
 
-    result =  integration_time**2/(4*np.pi)*( \
-            radar_cross_section(r_1)/ \
-            np.linalg.norm(r_1-r_t)**2/ \
-            np.linalg.norm(r_r-r_1)**2* \
-            delay_doppler_jacobian_1(delay, f_doppler) \
-            + 
-            radar_cross_section(r_2)/ \
-            np.linalg.norm(r_2-r_t)**2/ \
-            np.linalg.norm(r_r-r_2)**2* \
-            delay_doppler_jacobian_2(delay, f_doppler) \
+    result =  integration_time**2/(4*np.pi) * ( \
+                radar_cross_section(r_1)/( \
+                    np.linalg.norm(r_1-r_t)**2* \
+                    np.linalg.norm(r_r-r_1)**2 \
+                ) * \
+                delay_doppler_jacobian_1(delay, f_doppler) \
+                + 
+                radar_cross_section(r_2)/( \
+                    np.linalg.norm(r_2-r_t)**2* \
+                    np.linalg.norm(r_r-r_2)**2 \
+                ) * \
+                delay_doppler_jacobian_2(delay, f_doppler) \
             )
-    print("{0}, d={1} , f={2}".format(result, delay/delay_chip, f_doppler))
-    return result
+    return result.real
 
 def doppler_shift(r):
     ''' 
@@ -113,8 +120,8 @@ def doppler_shift(r):
     '''
     #wavelength = light_speed/f_carrier
     #f_D_0 = (1/wavelength)*( \
-    #           -np.inner(v_t, incident_vector(r)) \
-    #           +np.inner(v_r, reflection_vector(r))
+    #           -np.inner(v_t, incident_direction(r)) \
+    #           +np.inner(v_r, scattered_direction(r))
     #        )
     ##f_surface = scattering_vector(r)*v_surface(r)/2*pi
     #f_surface = 0
@@ -131,27 +138,26 @@ def scattering_vector(r):
         the ocean with wind remote sensing application,” IEEE Transactions on 
         Geoscience and Remote Sensing, vol. 38, no. 2, pp. 951–964, Mar. 2000.  
     '''
-    K = 2*np.pi*f_carrier/light_speed
-    return K*(reflection_vector(r) - incident_vector(r))
+    return (scattered_direction(r) - incident_direction(r))
 
-def reflection_vector(r):
-    reflection_vector = (r_r - r)
-    reflection_vector_norm = np.linalg.norm(r_r - r)
-    reflection_vector[0] /= reflection_vector_norm
-    reflection_vector[1] /= reflection_vector_norm
-    reflection_vector[2] /= reflection_vector_norm
-    return reflection_vector
+def scattered_direction(r):
+    scattered_direction = (r_r - r)
+    scattered_direction_norm = np.linalg.norm(r_r - r)
+    scattered_direction[0] /= scattered_direction_norm
+    scattered_direction[1] /= scattered_direction_norm
+    scattered_direction[2] /= scattered_direction_norm
+    return scattered_direction
 
-#def incident_vector(r):
+#def incident_direction(r):
 #    return (r - r_t)/np.linalg.norm(r - r_t)
 
-def incident_vector(r):
-    incident_vector = (r - r_t)
-    incident_vector_norm = np.linalg.norm(r - r_t)
-    incident_vector[0] /= incident_vector_norm
-    incident_vector[1] /= incident_vector_norm
-    incident_vector[2] /= incident_vector_norm
-    return  incident_vector
+def incident_direction(r):
+    incident_direction = (r - r_t)
+    incident_direction_norm = np.linalg.norm(r - r_t)
+    incident_direction[0] /= incident_direction_norm
+    incident_direction[1] /= incident_direction_norm
+    incident_direction[2] /= incident_direction_norm
+    return  incident_direction
 
 def time_delay(r):
     #path_r = np.linalg.norm(r-r_t) + np.linalg.norm(r_r-r)
@@ -191,8 +197,6 @@ def slope_probability_density_function(x):
         2004 Sumatra-Andaman Tsunami Event,” Journal of Sensors, vol. 2016, pp. 
         1–14, 2016.  
     '''
-    # phi_0 is the angle between the up-down wind direction and the x-axis
-    phi_0 = 90*np.pi/180 
     wind_rotation = np.array([
         [np.cos(phi_0), -np.sin(phi_0)],
         [np.sin(phi_0),  np.cos(phi_0)]
@@ -202,9 +206,9 @@ def slope_probability_density_function(x):
         [0, variance_crosswind(u_10)]
     ])
     w = (wind_rotation.dot(covariance)).dot(np.transpose(wind_rotation))
-    return 1/(2*np.pi*(np.linalg.det(w)**(1/2))) \
-            *np.exp( \
-                -1/2*(np.transpose(x).dot(np.linalg.inv(w))).dot(x) \
+    return 1/(2*np.pi*np.sqrt(np.linalg.det(w))) * \
+            np.exp(
+                -1/2*(np.transpose(x).dot(np.linalg.inv(w))).dot(x)
             )
 
 def variance_upwind(u_10):
@@ -230,7 +234,7 @@ def variance_upwind(u_10):
         ],
         [
             lambda x: x,
-            lambda x: 6*np.log(x) - 4,
+            lambda x: 6*np.log(x),
             lambda x: 0.411*x
         ])
     return 0.45*(3.16e-3*f)
@@ -250,7 +254,6 @@ def variance_crosswind(wind_speed_10m_above_sea):
         crosswind variance
     '''
     return 0.45*(0.003 + 1.92e-3*u_10)
-
 
 # --------------------
 
@@ -273,8 +276,18 @@ r = [x_grid, y_grid, 0]
 z_grid_delay = time_delay(r)/delay_chip
 z_grid_doppler = doppler_shift(r)
 
+delay_sp =  time_delay(np.array([0,0,0]))
+f_doppler_sp = doppler_shift(np.array([0,0,0]))
+print(f_doppler_sp)
+print(f_doppler_sp + doppler_start)
+print(f_doppler_sp + doppler_end)
+
 delay_values = list(np.arange(delay_start, delay_end, delay_resolution))
-doppler_values = list(np.arange(doppler_start, doppler_end, doppler_resolution))
+doppler_values = list(np.arange(
+                        f_doppler_sp + doppler_start, 
+                        f_doppler_sp + doppler_end, 
+                        doppler_resolution
+                        ))
 
 fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
 contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, [i/delay_chip for i in delay_values], cmap='winter')
@@ -290,24 +303,78 @@ ax_lines.yaxis.set_major_formatter(ticks_y)
 plt.xlabel('[km]')
 plt.ylabel('[km]')
 
+print('Finding intersection for d:{0}, f:{1}'.format(delay_values[4], doppler_values[2]))
+x_s_1 = x_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
+y_s_1 = y_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
+x_s_2 = x_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
+y_s_2 = y_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
+ax_lines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
+ax_lines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
+
+# Jacobian Mask
+jacobian_mask = np.zeros([len(delay_values), len(doppler_values)])
+for i, delay in enumerate(delay_values):
+    for j, f_doppler in enumerate(doppler_values):
+        if (x_delay_doppler_1(delay, f_doppler).imag == 0):
+            jacobian_mask[i,j] = 1 
+
 waf_matrix = np.zeros([len(delay_values), len(doppler_values)])
+for i, delay in enumerate(delay_values):
+    for j, f_doppler in enumerate(doppler_values):
+            waf_matrix[i][j] = waf_squared(delay, f_doppler)
+
 sigma_matrix = np.zeros([len(delay_values), len(doppler_values)])
 for i, delay in enumerate(delay_values):
     for j, f_doppler in enumerate(doppler_values):
-        print("{0}/{1} d={2} , f={3}".format(i, len(delay_values), delay/delay_chip, f_doppler))
-        print("{0}/{1} d={2} , f={3}".format(j, len(doppler_values), delay/delay_chip, f_doppler))
-        #waf_matrix[i][j] = waf_squared(delay, f_doppler)
-        #sigma_matrix[i][j] = sigma(delay, f_doppler)
-        x_1 = x_delay_doppler_1(delay, f_doppler)
-        if (x_1 != 0):
-            sigma_matrix[i,j] = 1
+        if jacobian_mask[i,j] == 1 or ((i+1)<len(delay_values) and jacobian_mask[i+1,j] == 1):
+            #print("{0}/{1} d={2} , f={3}".format(i, len(delay_values), delay/delay_chip, f_doppler))
+            #print("{0}/{1} d={2} , f={3}".format(j, len(doppler_values), delay/delay_chip, f_doppler))
+            sigma_val = sigma(delay, f_doppler)
+            sigma_matrix[i][j] = sigma_val
 
-#ddm = signal.convolve2d(waf_matrix, sigma_matrix)
+ddm = np.zeros([len(delay_values), len(doppler_values)])
+ddm = signal.convolve2d(waf_matrix, sigma_matrix)
 
-fig, ax = plt.subplots(1,figsize=(10, 4))
-im = ax.imshow(sigma_matrix, cmap='viridis', 
-        extent=(doppler_start,doppler_end,delay_start,delay_end),
+fig_mask, ax_mask = plt.subplots(1,figsize=(10, 4))
+ax_mask.set_title('Mask')
+im = ax_mask.imshow(jacobian_mask, cmap='viridis', 
+        extent=(f_doppler_sp + doppler_start, f_doppler_sp + doppler_end,delay_end/delay_chip,delay_start/delay_chip),
         aspect="auto"
     )
+
+fig_waf, ax_waf = plt.subplots(1,figsize=(10, 4))
+ax_waf.set_title('WAF')
+im = ax_waf.imshow(waf_matrix, cmap='viridis', 
+        extent=(f_doppler_sp + doppler_start,f_doppler_sp + doppler_end,delay_end/delay_chip,delay_start/delay_chip),
+        aspect="auto"
+    )
+
+fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
+ax_sigma.set_title('Sigma')
+im = ax_sigma.imshow(sigma_matrix, cmap='viridis', 
+        extent=(f_doppler_sp + doppler_start,doppler_end,f_doppler_sp + delay_end/delay_chip,delay_start/delay_chip),
+        aspect="auto"
+    )
+
+fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
+ax_ddm.set_title('DDM')
+im = ax_ddm.imshow(ddm, cmap='viridis', 
+        extent=(f_doppler_sp + doppler_start,f_doppler_sp + doppler_end, delay_end/delay_chip,delay_start/delay_chip),
+        aspect="auto"
+    )
+
+fig_waf_delay, ax_waf_delay = plt.subplots(1,figsize=(10, 4))
+waf_delay_values = np.zeros(len(delay_values))
+for i, val in enumerate(delay_values):
+    waf_delay_values[i] = waf_delay(val)**2
+ax_waf_delay.plot(delay_values, waf_delay_values)
+ax_waf_delay.set_title('waf_delay')
+
+fig_waf_frequency, ax_waf_frequency = plt.subplots(1,figsize=(10, 4))
+waf_frequency_values = np.zeros(len(doppler_values))
+for i, val in enumerate(doppler_values):
+    waf_frequency_values[i] = waf_frequency(f_doppler_sp - val)**2
+ax_waf_frequency.plot(doppler_values, waf_frequency_values)
+ax_waf_frequency.set_title('waf_freq')
 
 plt.show()
