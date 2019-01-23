@@ -4,7 +4,7 @@ import numpy as np
 
 h_t = 16836198.649 # meters
 h_r = 612487.690 # meters
-elevation = 60*np.pi/180 # rad
+elevation = 45*np.pi/180 # rad
 
 # Coordinate Frame as defined in Figure 2
 #      J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X. 
@@ -33,16 +33,18 @@ fresnel_coefficient = 1 # TODO
 integration_time = 1e-3 # seconds
 delay_chip =  1/1.023e6 # seconds
 # Wind speed at 10 meters above sea surface
-u_10 =  15.0 # m/s 
+u_10 =  8.0 # m/s 
 # Angle between the up-down wind direction and the x-axis
-phi_0 = 85*np.pi/180 # rad 
+#phi_0 = (135)*np.pi/180 # rad 
+phi_0 = (135)*np.pi/180 # rad 
 
-delay_start = -3*delay_chip # seconds
-delay_end = 15*delay_chip # seconds
-delay_resolution = 0.2*delay_chip # seconds
+delay_start = -2*delay_chip # seconds
+delay_end = 55*delay_chip # seconds
+#delay_resolution = 0.3*delay_chip # seconds
+delay_resolution = 0.25*delay_chip # seconds
 
-doppler_start = -1200 # Hz
-doppler_end = 1200 # Hz
+doppler_start = -6000 # Hz
+doppler_end = 6000 # Hz
 #doppler_start = -2500 # Hz
 #doppler_end = -1200 # Hz
-doppler_resolution = 10.0 # Hz
+doppler_resolution = 40.0 # Hz
