@@ -27,6 +27,9 @@ To deactivate environment:
 Once the right version of python is set and the environment is activated we can install packages with:
     pip install pkg_name
 
+To install all the packages
+    pip install -r requirements.txt
+
 # Installing the project module
 Based on [this answer](https://stackoverflow.com/questions/714063/importing-modules-from-parent-folder)
 

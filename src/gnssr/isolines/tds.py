@@ -45,5 +45,7 @@ doppler_increment = 500 # micro secs
 doppler_end = 3000 # micro secs
 doppler_range = [doppler_start, doppler_increment, doppler_end]
 
-tds_iso_lines.plot_range(delay_range, doppler_range)
-plt.show()
+print("doppler_sp: {0}".format(tds_iso_lines.doppler_eq(0,0)))
+
+#tds_iso_lines.plot_range(delay_range, doppler_range)
+#plt.show()

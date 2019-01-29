@@ -46,7 +46,7 @@ def main():
     start_server()
 
 def start_server():
-    host = "172.20.1.137"
+    host = "127.0.0.1"
     port = 8889         # arbitrary non-privileged port
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
