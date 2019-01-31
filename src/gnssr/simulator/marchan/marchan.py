@@ -13,7 +13,7 @@ from problem_definition import *
 # Bistatic radar equation
 # ----------------------
 
-def waf_squared(delay, f_doppler): 
+def waf_squared(delay, doppler): 
     ''' 
     The Woodward Ambiguity Function (waf) squared can be approximated by the 
     product of a function dependent on the delay and a function dependent on the 
@@ -26,9 +26,9 @@ def waf_squared(delay, f_doppler):
         Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
         8, pp. 2733–2740, Aug. 2009.  
     ''' 
-    delay_sp =  time_delay(np.array([0,0,0]))
-    f_doppler_sp = doppler_shift(np.array([0,0,0]))
-    return waf_delay(delay)**2 * np.abs(waf_frequency(f_doppler_sp - f_doppler))**2
+    delay_sp =  eq_delay_incremet(np.array([0,0,0]))
+    doppler_sp = eq_doppler_absolute_shift(np.array([0,0,0]))
+    return waf_delay(delay)**2 * np.abs(waf_frequency(doppler_sp - doppler))**2
 
 #def waf_delay(delay):
 #    ''' 
@@ -74,7 +74,7 @@ def waf_frequency(f):
             )
     return sol
 
-def sigma(delay, f_doppler):
+def sigma(delay, doppler):
     '''
     Implements Equation 10.
         J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
@@ -83,43 +83,37 @@ def sigma(delay, f_doppler):
         Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
         Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
     '''
-    x_1 = x_delay_doppler_1(delay, f_doppler).real
-    y_1 = y_delay_doppler_1(delay, f_doppler).real
+    x_1 = x_delay_doppler_1(delay, doppler).real
+    y_1 = y_delay_doppler_1(delay, doppler).real
     r_1 = np.array([x_1,y_1,0])
-
-    x_2 = x_delay_doppler_2(delay, f_doppler).real
-    y_2 = y_delay_doppler_2(delay, f_doppler).real
+    x_2 = x_delay_doppler_2(delay, doppler).real
+    y_2 = y_delay_doppler_2(delay, doppler).real
     r_2 = np.array([x_2,y_2,0])
 
-    result = receiver_antenna_gain(r_1) + receiver_antenna_gain(r_2)
-
-    #result =  transmitting_power*integration_time**2/(4*np.pi) * ( \
-    #            radar_cross_section(r_1)/( \
-    #                np.linalg.norm(r_1-r_t)**2* \
-    #                np.linalg.norm(r_r-r_1)**2 \
-    #            ) * \
-    #            delay_doppler_jacobian_1(delay, f_doppler) * \
-    #            receiver_antenna_gain(r_1) * \
-    #            transmitting_antenna_gain(r_1) \
-    #            + 
-    #            radar_cross_section(r_2)/( \
-    #                np.linalg.norm(r_2-r_t)**2* \
-    #                np.linalg.norm(r_r-r_2)**2 \
-    #            ) * \
-    #            delay_doppler_jacobian_2(delay, f_doppler) * \
-    #            receiver_antenna_gain(r_2) * \
-    #            transmitting_antenna_gain(r_2) \
-    #        )
-    np.place(result, result < 0, 0)
+    result =  transmitting_power*integration_time**2/(4*np.pi) * ( \
+                radar_cross_section(r_1)/( \
+                    np.linalg.norm(r_1-r_t)**2* \
+                    np.linalg.norm(r_r-r_1)**2 \
+                ) * \
+                delay_doppler_jacobian_1(delay, doppler) * \
+                receiver_antenna_gain(r_1) * \
+                transmitting_antenna_gain(r_1) \
+                + 
+                radar_cross_section(r_2)/( \
+                    np.linalg.norm(r_2-r_t)**2* \
+                    np.linalg.norm(r_r-r_2)**2 \
+                ) * \
+                delay_doppler_jacobian_2(delay, doppler) * \
+                receiver_antenna_gain(r_2) * \
+                transmitting_antenna_gain(r_2) \
+            )
     return result.real
 
 antenna = tds_antenna()
 def receiver_antenna_gain(r):
-    #r_antenna = r[0:2] - r_r[0:2] 
     r_antenna = r[0:2]
     elevation = np.arctan2(h_r,np.sqrt(r_antenna[0]**2+r_antenna[1]**2))*180/np.pi
     azimuth = np.arctan2(-r_antenna[1],-r_antenna[0])*180/np.pi
-    import pdb; pdb.set_trace() # break
     return antenna.gain(azimuth, elevation)
 
 def transmitting_antenna_gain(r):
@@ -129,7 +123,7 @@ def transmitting_antenna_gain(r):
     #    s = 0
     return 1
 
-def doppler_shift(r):
+def eq_doppler_absolute_shift(r):
     ''' 
     Doppler shift as a contribution of the relative motion of transmitter and 
     receiver as well as the reflection point. 
@@ -150,8 +144,8 @@ def doppler_shift(r):
     f_D_0 =  f_carrier / light_speed * (-v_t[1] * np.cos(elevation) - v_t[2] * np.sin(elevation) + (v_r[0] * r[0] + v_r[1] * (r[1] + h_r / np.tan(elevation)) - v_r[2] * h_r) * (r[0] ** 2 + (r[1] + h_r / np.tan(elevation)) ** 2 + h_r ** 2) ** (-0.1e1 / 0.2e1))
     return f_D_0 + f_surface
 
-def doppler_shift_increment(r):
-    return doppler_shift(r) - doppler_shift(np.array([0,0,0]))
+def eq_doppler_absolute_shift_increment(r):
+    return eq_doppler_absolute_shift(r) - eq_doppler_absolute_shift(np.array([0,0,0]))
 
 def scattering_vector(r):
     '''
@@ -175,9 +169,6 @@ def scattered_direction(r):
     scattered_direction[2] /= scattered_direction_norm
     return scattered_direction
 
-#def incident_direction(r):
-#    return (r - r_t)/np.linalg.norm(r - r_t)
-
 def incident_direction(r):
     incident_direction = (r - r_t)
     incident_direction_norm = np.linalg.norm(r - r_t)
@@ -186,15 +177,11 @@ def incident_direction(r):
     incident_direction[2] /= incident_direction_norm
     return  incident_direction
 
-def time_delay(r):
+def eq_delay_incremet(r):
     return (np.sqrt(r[0] ** 2 + (r[1] + h_r / np.tan(elevation)) ** 2 + h_r ** 2) - h_r / np.sin(elevation) - r[1] * np.cos(elevation)) / light_speed
 
 def radar_cross_section(r):
     return rcs_sea(r)
-
-# -------------------------------------
-# Sea Surface Radar Cross Section Model
-# -------------------------------------
 
 def rcs_sea(r):
     '''
@@ -291,102 +278,91 @@ def variance_crosswind(wind_speed_10m_above_sea):
         ])
     return (0.45*(0.003 + 1.92e-3*f))
 
-# --------------------
+def main():
 
-# Plotting Area
+    # Surface mesh
+    x_0 =  -200e3 # meters
+    x_1 =  200e3 # meters
+    n_x = 500
+    y_0 =  -200e3 # meters
+    y_1 =  200e3 # meters
+    n_y = 500
+    x_grid, y_grid = np.meshgrid(
+       np.linspace(x_0, x_1, n_x), 
+       np.linspace(y_0, y_1, n_y)
+       )
 
-x_0 =  -200e3 # meters
-x_1 =  200e3 # meters
-n_x = 500
+    # Dealy-Doppler values
+    doppler_sp = eq_doppler_absolute_shift(np.array([0,0,0]))
+    delay_values = list(np.arange(delay_increment_start, delay_increment_end, delay_resolution))
+    doppler_absolute_values = list(np.arange(
+                            doppler_sp + doppler_increment_start, 
+                            doppler_sp + doppler_increment_end, 
+                            doppler_resolution
+                            ))
+    waf_delay_values = list(np.arange(-delay_increment_end, delay_increment_end, delay_resolution))
+    waf_doppler_increment_values = list(np.arange(doppler_increment_start, doppler_increment_end, doppler_resolution))
+    doppler_increment_values = doppler_absolute_values - eq_doppler_absolute_shift(np.array([0,0,0]))
 
-y_0 =  -200e3 # meters
-y_1 =  200e3 # meters
-n_y = 500
+    # Iso-delay and iso-doppler maps
+    r = [x_grid, y_grid, 0]
+    z_grid_delay = eq_delay_incremet(r)/delay_chip
+    z_grid_doppler_increment = eq_doppler_absolute_shift(r) - eq_doppler_absolute_shift(np.array([0,0,0]))
 
-x_grid, y_grid = np.meshgrid(
-   np.linspace(x_0, x_1, n_x), 
-   np.linspace(y_0, y_1, n_y)
-   )
+    fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
+    contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, [i/delay_chip for i in delay_values], cmap='winter')
+    fig_lines.colorbar(contour_delay, label='C/A chips', )
 
-r = [x_grid, y_grid, 0]
-z_grid_delay = time_delay(r)/delay_chip
-z_grid_doppler_increment = doppler_shift(r) - doppler_shift(np.array([0,0,0]))
+    contour_doppler = ax_lines.contour(x_grid, y_grid, z_grid_doppler_increment, doppler_increment_values, cmap='winter')
+    fig_lines.colorbar(contour_doppler, label='Hz', )
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
+    ax_lines.xaxis.set_major_formatter(ticks_x)
+    ax_lines.yaxis.set_major_formatter(ticks_y)
+    plt.xlabel('[km]')
+    plt.ylabel('[km]')
 
-delay_sp =  time_delay(np.array([0,0,0]))
-f_doppler_sp = doppler_shift(np.array([0,0,0]))
+    # Delay-Doppler mesh
+    delay_grid, doppler_grid = np.meshgrid(delay_values, doppler_absolute_values)
+    waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_values, waf_doppler_increment_values)
 
-delay_values = list(np.arange(delay_start, delay_end, delay_resolution))
-doppler_values = list(np.arange(
-                        f_doppler_sp + doppler_start, 
-                        f_doppler_sp + doppler_end, 
-                        doppler_resolution
-                        ))
-doppler_values_increment = doppler_values - doppler_shift(np.array([0,0,0]))
+    # Retrived power
+    waf_matrix = waf_squared(waf_delay_grid, waf_doppler_grid)
+    sigma_matrix = sigma(delay_grid, doppler_grid)
+    ddm = signal.convolve2d(sigma_matrix, waf_matrix, mode='same')
 
-fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
-contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, [i/delay_chip for i in delay_values], cmap='winter')
-fig_lines.colorbar(contour_delay, label='C/A chips', )
+    fig_waf, ax_waf = plt.subplots(1,figsize=(10, 4))
+    ax_waf.set_title('WAF')
+    im = ax_waf.imshow(waf_matrix, cmap='viridis', 
+            extent=(-delay_increment_end/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
+            aspect="auto"
+        )
 
-contour_doppler = ax_lines.contour(x_grid, y_grid, z_grid_doppler_increment, doppler_values_increment, cmap='winter')
-fig_lines.colorbar(contour_doppler, label='Hz', )
+    fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
+    ax_sigma.set_title('Sigma')
+    im = ax_sigma.imshow(sigma_matrix, cmap='viridis', 
+            extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
+            aspect="auto"
+        )
 
-ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
-ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
-ax_lines.xaxis.set_major_formatter(ticks_x)
-ax_lines.yaxis.set_major_formatter(ticks_y)
-plt.xlabel('[km]')
-plt.ylabel('[km]')
+    fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
+    ax_ddm.set_title('DDM')
+    im = ax_ddm.imshow(ddm, cmap='viridis', 
+            extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
+            aspect="auto"
+        )
 
-#print('Finding intersection for d:{0}, f:{1}'.format(delay_values[4], doppler_values[2]))
-#x_s_1 = x_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
-#y_s_1 = y_delay_doppler_2(delay_values[4], doppler_values[int(len(doppler_values)/2)])
-#x_s_2 = x_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
-#y_s_2 = y_delay_doppler_2(delay_values[8], doppler_values[int(len(doppler_values)/2)])
-#ax_lines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
-#ax_lines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
+    fig_waf_delay, ax_waf_delay = plt.subplots(1,figsize=(10, 4))
+    waf_delay_result = waf_delay(np.array(waf_delay_values))**2
+    ax_waf_delay.plot([i/delay_chip for i in waf_delay_values], waf_delay_result)
+    ax_waf_delay.set_title('waf_delay')
 
-delay_grid, doppler_grid = np.meshgrid(delay_values, doppler_values)
+    fig_waf_frequency, ax_waf_frequency = plt.subplots(1,figsize=(10, 4))
+    waf_frequency_result = waf_frequency(np.array(waf_doppler_increment_values))**2
+    ax_waf_frequency.plot(waf_doppler_increment_values, waf_frequency_result)
+    ax_waf_frequency.set_title('waf_freq')
 
-waf_matrix = np.zeros([len(delay_values), len(doppler_values)])
-waf_matrix = waf_squared(delay_grid, doppler_grid)
+    plt.show()
 
-sigma_matrix = np.zeros([len(delay_values), len(doppler_values)])
-sigma_matrix = sigma(delay_grid, doppler_grid)
-
-ddm = np.zeros([len(delay_values), len(doppler_values)])
-ddm = signal.convolve2d(waf_matrix, sigma_matrix)
-
-fig_waf, ax_waf = plt.subplots(1,figsize=(10, 4))
-ax_waf.set_title('WAF')
-im = ax_waf.imshow(waf_matrix, cmap='viridis', 
-        extent=(delay_start/delay_chip, delay_end/delay_chip, doppler_start, doppler_end),
-        aspect="auto"
-    )
-
-fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
-ax_sigma.set_title('Sigma')
-im = ax_sigma.imshow(sigma_matrix, cmap='viridis', 
-        extent=(delay_start/delay_chip, delay_end/delay_chip, doppler_start, doppler_end),
-        aspect="auto"
-    )
-
-fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
-ax_ddm.set_title('DDM')
-im = ax_ddm.imshow(ddm, cmap='viridis', 
-        extent=(delay_start/delay_chip, delay_end/delay_chip, doppler_start, doppler_end),
-        aspect="auto"
-    )
-
-fig_waf_delay, ax_waf_delay = plt.subplots(1,figsize=(10, 4))
-waf_delay_values = np.zeros(len(delay_values))
-waf_delay_values = waf_delay(np.array(delay_values))**2
-ax_waf_delay.plot([i/delay_chip for i in delay_values], waf_delay_values)
-ax_waf_delay.set_title('waf_delay')
-
-fig_waf_frequency, ax_waf_frequency = plt.subplots(1,figsize=(10, 4))
-waf_frequency_values = np.zeros(len(doppler_values))
-waf_frequency_values = waf_frequency(f_doppler_sp - np.array(doppler_values))**2
-ax_waf_frequency.plot(doppler_values_increment, waf_frequency_values)
-ax_waf_frequency.set_title('waf_freq')
-
-plt.show()
+if __name__ == '__main__':
+    main()

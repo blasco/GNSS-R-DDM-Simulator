@@ -45,23 +45,23 @@ class tds_antenna:
 def surface_gain(x,y,tds_antenna):
     h_r = 680e3
     elevation = np.arctan2(h_r,np.sqrt(x**2+y**2))*180/np.pi
-    azimuth = np.arctan2(-y,-x)*180/nrp.pi
-    return tds_antenna.gain(azimuth,  elevation)
-                                      
-def main():                           
-    antenna = tds_antenna()           
-    extent = 1500e3                   
-    extent_x0 =  -extent              
-    extent_x1 =  extent               
-    extent_y0 =  -extent              
-    extent_y1 =  extent               
-    linsapce_delta = 500              
-    X, Y = np.meshgrid(               
-            np.linspace(extent_x0, ex tent_x1, linsapce_delta), 
-            np.linspace(extent_y0, ex tent_y1, linsapce_delta)
-            )                         
-    Z_gain = surface_gain(X,Y,antenna )
-                                      
+    azimuth = np.arctan2(-y,-x)*180/np.pi
+    return tds_antenna.gain(azimuth, elevation)
+
+def main():
+    antenna = tds_antenna()
+    extent = 1500e3
+    extent_x0 =  -extent
+    extent_x1 =  extent
+    extent_y0 =  -extent
+    extent_y1 =  extent
+    linsapce_delta = 500
+    X, Y = np.meshgrid(
+            np.linspace(extent_x0, extent_x1, linsapce_delta), 
+            np.linspace(extent_y0, extent_y1, linsapce_delta)
+            )
+    Z_gain = surface_gain(X,Y,antenna)
+
     fig_surface, ax_surface = plt.subplots(1,figsize=(10, 4))
     plt.xlabel('[km]')
     plt.ylabel('[km]')

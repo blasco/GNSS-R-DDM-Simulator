@@ -35,17 +35,22 @@ transmitting_power = 1
 integration_time = 1e-3 # seconds
 delay_chip =  1/1.023e6 # seconds
 # Wind speed at 10 meters above sea surface
-u_10 =  5.0 # m/s 
+u_10 =  18.0 # m/s 
 # Angle between the up-down wind direction and the x-axis
 #phi_0 = (135)*np.pi/180 # rad 
 phi_0 = (135)*np.pi/180 # rad 
 
-delay_start = -20*delay_chip # seconds
-delay_end = 20*delay_chip # seconds
-delay_resolution = 0.3*delay_chip # seconds
+waf_delay_start = -5*delay_chip
+waf_delay_end = 5*delay_chip
+waf_doppler_start = -1000
+waf_doppler_end = 1000
 
-doppler_start = -5000 # Hz
-doppler_end = 5000 # Hz
+delay_increment_start = -5*delay_chip # seconds
+delay_increment_end = 15*delay_chip # seconds
+delay_resolution = 0.1*delay_chip # seconds
+
+doppler_increment_start = -5000 # Hz
+doppler_increment_end = 5000 # Hz
 #doppler_start = -2500 # Hz
 #doppler_end = -1200 # Hz
-doppler_resolution = 80.0 # Hz
+doppler_resolution = 30.0 # Hz
