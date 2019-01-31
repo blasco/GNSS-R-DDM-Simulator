@@ -42,11 +42,10 @@ phi_0 = (135)*np.pi/180 # rad
 
 delay_start = -20*delay_chip # seconds
 delay_end = 20*delay_chip # seconds
-#delay_resolution = 0.3*delay_chip # seconds
-delay_resolution = 0.2*delay_chip # seconds
+delay_resolution = 0.3*delay_chip # seconds
 
 doppler_start = -5000 # Hz
 doppler_end = 5000 # Hz
 #doppler_start = -2500 # Hz
 #doppler_end = -1200 # Hz
-doppler_resolution = 50.0 # Hz
+doppler_resolution = 80.0 # Hz
