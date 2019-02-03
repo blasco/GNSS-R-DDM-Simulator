@@ -8,6 +8,7 @@ from gnssr.tds.antenna_gain.antenna_gain import *
 from scipy import signal
 from delay_doppler_jacobian import *
 from problem_definition import *
+import cv2
 
 # -----------------------
 # Bistatic radar equation
@@ -26,9 +27,7 @@ def waf_squared(delay, doppler):
         Signals,” IEEE Transactions on Geoscience and Remote Sensing, vol. 47, no. 
         8, pp. 2733–2740, Aug. 2009.  
     ''' 
-    delay_sp =  eq_delay_incremet(np.array([0,0,0]))
-    doppler_sp = eq_doppler_absolute_shift(np.array([0,0,0]))
-    return waf_delay(delay)**2 * np.abs(waf_frequency(doppler_sp - doppler))**2
+    return waf_delay(delay)**2 * np.abs(waf_frequency(doppler))**2
 
 #def waf_delay(delay):
 #    ''' 
@@ -111,17 +110,14 @@ def sigma(delay, doppler):
 
 antenna = tds_antenna()
 def receiver_antenna_gain(r):
-    r_antenna = r[0:2]
+    r_antenna = r[0:2] - r_r[0:2] 
+    #r_antenna = r[0:2]
     elevation = np.arctan2(h_r,np.sqrt(r_antenna[0]**2+r_antenna[1]**2))*180/np.pi
     azimuth = np.arctan2(-r_antenna[1],-r_antenna[0])*180/np.pi
     return antenna.gain(azimuth, elevation)
 
 def transmitting_antenna_gain(r):
-    #distance_to_sp = np.linalg.norm(r[0:2])
-    #s = np.cos(distance_to_sp/200e3*np.pi/2)
-    #if s < 0:
-    #    s = 0
-    return 1
+    return gps_isotropic_antenna_gain
 
 def eq_doppler_absolute_shift(r):
     ''' 
@@ -250,7 +246,7 @@ def variance_upwind(u_10):
         ])
     return (0.45*(3.16e-3*f))
 
-def variance_crosswind(wind_speed_10m_above_sea):
+def variance_crosswind(u_10):
     ''' 
     Based on the 'clean surface mean square slope model' of Cox and Mux
     Implements Equation 4
@@ -293,38 +289,73 @@ def main():
        )
 
     # Dealy-Doppler values
-    doppler_sp = eq_doppler_absolute_shift(np.array([0,0,0]))
-    delay_values = list(np.arange(delay_increment_start, delay_increment_end, delay_resolution))
-    doppler_absolute_values = list(np.arange(
-                            doppler_sp + doppler_increment_start, 
-                            doppler_sp + doppler_increment_end, 
-                            doppler_resolution
-                            ))
-    waf_delay_values = list(np.arange(-delay_increment_end, delay_increment_end, delay_resolution))
+    delay_increment_values = list(np.arange(delay_increment_start, delay_increment_end, delay_resolution))
+    doppler_increment_values = list(np.arange(doppler_increment_start, doppler_increment_end, doppler_resolution))
+    waf_delay_increment_values = list(np.arange(-delay_increment_end, delay_increment_end, delay_resolution))
     waf_doppler_increment_values = list(np.arange(doppler_increment_start, doppler_increment_end, doppler_resolution))
-    doppler_increment_values = doppler_absolute_values - eq_doppler_absolute_shift(np.array([0,0,0]))
+    doppler_absolute_values = doppler_increment_values + eq_doppler_absolute_shift(np.array([0,0,0]))
+
+    r = np.array([x_grid, y_grid, 0])
 
     # Iso-delay and iso-doppler maps
-    r = [x_grid, y_grid, 0]
-    z_grid_delay = eq_delay_incremet(r)/delay_chip
+    z_grid_delay_chip = eq_delay_incremet(r)/delay_chip
     z_grid_doppler_increment = eq_doppler_absolute_shift(r) - eq_doppler_absolute_shift(np.array([0,0,0]))
 
-    fig_lines, ax_lines = plt.subplots(1,figsize=(10, 4))
-    contour_delay = ax_lines.contour(x_grid, y_grid, z_grid_delay, [i/delay_chip for i in delay_values], cmap='winter')
-    fig_lines.colorbar(contour_delay, label='C/A chips', )
+    # Receiver Antenna Gain
+    z_antenna = receiver_antenna_gain(r)
 
-    contour_doppler = ax_lines.contour(x_grid, y_grid, z_grid_doppler_increment, doppler_increment_values, cmap='winter')
-    fig_lines.colorbar(contour_doppler, label='Hz', )
+    # Radar cross section
+    z_rcs = radar_cross_section(r)
+
+    # Iso lines plot
+    fig_isolines, ax_isolines = plt.subplots(1,figsize=(10, 4))
+
+    contour_delay_chip = ax_isolines.contour(
+            x_grid, y_grid, z_grid_delay_chip, 
+            np.arange(0, delay_increment_end/delay_chip, 0.5), 
+            cmap='winter', alpha = 0.6
+            )
+    contour_doppler = ax_isolines.contour(
+            x_grid, y_grid, z_grid_doppler_increment, 
+            np.arange(doppler_increment_start, doppler_increment_end, 250), 
+            cmap='jet', alpha = 0.8
+            )
+    contour_antenna = ax_isolines.contourf(x_grid, y_grid, z_antenna, 55, cmap='jet', alpha = 0.3)
+
+    test_delay = np.array([12*delay_chip])
+    test_doppler = np.array([1000]) +  eq_doppler_absolute_shift(np.array([0,0,0]))
+    print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
+    x_s_1 = x_delay_doppler_1(test_delay, test_doppler)
+    y_s_1 = y_delay_doppler_1(test_delay, test_doppler)
+    x_s_2 = x_delay_doppler_2(test_delay, test_doppler)
+    y_s_2 = y_delay_doppler_2(test_delay, test_doppler)
+    ax_isolines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
+    ax_isolines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
+
+    fig_isolines.colorbar(contour_delay_chip, label='C/A chips')
+    fig_isolines.colorbar(contour_doppler, label='Hz')
+    fig_isolines.colorbar(contour_antenna, label='Gain')
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
-    ax_lines.xaxis.set_major_formatter(ticks_x)
-    ax_lines.yaxis.set_major_formatter(ticks_y)
+    ax_isolines.xaxis.set_major_formatter(ticks_x)
+    ax_isolines.yaxis.set_major_formatter(ticks_y)
+    plt.xlabel('[km]')
+    plt.ylabel('[km]')
+
+    # RCS surface plot
+    fig_rcs_surface, ax_rcs_surface = plt.subplots(1,figsize=(10, 4))
+    fig_rcs_surface.colorbar(contour_antenna, label='RCS')
+    contour_antenna = ax_rcs_surface.contourf(x_grid, y_grid, z_rcs, 55, cmap='jet')
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
+    ax_rcs_surface.xaxis.set_major_formatter(ticks_x)
+    ax_rcs_surface.yaxis.set_major_formatter(ticks_y)
     plt.xlabel('[km]')
     plt.ylabel('[km]')
 
     # Delay-Doppler mesh
-    delay_grid, doppler_grid = np.meshgrid(delay_values, doppler_absolute_values)
-    waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_values, waf_doppler_increment_values)
+    delay_grid, doppler_grid = np.meshgrid(delay_increment_values, doppler_absolute_values)
+    waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
 
     # Retrived power
     waf_matrix = waf_squared(waf_delay_grid, waf_doppler_grid)
@@ -336,25 +367,44 @@ def main():
     im = ax_waf.imshow(waf_matrix, cmap='viridis', 
             extent=(-delay_increment_end/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
             aspect="auto"
-        )
+            )
 
     fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
     ax_sigma.set_title('Sigma')
     im = ax_sigma.imshow(sigma_matrix, cmap='viridis', 
             extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
             aspect="auto"
-        )
+            )
 
     fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
     ax_ddm.set_title('DDM')
-    im = ax_ddm.imshow(ddm, cmap='viridis', 
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+    im = ax_ddm.imshow(ddm, cmap='jet', 
             extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
             aspect="auto"
-        )
+            )
+
+    # Image downscaling to desired resolution:
+    # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
+    fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
+    rescaled_doppler_resolution = 500
+    rescaled_delay_resolution_chips = 0.3
+    ddm_rescaled = cv2.resize(ddm, 
+            dsize=(
+                int((delay_increment_end/delay_chip - delay_increment_start/delay_chip)/rescaled_delay_resolution_chips), 
+                int((doppler_increment_end - doppler_increment_start)/rescaled_doppler_resolution)
+                ), 
+            interpolation=cv2.INTER_AREA
+            )
+    im = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
+            extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
+            aspect="auto"
+            )
 
     fig_waf_delay, ax_waf_delay = plt.subplots(1,figsize=(10, 4))
-    waf_delay_result = waf_delay(np.array(waf_delay_values))**2
-    ax_waf_delay.plot([i/delay_chip for i in waf_delay_values], waf_delay_result)
+    waf_delay_result = waf_delay(np.array(waf_delay_increment_values))**2
+    ax_waf_delay.plot([i/delay_chip for i in waf_delay_increment_values], waf_delay_result)
     ax_waf_delay.set_title('waf_delay')
 
     fig_waf_frequency, ax_waf_frequency = plt.subplots(1,figsize=(10, 4))

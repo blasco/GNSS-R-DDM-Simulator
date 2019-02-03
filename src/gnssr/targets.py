@@ -1,7 +1,7 @@
 class Target:
-    def __init__(self,lat,lon):
-        self.lat = lat
-        self.lon = lon
+    def __init__(self,lat_deg,lon_deg):
+        self.lat_deg = lat_deg
+        self.lon_deg = lon_deg
 
 targets = {}
 

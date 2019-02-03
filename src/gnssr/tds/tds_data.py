@@ -128,10 +128,9 @@ class tds_data:
         '''
             Calculates the doppler increment in HZ of the specified pixel
         '''
-        doppler_resolution = self.metagrp.groups[self.group].DopplerResolution
-        self.doppler_resolution = doppler_resolution
+        self.doppler_resolution = self.metagrp.groups[self.group].DopplerResolution
         tracking_offset_doppler_hz = self.metagrp.groups[self.group].TrackingOffsetDopplerHz
-        return doppler_pixel*doppler_resolution - tracking_offset_doppler_hz
+        return doppler_pixel*self.doppler_resolution - tracking_offset_doppler_hz
 
     def plot_ddm(self):
         '''
@@ -139,19 +138,25 @@ class tds_data:
         '''
         datenum = self.rootgrp.groups[self.group].variables['IntegrationMidPointTime'][self.index]
         ddm = self.rootgrp.groups[self.group].variables['DDM'][self.index].data
+
         string = str(datenum_to_pytime(float(datenum))) \
             + ' Lat: ' + "{0:.2f}".format(self.lat_sp_tds) \
             + ' Lon: ' + "{0:.2f}".format(self.lon_sp_tds)
-        delay_0 = self.calculate_delay_increment_chips(0)
-        delay_1 = self.calculate_delay_increment_chips(127)
-        doppler_0 = self.calculate_doppler_increment(-10)
-        doppler_1 = self.calculate_doppler_increment(10)
+
+        number_of_delay_pixels = self.metagrp.groups[self.group].NumberOfDelayPixels
+        number_of_doppler_pixels = self.metagrp.groups[self.group].NumberOfDopplerPixels
+
+        delay_start = self.calculate_delay_increment_chips(0)
+        delay_end = self.calculate_delay_increment_chips(number_of_delay_pixels-1)
+        doppler_start = self.calculate_doppler_increment(-np.floor(number_of_doppler_pixels/2))
+        doppler_end = self.calculate_doppler_increment(np.floor(number_of_doppler_pixels/2 - 0.5))
+
         fig, ax = plt.subplots(1,figsize=(10, 4))
         ax.set_ylabel('Hz')
         ax.set_xlabel('C/A chips')
         im = ax.imshow(ddm, cmap='viridis', 
-                extent=(delay_0, delay_1, doppler_0, doppler_1), 
-                aspect=(20/128)/np.abs(doppler_0/delay_0)
+                extent=(delay_start, delay_end, doppler_start, doppler_end), 
+                aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
                 )
         t = plt.text(0.01, 0.80, string, {'color': 'w', 'fontsize': 12}, transform=ax.transAxes)
         plt.show(block=False)
