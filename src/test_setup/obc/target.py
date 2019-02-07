@@ -34,12 +34,12 @@ class processor:
         self.fs_path = os.path.join(os.environ['PROJECT_SRC_ROOT'], 'test_setup/obc/fs')
 
     def cut_noise_region(self, ddm,ddm_ref,new_value=0):
-        '''
+        """
         For each pixel in ddm, replaces the pixel with new_value if the pixel 
         with same indeces in ddm_ref is less than 0.3
         cut_threshold is computed as the mean of the noise region of the ddm_ref 
         (from column 0 to 40)
-        '''
+        """
         ddm_cut = np.zeros(ddm.shape) + new_value
         cut_threshold = 0.15
         for row_i, row in enumerate(ddm_cut):

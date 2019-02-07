@@ -15,4 +15,3 @@ def find_contour_intersection(contour1,contour2):
   intersection = poly1.intersection(poly2)
 
   return intersection
-

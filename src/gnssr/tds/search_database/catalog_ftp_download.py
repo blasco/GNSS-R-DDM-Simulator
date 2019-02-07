@@ -21,20 +21,24 @@ def download_file(remote_file):
     except ftplib.error_perm:
         return
 
-ip = 'ftp.merrbys.co.uk'
-login = 'jblasco'
-password = '@jYhr=M4rF'
-with ftplib.FTP(ip, login, password) as ftp:
-    search_list=[]
-    with open(os.path.join(os.environ['TDS_ROOT'],'search_target/catalog_search_output.txt')) as kmz_search_file:
-        for line in kmz_search_file:
-            if 'File' in line:
-                search_list.append(line);
+def main():
+    ip = 'ftp.merrbys.co.uk'
+    login = 'jblasco'
+    password = '@jYhr=M4rF'
+    with ftplib.FTP(ip, login, password) as ftp:
+        search_list=[]
+        with open(os.path.join(os.environ['TDS_ROOT'],'search_target/catalog_search_output.txt')) as kmz_search_file:
+            for line in kmz_search_file:
+                if 'File' in line:
+                    search_list.append(line);
 
-    for count, line in enumerate(search_list):
-        print('\nFile %s of %s\n' % (count,len(search_list)))
-        file_string = line.split(' ')[1].strip()
-        ddm_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','DDMs.nc'))
-        metadata_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','metadata.nc'))
-        download_file(ddm_remote_file)
-        download_file(metadata_remote_file)
+        for count, line in enumerate(search_list):
+            print('\nFile %s of %s\n' % (count,len(search_list)))
+            file_string = line.split(' ')[1].strip()
+            ddm_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','DDMs.nc'))
+            metadata_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','metadata.nc'))
+            download_file(ddm_remote_file)
+            download_file(metadata_remote_file)
+
+if __name__ == '__main__':
+    main()

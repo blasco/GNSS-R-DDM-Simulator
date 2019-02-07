@@ -1,3 +1,5 @@
+doc/build
+doc/source/api_doc
 bin/
 etc/
 include/

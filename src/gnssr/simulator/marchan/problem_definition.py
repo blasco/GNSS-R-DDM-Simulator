@@ -4,7 +4,7 @@ import numpy as np
 
 h_t = 16836198.649 # meters
 #h_r = 12487.690 # meters
-h_r = 622487.690 # meters
+h_r = 682487.690 # meters
 elevation = 80*np.pi/180 # rad
 
 # Coordinate Frame as defined in Figure 2
@@ -19,7 +19,7 @@ r_r = np.array([0,-h_r/np.tan(elevation),h_r])
 # Velocity
 v_t = np.array([-2684.911, 1183.799, -671.829]) # m/s
 #v_r = np.array([-25,32.852, -3]) # m/s
-v_r = np.array([-2605,3243.852, -300]) # m/s
+v_r = np.array([-3605,3843.852, -850]) # m/s
 
 light_speed = 299792458.0 # m/s
 
@@ -40,17 +40,17 @@ gps_isotropic_antenna_gain = np.exp(14.4/10)
 integration_time = 1e-3 # seconds
 delay_chip =  1/1.023e6 # seconds
 # Wind speed at 10 meters above sea surface
-u_10 = 6.0 # m/s 
+u_10 = 10.0 # m/s 
 # Angle between the up-down wind direction and the x-axis
 #phi_0 = (135)*np.pi/180 # rad 
-phi_0 = (135)*np.pi/180 # rad 
+phi_0 = (180+125)*np.pi/180 # rad 
 
 delay_increment_start = -15*delay_chip # seconds
-delay_increment_end = 30*delay_chip # seconds
+delay_increment_end = 25*delay_chip # seconds
 delay_resolution = 0.2*delay_chip # seconds
 
 doppler_increment_start = -8000 # Hz
 doppler_increment_end = 8000 # Hz
 #doppler_start = -2500 # Hz
 #doppler_end = -1200 # Hz
-doppler_resolution = 50.0 # Hz
+doppler_resolution = 500.0 # Hz

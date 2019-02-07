@@ -64,7 +64,7 @@ class iso_lines:
         return (self.time_eq(x,y) - self.time_eq(0,0))*1e6
 
     def time_inc_eq_chips(self, x, y):
-        return (self.time_eq(x,y) - self.time_eq(0,0))*chips_per_second
+        return (self.time_eq(x,y) - self.time_eq(0,0))*gps_ca_chips_per_second
 
     def doppler_eq(self, x, y):
         self.elev = self.elev_deg*np.pi/180

@@ -7,10 +7,10 @@ import matplotlib.ticker as ticker
 from scipy.interpolate import griddata
 import xml.etree.ElementTree as ET
 
-class tds_antenna:
+class tds_antenna_gain:
 
     def __init__(self):
-        antenna_path = os.path.join(os.environ['TDS_ROOT'], 'antenna_gain/antenna_gain_map.xml') 
+        antenna_path = os.path.join(os.environ['TDS_ROOT'], 'antenna/gain_map.xml') 
         tree = ET.parse(antenna_path)
         root = tree.getroot()
 

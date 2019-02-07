@@ -4,7 +4,7 @@ import scipy.integrate as integrate
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-from gnssr.tds.antenna_gain.antenna_gain import *
+from gnssr.tds.antenna.gain import *
 from scipy import signal
 from delay_doppler_jacobian import *
 from problem_definition import *
@@ -108,7 +108,7 @@ def sigma(delay, doppler):
             )
     return result.real
 
-antenna = tds_antenna()
+antenna = tds_antenna_gain()
 def receiver_antenna_gain(r):
     r_antenna = r[0:2] - r_r[0:2] 
     #r_antenna = r[0:2]
@@ -204,35 +204,51 @@ def slope_probability_density_function(x):
         2004 Sumatra-Andaman Tsunami Event,” Journal of Sensors, vol. 2016, pp. 
         1–14, 2016.  
     '''
-    wind_rotation = np.array([
-        [np.cos(phi_0), -np.sin(phi_0)],
-        [np.sin(phi_0),  np.cos(phi_0)]
+    local_to_wind_reference_frame = np.array([
+        [np.cos(phi_0), np.sin(phi_0)],
+        [-np.sin(phi_0), np.cos(phi_0)]
     ])
+
+    s =  local_to_wind_reference_frame.dot(x)
+
+    rms_c = np.sqrt(variance_crosswind(u_10))
+    rms_u = np.sqrt(variance_upwind(u_10))
+
     covariance = np.array([
-        [variance_upwind(u_10), 0],
-        [0, variance_crosswind(u_10)]
+        [rms_u**2, 0],
+        [0, rms_c**2]
     ])
-    w = (wind_rotation.dot(covariance)).dot(np.transpose(wind_rotation))
-    return 1/np.sqrt(np.linalg.det(2*np.pi*w)) * \
+
+    hermite_coeficients = np.zeros((5,5))
+    hermite_coeficients[0,0] = 1
+    hermite_coeficients[1,2] = (0.01 - 0.0086*(u_10))
+    hermite_coeficients[3,0] = (0.04 -0.033*(u_10))
+    hermite_coeficients[0,4] = (0.4)
+    hermite_coeficients[2,2] = (0.12)
+    hermite_coeficients[4,0] = (0.23)
+
+    result = 1/(2*np.pi*rms_u*rms_c) * \
             np.exp(
-                -1/2*(np.transpose(x).dot(np.linalg.inv(w))).dot(x)
-            )
+                -1/2*((s[0]/rms_u)**2+(s[1]/rms_c)**2) \
+            ) * \
+            np.polynomial.hermite.hermval2d(s[0]/rms_u, s[1]/rms_c, hermite_coeficients)
 
-def variance_upwind(u_10):
-    ''' 
-    Based on the 'clean surface mean square slope model' of Cox and Mux
-    Implements Equation 4
-        Q. Yan and W. Huang, “GNSS-R Delay-Doppler Map Simulation Based on the 
-        2004 Sumatra-Andaman Tsunami Event,” Journal of Sensors, vol. 2016, pp. 
-        1–14, 2016.  
+    #eta = s[0]/rms_u
+    #xi = s[1]/rms_c
+    #result = 1/(2*np.pi*rms_u*rms_c)*np.exp(-1/2*(xi**2+eta**2)) * \
+    #        ( \
+    #            1 - \
+    #            1/2*c_21*(xi**2-1)*eta - \
+    #            1/6*c_03*(eta**3-3*eta) + \
+    #            1/24*c_40*(xi**4-6*xi**2+3) + \
+    #            1/4*c_22*(xi**2-1)*(eta**2-1) + \
+    #            1/24*c_04*(eta**4-6*eta**2+3) \
+    #        )
+    np.place(result, result < 0, 0)
+    return result
 
-    Args: 
-        u_10:   Wind speed at 10 meters above sea surface
-
-    Returns:
-        upwind variance
-    '''
-    f = np.piecewise(u_10, 
+def f_u_10(u_10):
+    return np.piecewise(u_10, 
         [
             u_10 <= 3.49,
             np.logical_and(u_10 > 3.49, u_10 <= 46),
@@ -244,7 +260,35 @@ def variance_upwind(u_10):
             lambda x: 6*np.log(x) - 4,
             lambda x: 0.411*x
         ])
-    return (0.45*(3.16e-3*f))
+
+def variance_upwind(u_10):
+    ''' 
+    Based on the 'clean surface mean square slope model' of Cox and Munk
+    Implements Equation 4
+        Q. Yan and W. Huang, “GNSS-R Delay-Doppler Map Simulation Based on the 
+        2004 Sumatra-Andaman Tsunami Event,” Journal of Sensors, vol. 2016, pp. 
+        1–14, 2016.  
+
+    Args: 
+        u_10:   Wind speed at 10 meters above sea surface
+
+    Returns:
+        upwind variance
+    '''
+    return (0.45*(3.16e-3*f_u_10(u_10)))
+
+# TODO: Fresnel model:
+# Di Simone > It even contains the Klein-Swift model for computation of the dielectric constant of sea water:
+# CYGNSS - Algorithm Theoretical Basis Document Level 2 Mean-Square Slope Retrieval
+#This may be useful for computing the reflection coefficient R, whose expressions are reported here (eq. 12.23-12.26)
+#F. Ulaby, R. Moore, and A. Fung, Microwave Remote Sensing, Active
+#and Passive. Vol. II: Radar Remote Sensing and Surface Scattering and
+#Emission Theory. Reading, MA: Addison-Wesley, 1982.
+#to be mapped in circular polarization as explained in (eq. (9))
+#Di Bisceglie, M., Di Martino, G., Di Simone, A., Galdi, C., Iodice, A., Riccio, D., & Ruella, G. (2018, July). Two-Scale Model for the Evaluation of Sea-Surface Scattering in GNSS-R Ship-Detection Applications. In IGARSS 2018-2018 IEEE International Geoscience and Remote Sensing Symposium (pp. 3181-3184). IEEE.
+
+def fresnel_model(r):
+    return 1
 
 def variance_crosswind(u_10):
     ''' 
@@ -260,28 +304,16 @@ def variance_crosswind(u_10):
     Returns:    
         crosswind variance
     '''
-    f = np.piecewise(u_10, 
-        [
-            u_10 <= 3.49,
-            np.logical_and(u_10 > 3.49, u_10 <= 46),
-            u_10 > 46
-            
-        ],
-        [
-            lambda x: x,
-            lambda x: 6*np.log(x) - 4,
-            lambda x: 0.411*x
-        ])
-    return (0.45*(0.003 + 1.92e-3*f))
+    return (0.45*(0.003 + 1.92e-3*f_u_10(u_10)))
 
 def main():
 
     # Surface mesh
-    x_0 =  -200e3 # meters
-    x_1 =  200e3 # meters
+    x_0 =  -150e3 # meters
+    x_1 =  150e3 # meters
     n_x = 500
-    y_0 =  -200e3 # meters
-    y_1 =  200e3 # meters
+    y_0 =  -150e3 # meters
+    y_1 =  150e3 # meters
     n_y = 500
     x_grid, y_grid = np.meshgrid(
        np.linspace(x_0, x_1, n_x), 
@@ -320,10 +352,10 @@ def main():
             np.arange(doppler_increment_start, doppler_increment_end, 250), 
             cmap='jet', alpha = 0.8
             )
-    contour_antenna = ax_isolines.contourf(x_grid, y_grid, z_antenna, 55, cmap='jet', alpha = 0.3)
 
     test_delay = np.array([12*delay_chip])
     test_doppler = np.array([1000]) +  eq_doppler_absolute_shift(np.array([0,0,0]))
+
     print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
     x_s_1 = x_delay_doppler_1(test_delay, test_doppler)
     y_s_1 = y_delay_doppler_1(test_delay, test_doppler)
@@ -334,7 +366,6 @@ def main():
 
     fig_isolines.colorbar(contour_delay_chip, label='C/A chips')
     fig_isolines.colorbar(contour_doppler, label='Hz')
-    fig_isolines.colorbar(contour_antenna, label='Gain')
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
     ax_isolines.xaxis.set_major_formatter(ticks_x)
@@ -342,14 +373,63 @@ def main():
     plt.xlabel('[km]')
     plt.ylabel('[km]')
 
-    # RCS surface plot
-    fig_rcs_surface, ax_rcs_surface = plt.subplots(1,figsize=(10, 4))
-    fig_rcs_surface.colorbar(contour_antenna, label='RCS')
-    contour_antenna = ax_rcs_surface.contourf(x_grid, y_grid, z_rcs, 55, cmap='jet')
+    # Antenna pattern plot
+    fig_antenna, ax_antenna = plt.subplots(1,figsize=(10, 4))
+    ax_antenna.set_title('Antenna')
+
+    contour_delay_chip = ax_antenna.contour(
+            x_grid, y_grid, z_grid_delay_chip, 
+            np.arange(0, delay_increment_end/delay_chip, 0.5), 
+            cmap='winter', alpha = 0.3
+            )
+    contour_doppler = ax_antenna.contour(
+            x_grid, y_grid, z_grid_doppler_increment, 
+            np.arange(doppler_increment_start, doppler_increment_end, 250), 
+            cmap='jet', alpha = 0.3
+            )
+    contour_antenna = ax_antenna.contourf(x_grid, y_grid, z_antenna, 55, cmap='jet', alpha = 1.0)
+
+    test_delay = np.array([12*delay_chip])
+    test_doppler = np.array([1000]) +  eq_doppler_absolute_shift(np.array([0,0,0]))
+    print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
+
+    fig_antenna.colorbar(contour_delay_chip, label='C/A chips')
+    fig_antenna.colorbar(contour_doppler, label='Hz')
+    fig_antenna.colorbar(contour_antenna, label='Gain')
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
-    ax_rcs_surface.xaxis.set_major_formatter(ticks_x)
-    ax_rcs_surface.yaxis.set_major_formatter(ticks_y)
+    ax_antenna.xaxis.set_major_formatter(ticks_x)
+    ax_antenna.yaxis.set_major_formatter(ticks_y)
+    plt.xlabel('[km]')
+    plt.ylabel('[km]')
+
+    # RCS surface plot
+    fig_rcs, ax_rcs = plt.subplots(1,figsize=(10, 4))
+    ax_rcs.set_title('RCS')
+
+    #contour_delay_chip = ax_rcs.contour(
+    #        x_grid, y_grid, z_grid_delay_chip, 
+    #        np.arange(0, delay_increment_end/delay_chip, 1), 
+    #        cmap='jet', alpha = 0.5
+    #        )
+    #contour_doppler = ax_rcs.contour(
+    #        x_grid, y_grid, z_grid_doppler_increment, 
+    #        np.arange(doppler_increment_start, doppler_increment_end, 250), 
+    #        cmap='jet', alpha = 0.5
+    #        )
+    contour_rcs = ax_rcs.contourf(x_grid, y_grid, z_rcs, 55, cmap='viridis', alpha = 1.0)
+
+    test_delay = np.array([12*delay_chip])
+    test_doppler = np.array([1000]) +  eq_doppler_absolute_shift(np.array([0,0,0]))
+    print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
+
+    #fig_rcs.colorbar(contour_delay_chip, label='C/A chips')
+    #fig_rcs.colorbar(contour_doppler, label='Hz')
+    fig_rcs.colorbar(contour_rcs, label='RCS')
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
+    ax_rcs.xaxis.set_major_formatter(ticks_x)
+    ax_rcs.yaxis.set_major_formatter(ticks_y)
     plt.xlabel('[km]')
     plt.ylabel('[km]')
 
@@ -386,8 +466,13 @@ def main():
             )
 
     # Image downscaling to desired resolution:
+    # TODO: This is just an average of the pixels around the area
+    # This is not valid, summation i srequired:
+    # Di Simone > From a physical viewpoint, 
+    # such an approach should call for summation instead of averaging
     # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
+    ax_ddm_rescaled.set_title('DDM rescaled')
     rescaled_doppler_resolution = 500
     rescaled_delay_resolution_chips = 0.3
     ddm_rescaled = cv2.resize(ddm, 
