@@ -8,7 +8,8 @@ def woodward_ambiguity_function(delay, doppler, sim_config):
     response to the scattered signal from a single delay-Doppler cell. 
     
     It can be approximated by the product of a function dependent on the delay 
-    and a function dependent on the frequency. 
+    increment and a function dependent on the doppler increment with respect to 
+    the specular point.
 
     Implements equation 22:
         V. U. Zavorotny and A. G. Voronovich, “Scattering of GPS signals from the 
@@ -27,7 +28,7 @@ def woodward_ambiguity_function(delay, doppler, sim_config):
 
 def waf_delay(delay, sim_config):
     """
-    Delay component of the Woodward Ambiguity Function (WAF) decomposition.
+    Delay increment component of the Woodward Ambiguity Function (WAF) decomposition.
 
     Implements equation 20:
         V. U. Zavorotny and A. G. Voronovich, “Scattering of GPS signals from the 
@@ -51,12 +52,12 @@ def waf_delay(delay, sim_config):
 
 def waf_frequency(doppler, sim_config):
     """
-    Defined in the text after Equation 1.
-        J. F. Marchan-Hernandez, A. Camps, N. Rodriguez-Alvarez, E. Valencia, X.  
-        Bosch-Lluis, and I. Ramos-Perez, “An Efficient Algorithm to the 
-        Simulation of Delay–Doppler Maps of Reflected Global Navigation 
-        Satellite System Signals,” IEEE Transactions on Geoscience and Remote 
-        Sensing, vol. 47, no.  8, pp. 2733–2740, Aug. 2009.  
+    Doppler increment component of the Woodward Ambiguity Function (WAF) decomposition.
+
+    Implements equation 21:
+        V. U. Zavorotny and A. G. Voronovich, “Scattering of GPS signals from the 
+        ocean with wind remote sensing application,” IEEE Transactions on Geoscience and 
+        Remote Sensing, vol. 38, no. 2, pp. 951–964, Mar. 2000.  
 
     A coherent_integration_time factor is missing in the function defined in 
     the paper.

@@ -45,7 +45,7 @@ def sigma(delay, doppler, sim_config):
     y_2 = y_delay_doppler_2(delay, doppler, sim_config).real
     r_2 = np.array([x_2,y_2,0])
 
-    return transmitting_power*coherent_integration_time**2/(4*np.pi) * ( \
+    p = transmitting_power*coherent_integration_time**2/(4*np.pi) * ( \
                 radar_cross_section(r_1, sim_config)/( \
                     np.linalg.norm(r_1-r_t)**2* \
                     np.linalg.norm(r_r-r_1)**2 \
@@ -62,3 +62,5 @@ def sigma(delay, doppler, sim_config):
                 receiver_antenna_gain(r_2, sim_config) * \
                 transmitting_antenna_gain(r_2, sim_config) \
             )
+    return p + np.max(p)*np.random.normal(0.02,0.05, p.shape)
+     

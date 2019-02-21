@@ -16,9 +16,6 @@ def datenum_to_pytime(matlab_datenum):
     python_datetime = datetime.fromordinal(int(matlab_datenum)) + timedelta(days=matlab_datenum%1) - timedelta(days = 366)
     return python_datetime
 
-def normalize(mat):
-    return (mat - np.min(mat))/(np.max(mat)-np.min(mat))
-
 class target_processor:
 
     def __init__(self):
@@ -26,8 +23,6 @@ class target_processor:
         #self.max_col = 85
         self.max_col = 95
         self.ddm_list = []
-
-        self.fig_labels, self.ax_labels = plt.subplots(1,figsize=(10, 4))
 
     def cut_noise_region(self, ddm,ddm_ref,new_value=0):
         """
@@ -48,7 +43,7 @@ class target_processor:
     def process_ddm(self, ddm_raw):
         self.ddm_original = normalize(ddm_raw) 
 
-        n = 200
+        n = 30 
         if len(self.ddm_list) < n :
             self.ddm_list.insert(0, self.ddm_original)
             return
@@ -56,7 +51,7 @@ class target_processor:
         # 1. Sea clutter estimation. 
         # As target appear as bright spots, the initial estimation is based of the 
         # composition of the minimum values for each pixel for the last n measurements
-        n = 10
+        n = 30 
         self.sea_clutter_0 = self.ddm_list[0]
         for i in range(1, n):
             ddm_i = normalize(self.ddm_list[i])
@@ -71,7 +66,7 @@ class target_processor:
 
         # Using the self.sea_clutter_0 as initial estimation a low pass filter that gives 
         # more weight to the lower values is applied 
-        n = 200
+        n = 30 
         tau = 0.08
         self.sea_clutter = np.array(self.sea_clutter_0)
         for i in range(1, n):
@@ -153,6 +148,7 @@ class target_processor:
         """
 
     def plot_targets():
+        self.fig_labels, self.ax_labels = plt.subplots(1,figsize=(10, 4))
         [p.remove() for p in reversed(self.ax_labels.patches)] # Clear previous patches
         selfall_labels = label(ddm_detections)
         self.ax_labels.imshow(self.ddm_original, cmap='viridis')

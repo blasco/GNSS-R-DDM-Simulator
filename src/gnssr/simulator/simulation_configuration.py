@@ -23,7 +23,7 @@ class simulation_configuration:
         self.coherent_integration_time = 1e-3 # seconds
         self.delay_chip =  1/gps_ca_chips_per_second # seconds
 
-        self.u_10 = 10.0 # m/s 
+        self.u_10 = 5.0 # m/s 
         """Wind speed at 10 meters above sea surface [m/s]."""
         self.phi_0 = (180+125)*np.pi/180 # rad 
         """Angle between the up-down wind direction and the x-axis."""
@@ -32,16 +32,16 @@ class simulation_configuration:
         self.delay_increment_end = 15*self.delay_chip # seconds
         self.delay_resolution = 0.2*self.delay_chip # seconds
 
-        self.doppler_increment_start = -5000 # Hz
-        self.doppler_increment_end = 5000 # Hz
+        self.doppler_increment_start = -4500 # Hz
+        self.doppler_increment_end = 4500 # Hz
         self.doppler_resolution = 50.0 # Hz
 
-        self.set_geometry_local_ref()
+        self.set_scenario_local_ref()
 
-    def set_geometry_local_ref(self,
+    def set_scenario_local_ref(self,
             h_t = 13.82e6, # m
             h_r = 620e3,  # m
-            elevation = 60*np.pi/180, # radians
+            elevation = 40*np.pi/180, # radians
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([-3605, 3843.852, -850]) # m/s
             ):

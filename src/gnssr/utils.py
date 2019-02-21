@@ -10,6 +10,9 @@ gps_ca_chips_per_second = 1.023e6
 
 light_speed = 299792458.0 # m/s
 
+def normalize(mat):
+    return (mat - np.min(mat))/(np.max(mat)-np.min(mat))
+
 def unit_vector(r):
     return r/np.linalg.norm(r)
 

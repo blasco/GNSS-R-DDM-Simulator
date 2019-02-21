@@ -17,29 +17,25 @@ import cv2
 def main():
 
     sim_config = simulation_configuration()
-    #TODO: u_10 = 0 fails
-    sim_config.u_10 = 1
-
-    delay_increment_start = sim_config.delay_increment_start 
-    delay_increment_end = sim_config.delay_increment_end 
-    delay_resolution = sim_config.delay_resolution
-
-    doppler_increment_start = sim_config.doppler_increment_start
-    doppler_increment_end = sim_config.doppler_increment_end
-    doppler_resolution = sim_config.doppler_resolution
-
     delay_chip = sim_config.delay_chip
+    # Really good
+    #sim_config.u_10 = 4
+    #sim_config.phi_0 = 35*np.pi/180
+    #sim_config.u_10 = 4
+    #sim_config.phi_0 = 38*np.pi/180
+    sim_config.u_10 = 3.9
+    sim_config.phi_0 = 37*np.pi/180
 
-    # Load TDS data
-    file_root_name = 'raw/L1B/2017-03-12-H18'
+    file_root_name = 'raw/L1B/2015-04-01-H00'
     target = targets['hibernia']
-    group = '000035'
-    index = 678
+    group = '000095'
+    index = 515
+
     tds = tds_data(file_root_name, group, index)
 
     # Sea clutter estimation. 
     p = target_processor();
-    for i in range(index - 200, index + 10):
+    for i in range(index - 30, index + 5):
         ddm = tds.rootgrp.groups[group].variables['DDM'][i].data
         p.process_ddm(ddm)
 
@@ -59,11 +55,24 @@ def main():
     doppler_start = tds.calculate_doppler_increment(-np.floor(number_of_doppler_pixels/2))
     doppler_end = tds.calculate_doppler_increment(np.floor(number_of_doppler_pixels/2 - 0.5))
 
+    delay_increment_start = sim_config.delay_increment_start 
+    delay_increment_end = sim_config.delay_increment_end 
+    delay_resolution = sim_config.delay_resolution
+
+    sim_config.delay_increment_start = delay_start*delay_chip + 2*delay_resolution
+    sim_config.delay_increment_end = delay_end*delay_chip
+    sim_config.doppler_increment_start = -5000
+    sim_config.doppler_increment_end = 5000
+
+    doppler_increment_start = sim_config.doppler_increment_start
+    doppler_increment_end = sim_config.doppler_increment_end
+    doppler_resolution = sim_config.doppler_resolution
+
     fig, ax = plt.subplots(1,figsize=(10, 4))
     ax.set_ylabel('Hz')
     ax.set_xlabel('C/A chips')
     im = ax.imshow(p.sea_clutter, cmap='jet', 
-            extent=(delay_start, delay_end, doppler_start, doppler_end), 
+            extent=(delay_start, delay_end, doppler_end, doppler_start), 
             aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
     t = plt.text(0.01, 0.80, string, {'color': 'w', 'fontsize': 12}, transform=ax.transAxes)
@@ -82,7 +91,7 @@ def main():
     v_ry = np.dot(tds.v_r, n_y)
     v_rz = np.dot(tds.v_r, n_z)
 
-    sim_config.set_geometry_local_ref(
+    sim_config.set_scenario_local_ref(
         h_r = np.dot((tds.r_r - r_sp), n_z),
         h_t = np.dot((tds.r_t - r_sp), n_z),
         elevation = angle_between(n_y, tds.r_t-r_sp),
@@ -91,14 +100,14 @@ def main():
         )
 
     # DDM
-    ddm = simulate_ddm(sim_config)
+    ddm_sim = normalize(simulate_ddm(sim_config)) 
 
     fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
-    ax_ddm.set_title('DDM')
+    ax_ddm.set_title('DDM simulator')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    im = ax_ddm.imshow(ddm, cmap='jet', 
-            extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
+    im = ax_ddm.imshow(ddm_sim, cmap='jet', 
+            extent=(delay_start, delay_end, doppler_end, doppler_start), 
             aspect="auto"
             )
 
@@ -110,18 +119,31 @@ def main():
     # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
     ax_ddm_rescaled.set_title('DDM rescaled')
-    rescaled_doppler_resolution = 500
-    rescaled_delay_resolution_chips = 0.3
-    ddm_rescaled = cv2.resize(ddm, 
+    rescaled_doppler_resolution = tds.doppler_resolution
+    rescaled_delay_resolution_chips = tds.time_delay_resolution/delay_chip
+    ddm_rescaled = cv2.resize(ddm_sim, 
             dsize=(
-                int((delay_increment_end/delay_chip - delay_increment_start/delay_chip)/rescaled_delay_resolution_chips), 
-                int((doppler_increment_end - doppler_increment_start)/rescaled_doppler_resolution)
+                128, 
+                20
                 ), 
             interpolation=cv2.INTER_AREA
-            )
+            ) 
+    ddm_rescaled = ddm_rescaled + 0.02*np.max(ddm_rescaled)*np.random.rand(ddm_rescaled.shape[0],ddm_rescaled.shape[1])
+
     im = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
-            extent=(delay_increment_start/delay_chip, delay_increment_end/delay_chip, doppler_increment_start, doppler_increment_end),
-            aspect="auto"
+            extent=(delay_start, delay_end, doppler_end, doppler_start), 
+            aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
+            )
+
+
+    fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
+    ax_diff.set_title('DDM diff')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+    ddm_diff = np.abs(ddm_rescaled-p.sea_clutter)
+    im = ax_diff.imshow(ddm_diff, cmap='jet', 
+            extent=(delay_start, delay_end, doppler_end, doppler_start), 
+            aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
 
     plt.show()
