@@ -68,14 +68,15 @@ def main():
     doppler_increment_end = sim_config.doppler_increment_end
     doppler_resolution = sim_config.doppler_resolution
 
-    fig, ax = plt.subplots(1,figsize=(10, 4))
-    ax.set_ylabel('Hz')
-    ax.set_xlabel('C/A chips')
-    im = ax.imshow(p.sea_clutter, cmap='jet', 
+    fig_tds, ax_tds = plt.subplots(1,figsize=(10, 4))
+    plt.title('TDS-1 Experimental Data')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+    im = ax_tds.imshow(p.sea_clutter, cmap='jet', 
             extent=(delay_start, delay_end, doppler_end, doppler_start), 
             aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
-    t = plt.text(0.01, 0.80, string, {'color': 'w', 'fontsize': 12}, transform=ax.transAxes)
+    t = plt.text(0.01, 0.85, string, {'color': 'w', 'fontsize': 12}, transform=ax_tds.transAxes)
 
     # Load TDS Geometry in simulation configuration
     r_sp, lat_sp, lon_sp = tds.find_sp();
@@ -103,7 +104,7 @@ def main():
     ddm_sim = normalize(simulate_ddm(sim_config)) 
 
     fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
-    ax_ddm.set_title('DDM simulator')
+    plt.title('DDM original simulation')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
     im = ax_ddm.imshow(ddm_sim, cmap='jet', 
@@ -118,7 +119,9 @@ def main():
     # such an approach should call for summation instead of averaging
     # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
-    ax_ddm_rescaled.set_title('DDM rescaled')
+    plt.title('Simulation')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
     rescaled_doppler_resolution = tds.doppler_resolution
     rescaled_delay_resolution_chips = tds.time_delay_resolution/delay_chip
     ddm_rescaled = cv2.resize(ddm_sim, 
@@ -137,14 +140,16 @@ def main():
 
 
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
-    ax_diff.set_title('DDM diff')
+    plt.title('Difference')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
     ddm_diff = np.abs(ddm_rescaled-p.sea_clutter)
+    ddm_diff[0,0] = 0.35
     im = ax_diff.imshow(ddm_diff, cmap='jet', 
             extent=(delay_start, delay_end, doppler_end, doppler_start), 
             aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
+    cbar = fig_diff.colorbar(im, label='Normalized Power', shrink=0.35)
 
     plt.show()
 
