@@ -27,6 +27,6 @@ def transmitting_antenna_gain(r, sim_config):
         numpy.ndarray with size(1,)
     """
     # Coulson, “The GPS at GTO Experiment.” 1996.
-    gps_isotropic_antenna_gain = np.exp(14.4/10)
+    gps_isotropic_antenna_gain = np.power(10, 14.4/10)
     return gps_isotropic_antenna_gain
 

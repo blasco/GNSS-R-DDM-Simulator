@@ -6,15 +6,30 @@ from gnssr.simulator.geometry.geometry import *
 def radar_cross_section(r, sim_config):
     """
     Args:
-        r (numpy.ndarray with size(3,)): Position on the local coordinate.
+        r (numpy.ndarray with size(3,)): Position on the local coordinates.
         sim_config: 
         sim_config: Instance of simulation_configuration class.
     Returns:
         numpy.ndarray with  size(1,).
     """
-    return rcs_sea(r, sim_config)
 
-def rcs_sea(r, sim_config):
+    #100x25m 
+    wake_x = 2e3 #m
+    wake_y = 0e3 #m
+    wake_x_size = 500 #m
+    wake_y_size = 100 #m
+    wake = np.logical_and.reduce((
+            np.abs(r[0]-wake_x) < wake_x_size, 
+            wake_y_size/wake_x_size*(r[0]-wake_x) - (r[1]-wake_y) >= 0, 
+            wake_y_size/wake_x_size*(r[0]-wake_x) + (r[1]-wake_y) >= 0
+            ))
+    sea = rcs_sea(r, sim_config, sim_config.u_10)
+    target = rcs_sea(r, sim_config, sim_config.u_10*2)
+    np.place(sea, wake, 0)
+    np.place(target, np.logical_not(wake), 0)
+    return sea + target
+
+def rcs_sea(r, sim_config, u_10):
     '''
     Radar Cross Section of the sea surface.
     Implements equation 34:
@@ -33,7 +48,7 @@ def rcs_sea(r, sim_config):
     return np.pi*(fresnel_coefficient**2)*((q_norm/q_z)**4) * \
             slope_probability_density_function(
                     ocean_surface_slope, 
-                    sim_config.u_10, 
+                    u_10, 
                     sim_config.phi_0
                     )
 
@@ -74,7 +89,6 @@ def slope_probability_density_function(x, u_10, phi_0):
             np.polynomial.hermite.hermval2d(s[0]/rms_u, s[1]/rms_c, hermite_coeficients)
 
     np.place(result, result < 0, 0)
-    #TODO: rcs not workign
     return result
 
 def f_u_10(u_10):

@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from skimage.measure import label, regionprops
 import matplotlib.patches as mpatches
 from datetime import *
+from gnssr.tds.tds_data import *
 
 def main():
     # Petronius Oil Platform
@@ -15,10 +16,15 @@ def main():
     #metagrp = Dataset(file_dir+"metadata.nc", "r", format="NETCDF4")
     #group = '000047'
     #start_0 = 590
-    rootgrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2015-04-01-H00-DDMs.nc') , "r", format="NETCDF4")
-    metagrp = Dataset(os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/2015-04-01-H00-metadata.nc') , "r", format="NETCDF4")
+
+    file_root_name = 'raw/L1B/2015-04-01-H00'
     group = '000095'
     index = 525
+
+    tds = tds_data(file_root_name, group, index)
+
+    rootgrp = tds.rootgrp
+    metagrp = tds.metagrp
 
     # The region of interest lies between delay column 60 and delay column 80
     min_col = 60
@@ -112,25 +118,85 @@ def main():
                     ddm_detections[row_i][col_i] = 1
 
     # Plotting
+    x_start = -6
+    x_end = 15
+    y_start = 4500
+    y_end = -4500
+
+    number_of_delay_pixels = tds.metagrp.groups[tds.group].NumberOfDelayPixels
+    number_of_doppler_pixels = tds.metagrp.groups[tds.group].NumberOfDopplerPixels
+    delay_start = tds.calculate_delay_increment_chips(0)
+    delay_end = tds.calculate_delay_increment_chips(number_of_delay_pixels-1)
+    doppler_start = tds.calculate_doppler_increment(-np.floor(number_of_doppler_pixels/2))
+    doppler_end = tds.calculate_doppler_increment(np.floor(number_of_doppler_pixels/2 - 0.5))
+
     fig_original = plt.figure(figsize=(10, 4))
-    im_original = plt.imshow(ddm_original, cmap='viridis', extent=(0,127,-10,9))
+    im_original = plt.imshow(ddm_original, 
+            cmap='viridis',
+            extent=(delay_start, delay_end, doppler_end, doppler_start),
+            aspect='auto'
+            )
+    plt.xlim([x_start,x_end])
+    plt.ylim([y_start,y_end])
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+
+    datenum = metagrp.groups[group].variables['IntegrationMidPointTime'][index]
+    lat = metagrp.groups[group].variables['SpecularPointLat'][index]
+    lon = metagrp.groups[group].variables['SpecularPointLon'][index]
+    #string = 'G: ' + group + ' I: ' + str(index) + ' - ' + \
+    #        str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
+    #        str(lat) + ' Lon: ' + str(lon) + '\n'
+
+    string = str(datenum_to_pytime(float(datenum))) \
+        + ' Lat: ' + "{0:.2f}".format(tds.lat_sp_tds) \
+        + ' Lon: ' + "{0:.2f}".format(tds.lon_sp_tds)
+    t = plt.text(-5.3, -3200, string, {'color': 'w', 'fontsize': 12})
+
     plt.show(block=False)
 
     fig_sea_clutter = plt.figure(figsize=(10, 4))
-    im_sea_clutter = plt.imshow(sea_clutter, cmap='viridis', extent=(0,127,-10,9))    
+    im_sea_clutter = plt.imshow(sea_clutter, 
+            cmap='viridis',
+            extent=(delay_start, delay_end, doppler_end, doppler_start),
+            aspect='auto'
+            )
+    plt.xlim([x_start,x_end])
+    plt.ylim([y_start,y_end])
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
     plt.show(block=False)
 
     fig_sub = plt.figure(figsize=(10, 4))
-    im_sub = plt.imshow(ddm_diff, cmap='viridis', extent=(0,127,-10,9))
+    im_sub = plt.imshow(ddm_diff, 
+            cmap='viridis',
+            extent=(delay_start, delay_end, doppler_end, doppler_start),
+            aspect='auto'
+            )
+    plt.xlim([x_start,x_end])
+    plt.ylim([y_start,y_end])
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
     plt.show(block=False)
 
     fig_detections = plt.figure(figsize=(10, 4))
-    im_detections = plt.imshow(ddm_detections, cmap='viridis', extent=(0,127,-10,9))
+    im_detections = plt.imshow(ddm_detections, 
+            cmap='viridis',
+            extent=(delay_start, delay_end, doppler_end, doppler_start),
+            aspect='auto'
+            )
+    plt.xlim([x_start,x_end])
+    plt.ylim([y_start,y_end])
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
     plt.show(block=False)
 
     all_labels = label(ddm_detections)
     fig_labels,ax_labels = plt.subplots(1,figsize=(10, 4))
-    ax_labels.imshow(ddm_original, cmap='viridis')
+    ax_labels.imshow(ddm_original, 
+            cmap='viridis',
+            aspect='auto'
+            )
     plt.show(block=False)
 
     for region in regionprops(all_labels):
@@ -138,14 +204,6 @@ def main():
         l = 1 
         rect = mpatches.Rectangle((minc-l, minr-l), maxc - minc + 2*l-1, maxr - minr + 2*l - 1, fill=False, edgecolor='red', linewidth=2)
         ax_labels.add_patch(rect)
-
-    datenum = metagrp.groups[group].variables['IntegrationMidPointTime'][index]
-    lat = metagrp.groups[group].variables['SpecularPointLat'][index]
-    lon = metagrp.groups[group].variables['SpecularPointLon'][index]
-    string = 'G: ' + group + ' I: ' + str(index) + ' - ' + \
-            str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
-            str(lat) + ' Lon: ' + str(lon) + '\n'
-    t = plt.text(5, 5, string, {'color': 'w', 'fontsize': 12})
 
     plt.show()
 

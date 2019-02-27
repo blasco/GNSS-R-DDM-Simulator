@@ -32,7 +32,7 @@ class tds_antenna_gain:
         for index, element in enumerate(root.iter('float')):
             elevation_index = int(index/(self.azimuth_pixels-1))
             azimuth_index = index%(self.azimuth_pixels-1)
-            self.gain_map[elevation_index][azimuth_index] = np.exp(float(element.text)/10)
+            self.gain_map[elevation_index][azimuth_index] = np.exp(float(element.text)/20)
         # The data contains the values for azimuth from -180 to 179.
         # The last column (azimuth=180) is aproximiated with the 
         # previous column (azimuth=179)
@@ -49,7 +49,7 @@ def surface_gain(x,y,tds_antenna):
     return tds_antenna.gain(azimuth, elevation)
 
 def main():
-    antenna = tds_antenna()
+    antenna = tds_antenna_gain()
     extent = 1500e3
     extent_x0 =  -extent
     extent_x1 =  extent
@@ -71,7 +71,10 @@ def main():
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
     ax_surface.xaxis.set_major_formatter(ticks_x)
     ax_surface.yaxis.set_major_formatter(ticks_y)
-    fig_surface.colorbar(cs_surface, label='Gain')
+    ticks_z = ticker.FuncFormatter(lambda x, pos: '{:.2f}'.format(20*np.log10(x)))
+    cbar = fig_surface.colorbar(cs_surface, label='Gain [dBi]')
+    cbar.formatter= ticks_z
+    cbar.update_ticks()
 
     A, E = np.meshgrid(
             np.linspace(-180, 180, 100),

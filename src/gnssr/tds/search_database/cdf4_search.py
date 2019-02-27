@@ -28,7 +28,7 @@ def cdf4_search(file_root_name, target, search_error):
             lat = metagrp.groups[group].variables['SpecularPointLat'][index]
             lon = metagrp.groups[group].variables['SpecularPointLon'][index]
             # 0.5 deg error approx 55 km error
-            if (abs((lat%360) - (target.lat%360)) <= search_error and abs((lon%360) - (target.lon%360)) <= search_error):
+            if (abs((lat%360) - (target.lat_deg%360)) <= search_error and abs((lon%360) - (target.lon_deg%360)) <= search_error):
                 string = 'G: ' + group + ' I: ' + str(index) + ' - ' + \
                         str(datenum) + ' - ' + str(datenum_to_pytime(float(datenum))) + ' - Lat: ' + \
                         str(lat) + ' Lon: ' + str(lon) + '\n'

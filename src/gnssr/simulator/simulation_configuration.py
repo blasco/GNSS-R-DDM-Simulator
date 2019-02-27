@@ -2,6 +2,7 @@
 
 import numpy as np
 from gnssr.utils import *
+from gnssr.simulator.rcs.sea_rcs import *
 
 class simulation_configuration:
 
@@ -17,7 +18,7 @@ class simulation_configuration:
 
         self.fresnel_coefficient = 1 # TODO
 
-        self.transmitting_power = np.exp(14.25/10)
+        self.transmitting_power = np.power(10, 14.25/10)
         """From Coulson, “The GPS at GTO Experiment.” 1996."""
 
         self.coherent_integration_time = 1e-3 # seconds
@@ -37,6 +38,8 @@ class simulation_configuration:
         self.doppler_resolution = 50.0 # Hz
 
         self.set_scenario_local_ref()
+
+        self.rcs = radar_cross_section
 
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m

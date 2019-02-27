@@ -15,21 +15,20 @@ from gnssr.targets import *
 from gnssr.tds.search_database.cdf4_search import *
 
 def main():
-
-    file_root_name = 'raw/L1B/2018-03-31-H06'
+    # Hibernia
+    # Really good detection
+    file_root_name = 'raw/L1B/2017-03-12-H18'
     target = targets['hibernia']
-    group = '000021'
-    index = 300 
-
-    #File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2018-03/31/H06/2018-03.31.H06.kmz
+    group = '000035'
+    index = 675
 
     # 0.5 deg error approx 55 km error
     if index == 0:
         search_error = 0.7 
         cdf4_search(file_root_name, target, search_error)
 
-    target_delay_increment = 14
-    target_doppler_increment = -3000
+    target_delay_increment = 0.8
+    target_doppler_increment = 1000
 
     tds = tds_data(file_root_name, group, index)
     tds.set_group_index(group, index)
@@ -117,8 +116,8 @@ def main():
     contour_doppler = ax_surface.contour(X, Y, Z_doppler, np.arange(-5000,5000,500), cmap='viridis')
     fig_surface.colorbar(contour_doppler, label='Hz')
     ax_surface.grid(c='k', ls='-', alpha=0.3)
-    #plt.xlim([-20e3,90e3])
-    #plt.ylim([-20e3,90e3])
+    plt.xlim([-20e3,90e3])
+    plt.ylim([-20e3,90e3])
 
     target_iso_delay = ax_surface.contour(X, Y, Z_time_chip, [target_delay_increment-0.3],
             colors='red', 

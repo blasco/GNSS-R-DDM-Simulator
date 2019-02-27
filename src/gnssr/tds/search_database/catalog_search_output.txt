@@ -1,49 +1,254 @@
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-01/25/H06/2017-01.25.H06.kmz
--90.203392 27.032812 0
--89.729378 27.161196 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-11/26/H18/2017-11.26.H18.kmz
+-49.139229 46.814651 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/08/H18/2015-09.08.H18.kmz
--90.140533 27.128517 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-11/12/H18/2017-11.12.H18.kmz
+-48.534985 46.450462 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/01/H06/2015-09.01.H06.kmz
--90.101166 27.406591 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-11/15/H18/2017-11.15.H18.kmz
+-49.138111 46.810436 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-07/03/H06/2018-07.03.H06.kmz
--90.179970 26.922499 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-11/16/H06/2017-11.16.H06.kmz
+-48.366825 46.429119 0
+-48.616394 47.019825 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-02/23/H18/2016-02.23.H18.kmz
--89.847466 27.395401 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-11/07/H06/2017-11.07.H06.kmz
+-48.450928 47.115742 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-03/02/H00/2016-03.02.H00.kmz
+-48.970612 46.614220 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-03/02/H18/2016-03.02.H18.kmz
+-49.232018 47.179859 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/01/H00/2015-09.01.H00.kmz
+-48.326534 46.889717 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-09/17/H00/2015-09.17.H00.kmz
+-48.387775 47.205490 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-07/18/H18/2018-07.18.H18.kmz
+-48.997627 46.765541 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-07/23/H06/2018-07.23.H06.kmz
+-48.652843 46.339840 0
+-48.889744 46.911652 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-07/29/H18/2018-07.29.H18.kmz
+-48.832336 46.750881 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-02/22/H18/2016-02.22.H18.kmz
+-48.415897 47.073212 0
+-48.674706 46.487675 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-04/27/H18/2016-04.27.H18.kmz
+-48.896786 46.687683 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-04/12/H00/2016-04.12.H00.kmz
+-48.780243 46.282299 0
+-49.053024 46.852787 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-04/19/H00/2016-04.19.H00.kmz
+-48.681473 46.633392 0
+-48.853569 47.242249 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-09/18/H00/2016-09.18.H00.kmz
+-48.302181 46.520557 0
+-48.569370 47.096260 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-09/18/H18/2016-09.18.H18.kmz
+-48.418198 46.603645 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-09/03/H00/2016-09.03.H00.kmz
+-48.805149 46.372269 0
+-49.057304 46.952168 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-11/27/H00/2015-11.27.H00.kmz
+-49.099735 46.648247 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-11/27/H18/2015-11.27.H18.kmz
+-49.046093 47.178955 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-11/12/H00/2015-11.12.H00.kmz
+-48.985535 46.810188 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-07/07/H00/2015-07.07.H00.kmz
+-49.235817 46.359020 0
 
 File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-02/10/H06/2017-02.10.H06.kmz
--90.313652 27.078947 0
+-48.388248 46.876881 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-08/23/H18/2015-08.23.H18.kmz
--90.003250 27.191704 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/21/H06/2018-04.21.H06.kmz
+-49.271755 46.633160 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/26/H18/2018-04.26.H18.kmz
+-48.585884 46.898636 0
+-48.811687 46.310646 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/05/H18/2018-04.05.H18.kmz
+-49.077427 46.718121 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/15/H06/2018-04.15.H06.kmz
+-48.627850 46.733814 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/16/H18/2018-04.16.H18.kmz
+-48.616203 46.700130 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-04/16/H06/2018-04.16.H06.kmz
+-48.335499 46.720699 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/22/H18/2018-02.22.H18.kmz
+-49.125259 46.477600 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/18/H18/2018-02.18.H18.kmz
+-48.675545 46.783497 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/13/H18/2018-02.13.H18.kmz
+-49.059303 47.219639 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/28/H18/2018-02.28.H18.kmz
+-48.866554 46.767994 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/28/H06/2018-02.28.H06.kmz
+-48.604115 46.656296 0
+-48.839924 47.240742 0
 
 File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/23/H06/2018-02.23.H06.kmz
--90.179039 27.105198 0
+-48.492165 46.977364 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-07/31/H18/2016-07.31.H18.kmz
--89.788727 27.379162 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/17/H18/2018-02.17.H18.kmz
+-48.300800 47.053520 0
+-48.505070 46.451214 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-05/25/H18/2018-05.25.H18.kmz
--90.076035 27.321642 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-02/07/H18/2018-02.07.H18.kmz
+-48.502682 47.199108 0
+-48.724331 46.599812 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-06/09/H06/2017-06.09.H06.kmz
--89.893356 27.286419 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-07/24/H00/2016-07.24.H00.kmz
+-48.700569 46.454052 0
+-48.934917 47.039330 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-07/25/H00/2016-07.25.H00.kmz
+-49.212334 46.667072 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-05/27/H06/2018-05.27.H06.kmz
+-49.067074 46.701500 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-06/10/H06/2017-06.10.H06.kmz
+-49.240101 47.102001 0
 
 File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-06/25/H06/2017-06.25.H06.kmz
--89.790215 27.046495 0
+-48.353851 46.393806 0
+-48.552570 46.995499 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-08/09/H06/2016-08.09.H06.kmz
--90.045525 27.204107 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-05/24/H18/2017-05.24.H18.kmz
+-48.303822 47.143341 0
+-48.525604 46.554871 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-03/04/H18/2017-03.04.H18.kmz
--89.759865 27.450405 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-08/09/H00/2016-08.09.H00.kmz
+-48.771271 46.448494 0
+-48.976376 47.033710 0
+-48.538666 46.427971 0
+-48.745674 47.024815 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/20/H06/2018-03.20.H06.kmz
--89.853691 27.153006 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-08/25/H18/2016-08.25.H18.kmz
+-49.178898 46.774654 0
 
-File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/10/H06/2018-03.10.H06.kmz
--90.032372 27.476448 0
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-10/02/H00/2015-10.02.H00.kmz
+-49.186405 46.818832 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-10/27/H00/2015-10.27.H00.kmz
+-48.475830 47.084579 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-12/15/H00/2016-12.15.H00.kmz
+-48.987843 46.616959 0
+-49.246586 47.202732 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-12/15/H18/2016-12.15.H18.kmz
+-48.494141 47.054329 0
+-48.714718 46.467907 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-12/16/H06/2016-12.16.H06.kmz
+-48.722546 46.759632 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-11/20/H18/2016-11.20.H18.kmz
+-48.986607 47.024227 0
+-49.117729 46.731518 0
+-49.247593 46.438545 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-11/13/H18/2016-11.13.H18.kmz
+-48.820530 47.040367 0
+-48.968559 46.443474 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-11/29/H00/2016-11.29.H00.kmz
+-48.448772 46.352505 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-06/23/H00/2016-06.23.H00.kmz
+-49.246643 46.250610 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2015-06/12/H00/2015-06.12.H00.kmz
+-48.576023 46.613132 0
+-48.781433 47.181992 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-10/20/H00/2016-10.20.H00.kmz
+-49.146061 46.680546 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2016-10/04/H00/2016-10.04.H00.kmz
+-48.399311 47.017822 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-08/08/H18/2018-08.08.H18.kmz
+-48.681404 46.687744 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-08/03/H06/2018-08.03.H06.kmz
+-48.802319 46.607307 0
+-49.035400 47.192009 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-08/09/H06/2018-08.09.H06.kmz
+-48.439442 46.472164 0
+-48.630043 47.077457 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-08/02/H18/2018-08.02.H18.kmz
+-49.083481 47.243450 0
+-49.264172 46.644951 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-03/13/H18/2017-03.13.H18.kmz
+-48.801929 47.222580 0
+-49.035580 46.627037 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-03/12/H18/2017-03.12.H18.kmz
+-48.724892 47.218887 0
+-48.911366 46.615971 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2017-03/29/H06/2017-03.29.H06.kmz
+-49.262218 46.314701 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/04/H18/2018-03.04.H18.kmz
+-48.844967 46.691582 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/26/H18/2018-03.26.H18.kmz
+-49.168980 46.775600 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/31/H06/2018-03.31.H06.kmz
+-48.737015 46.532730 0
+-48.973640 47.113865 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/27/H06/2018-03.27.H06.kmz
+-48.963093 46.776657 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/15/H18/2018-03.15.H18.kmz
+-49.161633 46.855614 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-03/16/H06/2018-03.16.H06.kmz
+-49.035107 46.760605 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-06/13/H06/2018-06.13.H06.kmz
+-49.253960 46.799831 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-06/12/H18/2018-06.12.H18.kmz
+-48.810173 46.722889 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-06/07/H18/2018-06.07.H18.kmz
+-48.804398 46.770546 0
+
+File: /home/woowapdabug/projects/thesis/py_venv_gnssr/src/gnssr/tds/raw/L1B_Catalogue/2018-06/07/H06/2018-06.07.H06.kmz
+-48.372406 47.224133 0

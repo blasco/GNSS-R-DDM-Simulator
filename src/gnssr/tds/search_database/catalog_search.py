@@ -25,7 +25,7 @@ def main():
     #    catalog_search(file)
 
     # Parallel execution
-    catalog_path = os.path.join(os.environ['TDS_ROOT'],'search_target/catalog_search_output.txt')
+    catalog_path = os.path.join(os.environ['TDS_ROOT'],'search_database/catalog_search_output.txt')
     open(catalog_path, 'wt').close() # Clear file
     progress_bar = tqdm(total=len(kmz_files), unit_scale=False, unit='Files')
     with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
@@ -38,9 +38,9 @@ def main():
     print('\n%s: Download finished\n' % time.ctime())
 
 def catalog_search(filename):
-    target = targets['atlantis_pq']
+    target = targets['hibernia']
     # 0.5 deg error approx 55 km error
-    search_error = 0.3
+    search_error = 0.5
 
     results=[]
     lat = 0
@@ -57,7 +57,7 @@ def catalog_search(filename):
             if len(tmp):
                 # Track Placemark
                 tmp = tmp[0]  # always one element by definition
-                skip = 20 
+                skip = 10 
                 skip_count = 0
                 for desc in tmp.iterdescendants():
                     # Skip some placemarks to speed up
@@ -69,7 +69,7 @@ def catalog_search(filename):
                     if desc.tag == 'coord':
                         lon = float(content.split()[0])
                         lat = float(content.split()[1])
-                        if (abs((lat%360) - (target.lat%360)) <= search_error) and (abs((lon%360) - (target.lon%360)) <= search_error):
+                        if (abs((lat%360) - (target.lat_deg%360)) <= search_error) and (abs((lon%360) - (target.lon_deg%360)) <= search_error):
                             if not saved_file:
                                 results.append('\nFile: ' + filename + '\n')
                                 saved_file=True

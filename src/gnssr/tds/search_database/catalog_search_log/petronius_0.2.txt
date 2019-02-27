@@ -1,11 +1,5 @@
 File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2015-10/11/H06/2015-10.11.H06.kmz
 -87.777023 29.030979 0
 
-File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2016-11/14/H06/2016-11.14.H06.kmz
--87.984558 29.211805 0
-
-File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2016-10/04/H06/2016-10.04.H06.kmz
--87.804527 29.260788 0
-
 File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2018-03/30/H06/2018-03.30.H06.kmz
 -87.820564 28.960224 0

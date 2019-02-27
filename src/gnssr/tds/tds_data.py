@@ -165,7 +165,7 @@ class tds_data:
         ax.set_ylabel('Hz')
         ax.set_xlabel('C/A chips')
         im = ax.imshow(ddm, cmap='viridis', 
-                extent=(delay_start, delay_end, doppler_start, doppler_end), 
+                extent=(delay_start, delay_end, doppler_end, doppler_start), 
                 aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
                 )
         t = plt.text(0.01, 0.80, string, {'color': 'w', 'fontsize': 12}, transform=ax.transAxes)

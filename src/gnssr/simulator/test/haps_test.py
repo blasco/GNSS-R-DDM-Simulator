@@ -28,8 +28,8 @@ def main():
 
     file_root_name = 'raw/L1B/2015-04-01-H00'
     target = targets['hibernia']
-    group = '000095'
-    index = 415
+    group = '000094'
+    index = 115
 
     tds = tds_data(file_root_name, group, index)
 

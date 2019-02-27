@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-import ftplib
+import ftplib 
 from tqdm import tqdm
 import time
 import os
 
-def download_file(remote_file):
+def download_file(remote_file, ftp):
     root_dir = os.path.join(os.environ['TDS_ROOT'],'raw/L1B/')
     local_file = os.path.join(root_dir, remote_file.replace('/Data/L1B/','').replace('/','-'))
     os.makedirs(os.path.dirname(local_file), exist_ok=True)
@@ -27,7 +27,7 @@ def main():
     password = '@jYhr=M4rF'
     with ftplib.FTP(ip, login, password) as ftp:
         search_list=[]
-        with open(os.path.join(os.environ['TDS_ROOT'],'search_target/catalog_search_output.txt')) as kmz_search_file:
+        with open(os.path.join(os.environ['TDS_ROOT'],'search_database/catalog_search_output.txt')) as kmz_search_file:
             for line in kmz_search_file:
                 if 'File' in line:
                     search_list.append(line);
@@ -37,8 +37,8 @@ def main():
             file_string = line.split(' ')[1].strip()
             ddm_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','DDMs.nc'))
             metadata_remote_file = os.path.join('/Data/L1B/', os.path.basename(file_string).replace('.','/').replace('kmz','metadata.nc'))
-            download_file(ddm_remote_file)
-            download_file(metadata_remote_file)
+            download_file(ddm_remote_file, ftp)
+            download_file(metadata_remote_file, ftp)
 
 if __name__ == '__main__':
     main()

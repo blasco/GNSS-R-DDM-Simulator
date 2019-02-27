@@ -15,26 +15,41 @@ from gnssr.targets import *
 from gnssr.tds.search_database.cdf4_search import *
 
 def main():
-
-    file_root_name = 'raw/L1B/2018-03-31-H06'
+    # Di Simone
+    file_root_name = 'raw/L1B/2015-04-01-H00'
     target = targets['hibernia']
-    group = '000021'
-    index = 300 
+    group = '000095'
+    index = 525
 
-    #File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2018-03/31/H06/2018-03.31.H06.kmz
+    # Hibernia
+    # Really good detection
+    #file_root_name = 'raw/L1B/2017-03-12-H18'
+    #target = targets['hibernia']
+    #group = '000035'
+    #index = 681
+
+    # Devils Tower
+    #file_root_name = 'raw/L1B/2015-12-04-H18'
+    #target = targets['devils_tower']
+    #group = '000066'
+    #index =  376
+
+    #file_root_name = 'raw/L1B/2016-11-14-H06'
+    #target = targets['petronius']
+    #group = '000057'
+    #index = 0 
 
     # 0.5 deg error approx 55 km error
     if index == 0:
         search_error = 0.7 
         cdf4_search(file_root_name, target, search_error)
 
-    target_delay_increment = 14
-    target_doppler_increment = -3000
+    target_delay_increment = 4
+    target_doppler_increment = 2000
 
     tds = tds_data(file_root_name, group, index)
     tds.set_group_index(group, index)
     tds.plot_ddm()
-    plt.xlim([-5,15])
 
     print("t vel: {}".format(np.linalg.norm(tds.v_t)))
 
@@ -75,7 +90,7 @@ def main():
         v_ry = np.dot(tds.v_r, n_y)
         v_rz = np.dot(tds.v_r, n_z)
         # With the very far way transmitter approximation:
-        f_D_0 =  -f_carrier / light_speed * (-v_ty * np.cos(elev) - v_tz * np.sin(elev) + (v_rx * x + v_ry * (y + h_r / np.tan(elev)) - v_rz * h_r) * (x ** 2 + (y + h_r / np.tan(elev)) ** 2 + h_r ** 2) ** (-0.1e1 / 0.2e1))
+        f_D_0 =  f_carrier / light_speed * (-v_ty * np.cos(elev) - v_tz * np.sin(elev) + (v_rx * x + v_ry * (y + h_r / np.tan(elev)) - v_rz * h_r) * (x ** 2 + (y + h_r / np.tan(elev)) ** 2 + h_r ** 2) ** (-0.1e1 / 0.2e1))
         return f_D_0
 
     def doppler_inc_eq(x, y):
@@ -117,28 +132,14 @@ def main():
     contour_doppler = ax_surface.contour(X, Y, Z_doppler, np.arange(-5000,5000,500), cmap='viridis')
     fig_surface.colorbar(contour_doppler, label='Hz')
     ax_surface.grid(c='k', ls='-', alpha=0.3)
-    #plt.xlim([-20e3,90e3])
-    #plt.ylim([-20e3,90e3])
 
-    target_iso_delay = ax_surface.contour(X, Y, Z_time_chip, [target_delay_increment-0.3],
+    target_iso_delay = ax_surface.contour(X, Y, Z_time_chip, [target_delay_increment],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
             extent=(extent_x0, extent_x1, extent_y0, extent_y1)
             )
-    target_iso_delay = ax_surface.contour(X, Y, Z_time_chip, [target_delay_increment+0.3],
-            colors='red', 
-            linewidths = 2.5,
-            linestyles='dashed',
-            extent=(extent_x0, extent_x1, extent_y0, extent_y1)
-            )
-    target_iso_doppler = ax_surface.contour(X, Y, Z_doppler, [target_doppler_increment-250],
-            colors='red', 
-            linewidths = 2.5,
-            linestyles='dashed',
-            extent=(extent_x0, extent_x1, extent_y0, extent_y1)
-            )
-    target_iso_doppler = ax_surface.contour(X, Y, Z_doppler, [target_doppler_increment+250],
+    target_iso_doppler = ax_surface.contour(X, Y, Z_doppler, [target_doppler_increment],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
@@ -169,21 +170,21 @@ def main():
     lat = np.arcsin(abs(r_target[2]/np.linalg.norm(r_target)))*180/np.pi
     print("lat target: {0} lon target: {1}".format(lat, lon))
 
-    ## Intersection of target iso-delay and iso-doppler intersections
-    #intersections = find_contour_intersection(target_iso_delay, target_iso_doppler)
-    #try:
-    #    for i in intersections:
-    #        ax_surface.scatter(i.x, i.y, s=70, zorder=4, color='orange')
-    #        r_i = np.array([i.x, i.y])
-    #        r_target = np.array([x_target, y_target])
-    #        print("error: {0}".format(np.linalg.norm(r_target - r_i)/1e3))
-    #        r_sol = r_sp + n_x*i.x + n_y*i.y
-    #        lon = np.arctan2(r_sol[1],r_sol[0])*180/np.pi
-    #        lat = np.arcsin(abs(r_sol[2]/np.linalg.norm(r_sol)))*180/np.pi
-    #        print("lat: {0} lon: {1}".format(lat, lon))
+    # Intersection of target iso-delay and iso-doppler intersections
+    intersections = find_contour_intersection(target_iso_delay, target_iso_doppler)
+    try:
+        for i in intersections:
+            ax_surface.scatter(i.x, i.y, s=70, zorder=4, color='orange')
+            r_i = np.array([i.x, i.y])
+            r_target = np.array([x_target, y_target])
+            print("error: {0}".format(np.linalg.norm(r_target - r_i)/1e3))
+            r_sol = r_sp + n_x*i.x + n_y*i.y
+            lon = np.arctan2(r_sol[1],r_sol[0])*180/np.pi
+            lat = np.arcsin(abs(r_sol[2]/np.linalg.norm(r_sol)))*180/np.pi
+            print("lat: {0} lon: {1}".format(lat, lon))
 
-    #except TypeError as te:
-    #    print ('No intersections')
+    except TypeError as te:
+        print ('No intersections')
 
     plt.show(block=False)
 
