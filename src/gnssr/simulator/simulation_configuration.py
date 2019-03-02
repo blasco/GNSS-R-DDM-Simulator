@@ -16,7 +16,7 @@ class simulation_configuration:
         and Voronovich 2000.
         """
 
-        self.fresnel_coefficient = 1 # TODO
+        self.fresnel_coefficient = 0.65
 
         self.transmitting_power = np.power(10, 14.25/10)
         """From Coulson, “The GPS at GTO Experiment.” 1996."""

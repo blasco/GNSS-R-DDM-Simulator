@@ -106,19 +106,6 @@ def variance_upwind(u_10):
     '''
     return (0.45*(3.16e-3*f_u_10(u_10)))
 
-# TODO: Fresnel model:
-# Di Simone > It even contains the Klein-Swift model for computation of the dielectric constant of sea water:
-# CYGNSS - Algorithm Theoretical Basis Document Level 2 Mean-Square Slope Retrieval
-#This may be useful for computing the reflection coefficient R, whose expressions are reported here (eq. 12.23-12.26)
-#F. Ulaby, R. Moore, and A. Fung, Microwave Remote Sensing, Active
-#and Passive. Vol. II: Radar Remote Sensing and Surface Scattering and
-#Emission Theory. Reading, MA: Addison-Wesley, 1982.
-#to be mapped in circular polarization as explained in (eq. (9))
-#Di Bisceglie, M., Di Martino, G., Di Simone, A., Galdi, C., Iodice, A., Riccio, D., & Ruella, G. (2018, July). Two-Scale Model for the Evaluation of Sea-Surface Scattering in GNSS-R Ship-Detection Applications. In IGARSS 2018-2018 IEEE International Geoscience and Remote Sensing Symposium (pp. 3181-3184). IEEE.
-
-def fresnel_model(r):
-    return 1
-
 def variance_crosswind(u_10):
     ''' 
     Based on the 'clean surface mean square slope model' of Cox and Mux

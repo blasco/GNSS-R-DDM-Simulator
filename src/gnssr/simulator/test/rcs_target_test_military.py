@@ -10,6 +10,7 @@ import gnssr.simulator.rcs.sea_rcs as sea_rcs
 from gnssr.simulator.isolines import *
 from gnssr.simulator.simulation_configuration import *
 from gnssr.simulator.ddm import *
+from gnssr.utils import *
 
 import cv2
 
@@ -39,8 +40,8 @@ def main():
             v_r = np.array([25, 25, 25]) # m/s
             )
 
-    sim_config.rcs = target_rcs.radar_cross_section
-    sim_config.u_10 = 5 # m/s
+    sim_config.u_10 = 2 # m/s
+    sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 0, y)
 
     sim_config.delay_chip = 1/10.23e6 # s
     delay_chip = sim_config.delay_chip
@@ -51,7 +52,7 @@ def main():
     sim_config.delay_increment_start = -0.2*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     sim_config.delay_resolution = 0.05*delay_chip
-    sim_config.coherent_integration_time = 1e-2 # sec
+    sim_config.coherent_integration_time = 1e-1 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -148,9 +149,9 @@ def main():
 
     # DDM
     ddm_sim = simulate_ddm(sim_config) 
-    sim_config.rcs = sea_rcs.radar_cross_section
-    ddm_sim_sea = simulate_ddm(sim_config) 
-    ddm_diff = np.abs(ddm_sim - ddm_sim_sea)
+    sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 5, y)
+    ddm_sim_1 = simulate_ddm(sim_config) 
+    ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM diff simulation')
@@ -187,8 +188,8 @@ def main():
     number_of_delay_pixels = 128
     number_of_doppler_pixels = 20
     ddm_sim_res = rescale(ddm_sim, number_of_doppler_pixels, number_of_delay_pixels)
-    ddm_sea_res = rescale(ddm_sim_sea, number_of_doppler_pixels, number_of_delay_pixels)
-    ddm_diff_res = np.abs(ddm_sim_res - ddm_sea_res)
+    ddm_sim_1_res = rescale(ddm_sim_1, number_of_doppler_pixels, number_of_delay_pixels)
+    ddm_diff_res = np.abs(normalize(ddm_sim_res) - normalize(ddm_sim_1_res))
 
     im = ax_ddm_rescaled.imshow(ddm_diff_res, cmap='jet', 
             extent=(

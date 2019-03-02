@@ -3,7 +3,7 @@
 import numpy as np
 from gnssr.simulator.geometry.geometry import *
 
-def radar_cross_section(r, sim_config):
+def radar_cross_section(r, t, sim_config):
     """
     Args:
         r (numpy.ndarray with size(3,)): Position on the local coordinates.
@@ -14,7 +14,8 @@ def radar_cross_section(r, sim_config):
     """
 
     #100x25m 
-    wake_x = 2e3 #m
+    v_x = 33 # m/s
+    wake_x = 2e3 - v_x*t#m
     wake_y = 2e3 #m
     wake_x_size = 120 #m
     wake_y_size = 40 #m

@@ -4,6 +4,7 @@ import numpy as np
 
 from gnssr.simulator.jacobian.planar import *
 from gnssr.simulator.antenna.tds_antenna import *
+from gnssr.utils import *
 
 def sigma(delay, doppler, sim_config):
     """
@@ -45,8 +46,9 @@ def sigma(delay, doppler, sim_config):
     r_2 = np.array([x_2,y_2,0])
 
     radar_cross_section = sim_config.rcs
+    wavelength = light_speed/sim_config.f_carrier
 
-    p = transmitting_power*coherent_integration_time**2/(4*np.pi) * ( \
+    p = transmitting_power*wavelength**2*coherent_integration_time**2/(4*np.pi)**3 * ( \
                 radar_cross_section(r_1, sim_config)/( \
                     np.linalg.norm(r_1-r_t)**2* \
                     np.linalg.norm(r_r-r_1)**2 \
@@ -71,7 +73,7 @@ def sigma(delay, doppler, sim_config):
     #        aspect="auto"
     #        )
 
-    #noise = np.max(p)*np.random.normal(0.02,0.05, p.shape)
+    #noise = 0.01*np.max(p)*np.random.normal(0.02,0.05, p.shape)
     noise = 0
     return p  + noise
      
