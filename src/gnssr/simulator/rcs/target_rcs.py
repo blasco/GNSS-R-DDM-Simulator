@@ -15,9 +15,9 @@ def radar_cross_section(r, sim_config):
 
     #100x25m 
     wake_x = 2e3 #m
-    wake_y = 0e3 #m
-    wake_x_size = 500 #m
-    wake_y_size = 100 #m
+    wake_y = 2e3 #m
+    wake_x_size = 120 #m
+    wake_y_size = 40 #m
     wake = np.logical_and.reduce((
             np.abs(r[0]-wake_x) < wake_x_size, 
             wake_y_size/wake_x_size*(r[0]-wake_x) - (r[1]-wake_y) >= 0, 

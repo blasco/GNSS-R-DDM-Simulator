@@ -74,7 +74,6 @@ def slope_probability_density_function(x, u_10, phi_0):
             np.polynomial.hermite.hermval2d(s[0]/rms_u, s[1]/rms_c, hermite_coeficients)
 
     np.place(result, result < 0, 0)
-    #TODO: rcs not workign
     return result
 
 def f_u_10(u_10):
