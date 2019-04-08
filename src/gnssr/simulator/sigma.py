@@ -54,7 +54,7 @@ def sigma(delay, doppler, sim_config):
                     np.linalg.norm(r_r-r_1)**2 \
                 ) * \
                 delay_doppler_jacobian_1(delay, doppler, sim_config) * \
-                receiver_antenna_gain(r_1, sim_config) * \
+                #receiver_antenna_gain(r_1, sim_config) * \
                 transmitting_antenna_gain(r_1, sim_config) \
                 + 
                 radar_cross_section(r_2, sim_config)/( \
@@ -62,7 +62,7 @@ def sigma(delay, doppler, sim_config):
                     np.linalg.norm(r_r-r_2)**2 \
                 ) * \
                 delay_doppler_jacobian_2(delay, doppler, sim_config) * \
-                receiver_antenna_gain(r_2, sim_config) * \
+                #receiver_antenna_gain(r_2, sim_config) * \
                 transmitting_antenna_gain(r_2, sim_config) \
             )
 

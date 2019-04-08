@@ -34,25 +34,25 @@ def main():
 
     sim_config.set_scenario_local_ref(
             h_t = 13.82e6, # m
-            h_r = 18e3, # meters
+            h_r = 20e3, # meters
             elevation = 60.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([25, 25, 25]) # m/s
             )
 
-    sim_config.u_10 = 2 # m/s
     sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 0, y)
+    sim_config.u_10 = 5.0 # m/s
 
     sim_config.delay_chip = 1/10.23e6 # s
     delay_chip = sim_config.delay_chip
 
-    sim_config.doppler_increment_start = -45
-    sim_config.doppler_increment_end = 45 
-    sim_config.doppler_resolution = 0.3 
+    sim_config.doppler_increment_start = -70
+    sim_config.doppler_increment_end = 70 
+    sim_config.doppler_resolution = 0.5 
     sim_config.delay_increment_start = -0.2*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 8*delay_chip
     sim_config.delay_resolution = 0.05*delay_chip
-    sim_config.coherent_integration_time = 1e-1 # sec
+    sim_config.coherent_integration_time = 30e-2 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -110,33 +110,32 @@ def main():
     #fig_rcs.colorbar(contour_doppler, label='Hz')
     fig_rcs.colorbar(contour_rcs, label='Gain')
 
-
     target_delay_increment = 0.54
     target_doppler_increment = 17.35
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_delay_chip, 
             #[target_delay_increment-0.1],
-            [4.5],
+            [3.6],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
             )
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_delay_chip, 
             #[target_delay_increment+0.1],
-            [5],
+            [3.7],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
             )
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_doppler_increment, 
             #[target_doppler_increment-0.5],
-            [14],
+            [16],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
             )
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_doppler_increment, 
             #[target_doppler_increment+0.5],
-            [16],
+            [18],
             colors='red', 
             linewidths = 2.5,
             linestyles='dashed',
@@ -149,31 +148,35 @@ def main():
 
     # DDM
     ddm_sim = simulate_ddm(sim_config) 
-    sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 5, y)
+    #sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 0.5, y)
+    sim_config.rcs = sea_rcs.radar_cross_section
+    sim_config.u_10 = 5.5
     ddm_sim_1 = simulate_ddm(sim_config) 
-    ddm_diff = np.abs(ddm_sim - ddm_sim_1)
+    ddm_diff = np.abs(normalize(ddm_sim) - normalize(ddm_sim_1))
 
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM diff simulation')
-    plt.xlabel('C/A chips')
+    plt.xlabel('chips')
     plt.ylabel('Hz')
-    im = ax_diff.imshow(ddm_diff, cmap='jet', 
+    contour_diff = ax_diff.imshow(ddm_diff, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
                 doppler_increment_end, doppler_increment_start), 
             aspect="auto"
             )
+    fig_diff.colorbar(contour_diff)
 
     fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM original simulation')
-    plt.xlabel('C/A chips')
+    plt.xlabel('chips')
     plt.ylabel('Hz')
-    im = ax_ddm.imshow(ddm_sim, cmap='jet', 
+    contour_sim = ax_ddm.imshow(ddm_sim, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
                 doppler_increment_end, doppler_increment_start), 
             aspect="auto"
             )
+    fig_ddm.colorbar(contour_sim)
 
     # Image downscaling to desired resolution:
     # TODO: This is just an average of the pixels around the area
@@ -183,7 +186,7 @@ def main():
     # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
     plt.title('Rescaled Diff')
-    plt.xlabel('C/A chips')
+    plt.xlabel('chips')
     plt.ylabel('Hz')
     number_of_delay_pixels = 128
     number_of_doppler_pixels = 20

@@ -13,22 +13,22 @@ haps_iso_lines.h_t = 20000e3 # meters
 haps_iso_lines.h_r = 20e3 # meters
 
 # Elevation
-haps_iso_lines.elev_deg = 52.2 # deg
+haps_iso_lines.elev_deg = 60 # deg
 
 # Velocity
 haps_iso_lines.v_tx = 2121 # m/s
 haps_iso_lines.v_ty = 2121 # m/s
 haps_iso_lines.v_tz = 5 # m/s
 
-haps_iso_lines.v_rx = 5 # m/s
-haps_iso_lines.v_ry = 5 # m/s
-haps_iso_lines.v_rz = 5 # m/s
+haps_iso_lines.v_rx = 25 # m/s
+haps_iso_lines.v_ry = 25 # m/s
+haps_iso_lines.v_rz = 25 # m/s
 
 # Plotting Area
-haps_iso_lines.extent_x0 =  -20e3 # meters
-haps_iso_lines.extent_x1 =  20e3 # meters
-haps_iso_lines.extent_y0 =  -20e3 # meters
-haps_iso_lines.extent_y1 =  20e3 # meters
+haps_iso_lines.extent_x0 =  -10e3 # meters
+haps_iso_lines.extent_x1 =  10e3 # meters
+haps_iso_lines.extent_y0 =  -10e3 # meters
+haps_iso_lines.extent_y1 =  10e3 # meters
 
 haps_iso_lines.linsapce_delta = 500
 
@@ -37,13 +37,13 @@ haps_iso_lines.linsapce_delta = 500
 # Iso Delay values 
 delay_start = 0 # C/A chips
 delay_increment = 0.5# C/A chips
-delay_end = 15 # C/A chips
+delay_end = 3 # C/A chips
 delay_range = [delay_start, delay_increment, delay_end]
 
 # Iso Doppler values
-doppler_start = -50 # Hz
-doppler_increment = 2.5 # Hz
-doppler_end = 50 # Hz
+doppler_start = -70 # Hz
+doppler_increment = 10 # Hz
+doppler_end = 70 # Hz
 doppler_range = [doppler_start, doppler_increment, doppler_end]
 
 haps_iso_lines.plot_range(delay_range, doppler_range)
