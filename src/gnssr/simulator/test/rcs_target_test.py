@@ -39,8 +39,8 @@ def main():
             v_r = np.array([20, 20, 20]) # m/s
             )
 
-    sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 8.0 # m/s
+    sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 20, p2)
+    sim_config.u_10 = 8.00001 # m/s
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
@@ -157,11 +157,13 @@ def main():
     ax_rcs.yaxis.set_major_formatter(ticks_y)
 
     # DDM
+
     ddm_sim = np.copy(simulate_ddm(sim_config))
-    sim_config.rcs = sea_rcs.radar_cross_section
-    sim_config.u_10 = 8.01 # m/s
-    ddm_sim_sea = np.copy(simulate_ddm(sim_config))
-    ddm_diff = np.abs(ddm_sim - ddm_sim_sea)
+    #sim_config.rcs = sea_rcs.radar_cross_section
+    sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
+    sim_config.u_10 = 8.0 # m/s
+    ddm_sim_1 = np.copy(simulate_ddm(sim_config))
+    ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM diff simulation')
@@ -197,8 +199,13 @@ def main():
     plt.title('Simulation')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    ddm_rescaled = rescale(ddm_diff, number_of_doppler_pixels, number_of_delay_pixels)
-    im = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
+    #ddm_rescaled = rescale(ddm_diff, number_of_doppler_pixels, number_of_delay_pixels)
+
+    ddm_sim_res = rescale(ddm_sim, number_of_doppler_pixels, number_of_delay_pixels)
+    ddm_sim_1_res = rescale(ddm_sim_1, number_of_doppler_pixels, number_of_delay_pixels)
+    ddm_diff_res = np.abs(ddm_sim_res - ddm_sim_1_res)
+
+    im = ax_ddm_rescaled.imshow(ddm_diff_res, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
                 doppler_increment_end, doppler_increment_start), 

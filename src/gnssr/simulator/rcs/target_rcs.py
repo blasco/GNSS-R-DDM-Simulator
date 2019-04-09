@@ -16,7 +16,7 @@ def radar_cross_section(r, t, sim_config):
 
     #100x25m 
     v_x = 33 # m/s
-    wake_x = 2e3 - v_x*t#m
+    wake_x = 4e3 - v_x*t#m
     wake_y = 0.5e3 #m
     wake_x_size = 150 #m
     wake_y_size = wake_x_size*np.tan(20*np.pi/180)
