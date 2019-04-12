@@ -16,7 +16,8 @@ class simulation_configuration:
         and Voronovich 2000.
         """
 
-        self.fresnel_coefficient = 0.65
+        #self.fresnel_coefficient = 0.65
+        self.fresnel_coefficient = 0.95
 
         self.transmitting_power = np.power(10, 14.25/10)
         """From Coulson, “The GPS at GTO Experiment.” 1996."""
@@ -24,7 +25,7 @@ class simulation_configuration:
         self.coherent_integration_time = 1e-3 # seconds
         self.delay_chip =  1/gps_ca_chips_per_second # seconds
 
-        self.u_10 = 5.0 # m/s 
+        self.u_10 = 3.0 # m/s 
         """Wind speed at 10 meters above sea surface [m/s]."""
         self.phi_0 = (180+125)*np.pi/180 # rad 
         """Angle between the up-down wind direction and the x-axis."""
@@ -44,7 +45,7 @@ class simulation_configuration:
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m
             h_r = 620e3,  # m
-            elevation = 40*np.pi/180, # radians
+            elevation = 85*np.pi/180, # radians
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([-3605, 3843.852, -850]) # m/s
             ):

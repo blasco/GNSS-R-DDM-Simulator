@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ''' 
-Facobians computed as defined in equations 11 and 12. 
+Jacobians computed as defined in equations 11 and 12. 
 x(delay,doppler) and y(delay,doppler) form the solutions to equations 17 and 18 
 generated with Maple 
 
@@ -19,41 +19,47 @@ def delay_doppler_jacobian_1(delay, f_doppler, sim_config):
     delay_resolution = sim_config.delay_resolution
     doppler_resolution = sim_config.doppler_resolution
 
-    j_11 = (1/delay_resolution)*(
-             x_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config).real - \
-             x_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config).real
+    j_11 = (1)*(
+             x_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config) - \
+             x_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config)
            )
-    j_12 = (1/doppler_resolution)*( 
-             x_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config).real - \
-             x_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config).real
+    j_12 = (1)*( 
+             x_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config) - \
+             x_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config)
             )
-    j_21 = (1/delay_resolution)*(
-             y_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config).real - \
-             y_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config).real
+    j_21 = (1)*(
+             y_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config) - \
+             y_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config)
             )
-    j_22 = (1/doppler_resolution)*(
-             y_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config).real - \
-             y_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config).real
+    j_22 = (1)*(
+             y_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config) - \
+             y_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config)
             )
-    return np.absolute(j_11*j_22 - j_12*j_21)
+    #return np.absolute(j_11*j_22 - j_12*j_21)
+    J = j_11*j_22 - j_12*j_21
+    np.place(J, J.imag != 0, 0)
+    return np.absolute(J).astype(float)
 
 def delay_doppler_jacobian_2(delay, f_doppler, sim_config):
     delay_resolution = sim_config.delay_resolution
     doppler_resolution = sim_config.doppler_resolution
 
     j_11 = (1/delay_resolution)* \
-            (x_delay_doppler_2(delay+delay_resolution/2, f_doppler, sim_config).real - \
-             x_delay_doppler_2(delay-delay_resolution/2, f_doppler, sim_config).real)
+            (x_delay_doppler_2(delay+delay_resolution/2, f_doppler, sim_config) - \
+             x_delay_doppler_2(delay-delay_resolution/2, f_doppler, sim_config))
     j_12 = (1/doppler_resolution)* \
-            (x_delay_doppler_2(delay, f_doppler+doppler_resolution/2, sim_config).real - \
-             x_delay_doppler_2(delay, f_doppler-doppler_resolution/2, sim_config).real)
+            (x_delay_doppler_2(delay, f_doppler+doppler_resolution/2, sim_config) - \
+             x_delay_doppler_2(delay, f_doppler-doppler_resolution/2, sim_config))
     j_21 = (1/delay_resolution)* \
-            (y_delay_doppler_2(delay+delay_resolution/2, f_doppler, sim_config).real - \
-             y_delay_doppler_2(delay-delay_resolution/2, f_doppler, sim_config).real)
+            (y_delay_doppler_2(delay+delay_resolution/2, f_doppler, sim_config) - \
+             y_delay_doppler_2(delay-delay_resolution/2, f_doppler, sim_config))
     j_22 = (1/doppler_resolution)* \
-            (y_delay_doppler_2(delay, f_doppler+doppler_resolution/2, sim_config).real - \
-             y_delay_doppler_2(delay, f_doppler-doppler_resolution/2, sim_config).real)
-    return np.absolute(j_11*j_22 - j_12*j_21)
+            (y_delay_doppler_2(delay, f_doppler+doppler_resolution/2, sim_config) - \
+             y_delay_doppler_2(delay, f_doppler-doppler_resolution/2, sim_config))
+    #return np.absolute(j_11*j_22 - j_12*j_21)
+    J = j_11*j_22 - j_12*j_21
+    np.place(J, J.imag != 0, 0)
+    return np.absolute(J).astype(float)
 
 def x_delay_doppler_1(delay, f_doppler, sim_config): 
     v_t = sim_config.v_t

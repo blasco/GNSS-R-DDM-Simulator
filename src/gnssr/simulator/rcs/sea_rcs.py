@@ -61,11 +61,13 @@ def slope_probability_density_function(x, u_10, phi_0):
 
     hermite_coeficients = np.zeros((5,5))
     hermite_coeficients[0,0] = 1
+    '''
     hermite_coeficients[2,2] = 0.45*(0.01 - 0.0086*f_u_10(u_10))
     hermite_coeficients[3,0] = 0.45*(0.04 -0.033*f_u_10(u_10))
     hermite_coeficients[0,4] = 0.45*(0.4)
     hermite_coeficients[2,2] = 0.45*(0.12)
     hermite_coeficients[4,0] = 0.45*(0.23)
+    '''
 
     result = 1/(2*np.pi*rms_u*rms_c) * \
             np.exp(
