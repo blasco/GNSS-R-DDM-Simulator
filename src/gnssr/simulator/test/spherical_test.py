@@ -15,6 +15,7 @@ import gnssr.simulator.jacobian.planar as planar
 
 def main():
 
+    '''
     sim_config = simulation_configuration()
 
     h     = 540e3; 
@@ -49,9 +50,9 @@ def main():
 
     spherical.compute_transformation(delay, fd, sim_config)
 
-'''
+    '''
 
-
+    sim_config = simulation_configuration()
 
     delay_chip = sim_config.delay_chip
 
@@ -107,12 +108,14 @@ def main():
 
     print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
 
+    '''
     x_s_1 = planar.x_delay_doppler_1(test_delay, test_doppler, sim_config)
     y_s_1 = planar.y_delay_doppler_1(test_delay, test_doppler, sim_config)
     x_s_2 = planar.x_delay_doppler_2(test_delay, test_doppler, sim_config)
     y_s_2 = planar.y_delay_doppler_2(test_delay, test_doppler, sim_config)
+    '''
 
-    spherical.compute_transformation(test_delay, test_doppler, sim_config)
+    x_s_1, y_s_1, x_s_2, y_s_2 =  spherical.compute_transformation(test_delay, test_doppler, sim_config)
 
     ax_isolines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
     ax_isolines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
@@ -128,7 +131,6 @@ def main():
 
 
     plt.show()
-'''
 
 if __name__ == '__main__':
     main()

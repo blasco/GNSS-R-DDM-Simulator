@@ -79,7 +79,7 @@ def compute_transformation(delay, f_doppler, sim_config):
     y0_1 = planar.y_delay_doppler_1(delay, f_doppler, sim_config) 
     y0_2 = planar.y_delay_doppler_2(delay, f_doppler, sim_config) 
 
-    print("planar solution: {0}, {1} ---- {2}, {3}\n".format(x0_1, y0_1, x0_2, y0_2))
+    #print("planar solution: {0}, {1} ---- {2}, {3}\n".format(x0_1, y0_1, x0_2, y0_2))
 
     Re = 6371e3;
     z1_old = np.sqrt(Re**2 - x0_1**2 - y0_1**2) - Re;
@@ -134,6 +134,8 @@ def compute_transformation(delay, f_doppler, sim_config):
         y1 = y1_new
         y2 = y2_new
 
-    print("spherical solution: {0}, {1} ---- {2}, {3}".format(x1, y1, x2, y2))
+    #print("spherical solution: {0}, {1} ---- {2}, {3}".format(x1, y1, x2, y2))
+
+    return x1, y1, x2, y2
 
 
