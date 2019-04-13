@@ -9,10 +9,15 @@ from gnssr.utils import *
 class tds_data:
 
     def __init__(self, file_root_name, group, index):
-        rootgrp_path = os.path.join(os.environ['TDS_ROOT'], file_root_name+'-DDMs.nc') 
+        rootgrp_path = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/'+file_root_name+'-DDMs.nc') 
         self.rootgrp = Dataset(rootgrp_path, "r", format="NETCDF4")
-        metagrp_path = os.path.join(os.environ['TDS_ROOT'], file_root_name+'-metadata.nc') 
+        metagrp_path = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/'+file_root_name+'-metadata.nc') 
         self.metagrp = Dataset(metagrp_path, "r", format="NETCDF4")
+        try:
+            l2b_path = os.path.join(os.environ['TDS_ROOT'], 'raw/L2B/'+file_root_name+'.nc') 
+            self.l2b = Dataset(l2b_path, "r", format="NETCDF4")
+        except:
+            print('No wind data available')
 
         self.set_group_index(group, index)
 
@@ -29,6 +34,51 @@ class tds_data:
                 #print("Foud: {0} | {1}".format(i, datenum_meta))
                 return i
                 break
+
+    def get_wind(self):
+        self.index_l2b = self.find_index_l2b()
+        return self.l2b.variables['WindSpeed'][self.index_l2b].data
+
+    def find_index_l2b(self):
+        """
+        The rootgrp index and the metagrp index do not match, the matching 
+        key is the IntegrationMidPointTime. This function finds the 
+        corresponding meta_index
+        """
+        datenum = self.rootgrp.groups[self.group].variables['IntegrationMidPointTime'][self.index]
+        datenums_l2b = np.array(self.l2b.variables['IntegrationMidPointTime'])
+        for i, datenum_meta in enumerate(datenums_l2b):
+            if datenum_meta == datenum:
+                #print("Foud: {0} | {1}".format(i, datenum_meta))
+                return i
+                break
+
+    def peak_power(self):
+        self.find_index_meta()
+            
+        ddmPeak = self.metagrp.groups[self.group].variables['DDMOutputNumericalScaling'][self.index].data
+        noiseEstimate = self.metagrp.groups[self.group].variables['MeanNoiseBox'][self.index].data
+
+        systemGainBB_dB = self.metagrp.variables['SystemGainBB'][self.index_meta].data + self.metagrp.variables['SystemGainBBComp'][self.index_meta].data
+        systemGainExtRef_dB = self.metagrp.variables['SystemGainExtRef'][self.index_meta].data + self.metagrp.variables['SystemGainExtRefComp'][self.index_meta].data
+
+        referenceType = self.metagrp.variables['ReferenceType'][self.index_meta].data
+        systemGainLin = 0
+        if (referenceType == 1) :
+            systemGainLin = 10**(systemGainBB_dB/10)
+        elif (referenceType == 2) :
+            systemGainLin = 10**(systemGainExtRef_dB/10)
+        elif (referenceType == 3) :
+            systemGainLin = 10**(systemGainBB_dB/10)
+        else :
+            print('No power data available')
+
+        inputCableGainLin = 10**(-0.6/10);
+
+        power = (ddmPeak - noiseEstimate)/systemGainLin/inputCableGainLin
+        print("power: {0}".format(power))
+
+        return power
 
     def set_group_index(self, group, index):
         """

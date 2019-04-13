@@ -14,6 +14,20 @@ from gnssr.utils import *
 
 import cv2
 
+def rescale(ddm_original, n_row_res, n_col_res):
+    n_row, n_col = ddm_original.shape 
+    assert n_row > n_row_res, "Cannot rescale to a biger size"
+    assert n_col > n_col_res, "Cannot rescale to a biger size"
+    n_row_res = int(n_row/int(n_row/n_row_res))
+    n_col_res = int(n_col/int(n_col/n_col_res))
+    ddm_res = np.zeros((n_row_res, n_col_res))
+    for row_i, row in enumerate(ddm_original):
+        for col_i, val in enumerate(row):
+            row_i_res = int(row_i/(n_row/n_row_res))
+            col_i_res = int(col_i/(n_col/n_col_res))
+            ddm_res[row_i_res,col_i_res] += val
+    return ddm_res
+
 def main():
 
     sim_config = simulation_configuration()
@@ -23,21 +37,33 @@ def main():
     #sim_config.phi_0 = 35*np.pi/180
     #sim_config.u_10 = 4
     #sim_config.phi_0 = 38*np.pi/180
-    sim_config.u_10 = 3.04
-    sim_config.phi_0 = -83*np.pi/180
 
-    file_root_name = '2015-04-01-H00'
+    file_root_name = '2017-05-25-H00'
     target = targets['hibernia']
-    group = '000095'
-    index = 415
+    group = '000082'
+    index = 181
 
     tds = tds_data(file_root_name, group, index)
 
-    # Sea clutter estimation. 
-    p = target_processor();
-    for i in range(index - 30, index + 5):
-        ddm = tds.rootgrp.groups[group].variables['DDM'][i].data
-        p.process_ddm(ddm)
+    ddm_tds = np.copy(tds.rootgrp.groups[group].variables['DDM'][tds.index].data)*tds.peak_power()
+    mean_wind = tds.get_wind()
+    tau = 0.08
+    for i in range(index - 20, index + 0):
+        tds.set_group_index(group, i)
+        ddm_i = tds.rootgrp.groups[group].variables['DDM'][i].data*tds.peak_power()
+        mean_wind += tds.get_wind()
+        mean_wind /= 2
+        for row_i, row in enumerate(ddm_tds):
+            for col_i, val in enumerate(row):
+                val_i = ddm_i[row_i][col_i]
+                val = ddm_tds[row_i][col_i]
+                ddm_tds[row_i][col_i] = val + tau*(val_i - val)
+
+    #sim_config.u_10 = mean_wind
+    print("wind: {0}".format(mean_wind))
+
+    sim_config.u_10 = 5.0
+    sim_config.phi_0 = -83*np.pi/180
 
     # Plot TDS DDM sea clutter
 
@@ -72,11 +98,12 @@ def main():
     plt.title('TDS-1 Experimental Data')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    im = ax_tds.imshow(p.sea_clutter, cmap='jet', 
+    contour_tds = ax_tds.imshow(normalize(tds.rootgrp.groups[tds.group].variables['DDM'][tds.index].data)*tds.peak_power(), cmap='jet', 
             extent=(delay_start, delay_end, doppler_end, doppler_start), 
             aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
     t = plt.text(0.01, 0.85, string, {'color': 'w', 'fontsize': 12}, transform=ax_tds.transAxes)
+    cbar = fig_tds.colorbar(contour_tds, label='Power')
 
     # Load TDS Geometry in simulation configuration
     r_sp, lat_sp, lon_sp = tds.find_sp();
@@ -120,18 +147,12 @@ def main():
     # such an approach should call for summation instead of averaging
     # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
-    plt.title('Simulation')
+    plt.title('Simulation Rescaled')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
     rescaled_doppler_resolution = tds.doppler_resolution
     rescaled_delay_resolution_chips = tds.time_delay_resolution/delay_chip
-    ddm_rescaled = cv2.resize(ddm_sim, 
-            dsize=(
-                128, 
-                20
-                ), 
-            interpolation=cv2.INTER_AREA
-            ) 
+    ddm_rescaled = rescale(ddm_sim, 20, 128)
     ddm_rescaled = ddm_rescaled + 0.02*np.max(ddm_rescaled)*np.random.rand(ddm_rescaled.shape[0],ddm_rescaled.shape[1])
 
     contour_res = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
@@ -141,6 +162,7 @@ def main():
     cbar = fig_ddm_rescaled.colorbar(contour_res, label='Normalized Power', shrink=0.35)
 
 
+    '''
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('Difference')
     plt.xlabel('C/A chips')
@@ -152,6 +174,7 @@ def main():
             aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
             )
     cbar = fig_diff.colorbar(im, label='Normalized Power', shrink=0.35)
+    '''
 
     plt.show()
 

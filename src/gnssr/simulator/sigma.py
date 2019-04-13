@@ -48,7 +48,7 @@ def sigma(delay, doppler, sim_config):
     radar_cross_section = sim_config.rcs
     wavelength = light_speed/sim_config.f_carrier
 
-    p = transmitting_power*wavelength**2*coherent_integration_time**2/(4*np.pi)**3 * ( \
+    p = transmitting_power*wavelength**2/(4*np.pi)**3 * ( \
                 radar_cross_section(r_1, sim_config)/( \
                     np.linalg.norm(r_1-r_t)**2* \
                     np.linalg.norm(r_r-r_1)**2 \

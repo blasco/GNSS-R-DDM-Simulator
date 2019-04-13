@@ -2,7 +2,7 @@ import numpy as np
 from datetime import *
 from dateutil import tz
 
-earth_semimajor_axis = 6378137 # meters
+earth_semimajor_axis = 6378137.0 # meters
 earth_semiminor_axis = 6356752.314245 # meters
 earth_inertial_angular_speed = 7.2921158553e-5 # rad/sec
         

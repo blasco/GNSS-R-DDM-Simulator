@@ -17,7 +17,7 @@ class simulation_configuration:
         """
 
         #self.fresnel_coefficient = 0.65
-        self.fresnel_coefficient = 0.95
+        self.fresnel_coefficient = 1
 
         self.transmitting_power = np.power(10, 14.25/10)
         """From Coulson, “The GPS at GTO Experiment.” 1996."""
@@ -45,7 +45,7 @@ class simulation_configuration:
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m
             h_r = 620e3,  # m
-            elevation = 85*np.pi/180, # radians
+            elevation = 80*np.pi/180, # radians
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([-3605, 3843.852, -850]) # m/s
             ):

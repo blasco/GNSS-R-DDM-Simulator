@@ -17,7 +17,6 @@ import cv2
 def main():
 
     sim_config = simulation_configuration()
-    sim_config.doppler_resolution = 50
 
     delay_chip = sim_config.delay_chip
     # Really good
@@ -25,7 +24,7 @@ def main():
     #sim_config.phi_0 = 35*np.pi/180
     #sim_config.u_10 = 4
     #sim_config.phi_0 = 38*np.pi/180
-    sim_config.u_10 = 2
+    sim_config.u_10 = 3
     sim_config.phi_0 = -83*np.pi/180
 
     file_root_name = 'raw/L1B/2015-04-01-H00'
@@ -94,7 +93,7 @@ def main():
 
     T_noise_receiver = 225
     k_b = 1.38e-23 # J/K
-    y_noise = sim_config.coherent_integration_time*k_b*T_noise_receiver
+    y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
     ddm_sim_snr = np.copy(10*np.log10(np.abs(ddm_sim)/y_noise))
 
     fig_ddm_snr, ax_ddm_snr = plt.subplots(1,figsize=(10, 4))
