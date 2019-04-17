@@ -12,10 +12,10 @@ def main():
     G_r = 25
     wavelength = 0.19  # m
     h_t = 13.82e6 # m
-    h_r = 500e3  # m
+    h_r = 20e3  # m
     k_b = 1.38e-23 # J/K
     T_r = 225.7 # K
-    T_i = 1e-3 # s
+    T_i = 2e-2 # s
     sigma_target = 12
 
     # From Gleason page 76

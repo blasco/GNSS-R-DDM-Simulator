@@ -11,6 +11,7 @@ from gnssr.targets import *
 from gnssr.tds.tds_data import *
 from gnssr.tds.detection.find_targets import *
 from gnssr.utils import *
+from gnssr.simulator.waf import *
 
 import cv2
 
@@ -18,6 +19,8 @@ def rescale(ddm_original, n_row_res, n_col_res):
     n_row, n_col = ddm_original.shape 
     assert n_row > n_row_res, "Cannot rescale to a biger size"
     assert n_col > n_col_res, "Cannot rescale to a biger size"
+    assert n_col % n_col_res == 0, "low res should be a multiple"
+    assert n_row % n_row_res == 0, "low res should be a multiple"
     n_row_res = int(n_row/int(n_row/n_row_res))
     n_col_res = int(n_col/int(n_col/n_col_res))
     ddm_res = np.zeros((n_row_res, n_col_res))
@@ -31,84 +34,69 @@ def rescale(ddm_original, n_row_res, n_col_res):
 def main():
 
     sim_config = simulation_configuration()
-    delay_chip = sim_config.delay_chip
-    # Really good
-    #sim_config.u_10 = 4
-    #sim_config.phi_0 = 35*np.pi/180
-    #sim_config.u_10 = 4
-    #sim_config.phi_0 = 38*np.pi/180
+    sim_config.jacobian_type = 'spherical'
 
-    file_root_name = '2017-05-25-H00'
+    delay_chip = sim_config.delay_chip
+
+    file_root_name = '2017-03-12-H18'
     target = targets['hibernia']
-    group = '000082'
-    index = 181
+    group = '000035'
+    index = 675
 
     tds = tds_data(file_root_name, group, index)
 
-    ddm_tds = np.copy(tds.rootgrp.groups[group].variables['DDM'][tds.index].data)*tds.peak_power()
     mean_wind = tds.get_wind()
-    tau = 0.08
-    for i in range(index - 20, index + 0):
+    p = target_processor_power();
+    n = 30
+    p.n = n
+    for i in range(index - n, index + 2):
         tds.set_group_index(group, i)
-        ddm_i = tds.rootgrp.groups[group].variables['DDM'][i].data*tds.peak_power()
-        mean_wind += tds.get_wind()
-        mean_wind /= 2
-        for row_i, row in enumerate(ddm_tds):
-            for col_i, val in enumerate(row):
-                val_i = ddm_i[row_i][col_i]
-                val = ddm_tds[row_i][col_i]
-                ddm_tds[row_i][col_i] = val + tau*(val_i - val)
+        ddm_i = normalize(tds.rootgrp.groups[group].variables['DDM'][i].data)*tds.peak_power()
+        p.process_ddm(ddm_i)
+        wind = tds.get_wind() 
+        if (wind != None):
+            mean_wind += wind
+            mean_wind /= 2
+    ddm_tds = np.copy(p.sea_clutter)
+    print("mean wind: {0}".format(mean_wind))
 
-    #sim_config.u_10 = mean_wind
-    print("wind: {0}".format(mean_wind))
-
-    sim_config.u_10 = 5.0
-    sim_config.phi_0 = -83*np.pi/180
+    sim_config.u_10 = 9.5 
+    sim_config.phi_0 = -120*np.pi/180
 
     # Plot TDS DDM sea clutter
-
+    tds.set_group_index(group, index)
+    r_sp, lat_sp, lon_sp = tds.find_sp();
     datenum = tds.rootgrp.groups[tds.group].variables['IntegrationMidPointTime'][tds.index]
 
     string = str(datenum_to_pytime(float(datenum))) \
         + ' Lat: ' + "{0:.2f}".format(tds.lat_sp_tds) \
         + ' Lon: ' + "{0:.2f}".format(tds.lon_sp_tds)
 
-    number_of_delay_pixels = tds.metagrp.groups[tds.group].NumberOfDelayPixels
-    number_of_doppler_pixels = tds.metagrp.groups[tds.group].NumberOfDopplerPixels
+    tds_number_of_delay_pixels = tds.metagrp.groups[tds.group].NumberOfDelayPixels
+    tds_number_of_doppler_pixels = tds.metagrp.groups[tds.group].NumberOfDopplerPixels
 
-    delay_start = tds.calculate_delay_increment_chips(0)
-    delay_end = tds.calculate_delay_increment_chips(number_of_delay_pixels-1)
-    doppler_start = tds.calculate_doppler_increment(-np.floor(number_of_doppler_pixels/2))
-    doppler_end = tds.calculate_doppler_increment(np.floor(number_of_doppler_pixels/2 - 0.5))
+    tds_delay_start = tds.calculate_delay_increment_chips(0)
+    tds_delay_end = tds.calculate_delay_increment_chips(tds_number_of_delay_pixels-1)
+    tds_delay_resolution = (tds_delay_end-tds_delay_start)/128
 
-    delay_increment_start = sim_config.delay_increment_start 
-    delay_increment_end = sim_config.delay_increment_end 
-    delay_resolution = sim_config.delay_resolution
-
-    sim_config.delay_increment_start = delay_start*delay_chip + 2*delay_resolution
-    sim_config.delay_increment_end = delay_end*delay_chip
-    sim_config.doppler_increment_start = -5000
-    sim_config.doppler_increment_end = 5000
-
-    doppler_increment_start = sim_config.doppler_increment_start
-    doppler_increment_end = sim_config.doppler_increment_end
-    doppler_resolution = sim_config.doppler_resolution
+    tds_doppler_start = tds.calculate_doppler_increment(-np.floor(tds_number_of_doppler_pixels/2))
+    tds_doppler_end = tds.calculate_doppler_increment(np.floor(tds_number_of_doppler_pixels/2 - 0.5))
+    tds_doppler_resolution = 500
 
     fig_tds, ax_tds = plt.subplots(1,figsize=(10, 4))
     plt.title('TDS-1 Experimental Data')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    contour_tds = ax_tds.imshow(normalize(tds.rootgrp.groups[tds.group].variables['DDM'][tds.index].data)*tds.peak_power(), cmap='jet', 
-            extent=(delay_start, delay_end, doppler_end, doppler_start), 
-            aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
+    contour_tds = ax_tds.imshow(ddm_tds, cmap='jet', 
+            extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
+            aspect=(tds_number_of_doppler_pixels/tds_number_of_delay_pixels)/np.abs(tds_doppler_start/tds_delay_start)
             )
     t = plt.text(0.01, 0.85, string, {'color': 'w', 'fontsize': 12}, transform=ax_tds.transAxes)
     cbar = fig_tds.colorbar(contour_tds, label='Power')
 
     # Load TDS Geometry in simulation configuration
-    r_sp, lat_sp, lon_sp = tds.find_sp();
-    n_z = unit_vector(ellip_norm(r_sp))
-    n_x = unit_vector(np.cross(n_z, r_sp-tds.r_t))
+    n_z = unit_vector(ellip_norm(tds.r_sp_tds))
+    n_x = unit_vector(np.cross(n_z, tds.r_sp_tds-tds.r_t))
     n_y = unit_vector(np.cross(n_z, n_x))
 
     v_tx = np.dot(tds.v_t, n_x)
@@ -120,61 +108,95 @@ def main():
     v_rz = np.dot(tds.v_r, n_z)
 
     sim_config.set_scenario_local_ref(
-        h_r = np.dot((tds.r_r - r_sp), n_z),
-        h_t = np.dot((tds.r_t - r_sp), n_z),
-        elevation = angle_between(n_y, tds.r_t-r_sp),
+        h_r = np.dot((tds.r_r - tds.r_sp_tds), n_z),
+        h_t = np.dot((tds.r_t - tds.r_sp_tds), n_z),
+        elevation = angle_between(n_y, tds.r_t-tds.r_sp_tds),
         v_t = np.array([v_tx,v_ty,v_tz]),
         v_r = np.array([v_rx,v_ry,v_rz])
         )
 
     # DDM
-    ddm_sim = (simulate_ddm(sim_config)) 
+    sim_config.delay_increment_start = tds_delay_start*delay_chip
+    sim_config.delay_increment_end = tds_delay_end*delay_chip
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/tds_number_of_delay_pixels/3
+    sim_config.doppler_increment_start = tds_doppler_start
+    sim_config.doppler_increment_end = tds_doppler_end + tds_doppler_resolution
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/tds_number_of_doppler_pixels/3
+
+    ddm_sim = (simulate_ddm(sim_config))
 
     fig_ddm, ax_ddm = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM original simulation')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
     contour_ddm = ax_ddm.imshow(ddm_sim, cmap='jet', 
-            extent=(delay_start, delay_end, doppler_end, doppler_start), 
+            extent=(sim_config.delay_increment_start, sim_config.delay_increment_end, sim_config.doppler_increment_end, sim_config.doppler_increment_start), 
             aspect="auto"
             )
     cbar = fig_ddm.colorbar(contour_ddm, label='Normalized Power')
 
     # Image downscaling to desired resolution:
-    # TODO: This is just an average of the pixels around the area
-    # This is not valid, summation i srequired:
-    # Di Simone > From a physical viewpoint, 
-    # such an approach should call for summation instead of averaging
-    # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
     plt.title('Simulation Rescaled')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    rescaled_doppler_resolution = tds.doppler_resolution
-    rescaled_delay_resolution_chips = tds.time_delay_resolution/delay_chip
-    ddm_rescaled = rescale(ddm_sim, 20, 128)
-    ddm_rescaled = ddm_rescaled + 0.02*np.max(ddm_rescaled)*np.random.rand(ddm_rescaled.shape[0],ddm_rescaled.shape[1])
+
+    ddm_rescaled = rescale(ddm_sim, tds_number_of_doppler_pixels, tds_number_of_delay_pixels) 
+
+    # Noise
+    waf_delay_increment_values = list(np.arange(
+        -tds_delay_end*delay_chip, 
+        tds_delay_end*delay_chip + tds_delay_resolution*delay_chip, 
+        tds_delay_resolution*delay_chip
+        ))
+    waf_doppler_increment_values = list(np.arange(
+        tds_doppler_start, 
+        tds_doppler_end + tds_doppler_resolution, 
+        tds_doppler_resolution
+        ))
+    waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
+    waf_matrix = woodward_ambiguity_function(waf_delay_grid, waf_doppler_grid, sim_config)**2
+
+    T_noise_receiver = 200
+    k_b = 1.38e-23 # J/K
+    y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
+
+    p1 = target_processor_power();
+    n = 30000 
+    p1.n = n
+    p1.tau = 0.08
+    ddm_noise = np.zeros(ddm_rescaled.shape)
+    for i in range(n+1):
+        print("i: {0}".format(i))
+        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1])-0.5)
+        ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
+        p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
+    ddm_rescaled = p1.sea_clutter
 
     contour_res = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
-            extent=(delay_start, delay_end, doppler_end, doppler_start), 
-            aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
+            extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
+            aspect=(tds_number_of_doppler_pixels/tds_number_of_delay_pixels)/np.abs(tds_doppler_start/tds_delay_start)
             )
     cbar = fig_ddm_rescaled.colorbar(contour_res, label='Normalized Power', shrink=0.35)
 
-
-    '''
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('Difference')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
-    ddm_diff = np.abs(ddm_rescaled-p.sea_clutter)
-    ddm_diff[0,0] = 0.35
+
+    ddm_diff = np.copy(ddm_rescaled)
+    for row_i, row in enumerate(ddm_diff):
+        for col_i, val in enumerate(row):
+            val_tds = ddm_tds[row_i,col_i]
+            val = ddm_rescaled[row_i,col_i]
+            ddm_diff[row_i,col_i] = (val-val_tds)/val_tds
+    #np.place(ddm_diff, ddm_diff < 0, np.nan)
+
     im = ax_diff.imshow(ddm_diff, cmap='jet', 
-            extent=(delay_start, delay_end, doppler_end, doppler_start), 
-            aspect=(number_of_doppler_pixels/number_of_delay_pixels)/np.abs(doppler_start/delay_start)
+            extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
+            aspect=(tds_number_of_doppler_pixels/tds_number_of_delay_pixels)/np.abs(tds_doppler_start/tds_delay_start)
             )
     cbar = fig_diff.colorbar(im, label='Normalized Power', shrink=0.35)
-    '''
 
     plt.show()
 

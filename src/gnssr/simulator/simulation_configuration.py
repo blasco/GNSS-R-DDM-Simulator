@@ -42,6 +42,8 @@ class simulation_configuration:
 
         self.rcs = radar_cross_section
 
+        self.jacobian_type = 'planar'
+
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m
             h_r = 620e3,  # m

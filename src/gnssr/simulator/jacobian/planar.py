@@ -19,19 +19,19 @@ def delay_doppler_jacobian_1(delay, f_doppler, sim_config):
     delay_resolution = sim_config.delay_resolution
     doppler_resolution = sim_config.doppler_resolution
 
-    j_11 = (1)*(
+    j_11 = (1/delay_resolution)*(
              x_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config) - \
              x_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config)
            )
-    j_12 = (1)*( 
+    j_12 = (1/doppler_resolution)*( 
              x_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config) - \
              x_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config)
             )
-    j_21 = (1)*(
+    j_21 = (1/delay_resolution)*(
              y_delay_doppler_1(delay+delay_resolution/2, f_doppler, sim_config) - \
              y_delay_doppler_1(delay-delay_resolution/2, f_doppler, sim_config)
             )
-    j_22 = (1)*(
+    j_22 = (1/doppler_resolution)*(
              y_delay_doppler_1(delay, f_doppler+doppler_resolution/2, sim_config) - \
              y_delay_doppler_1(delay, f_doppler-doppler_resolution/2, sim_config)
             )

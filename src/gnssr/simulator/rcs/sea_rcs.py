@@ -47,7 +47,7 @@ def slope_probability_density_function(x, u_10, phi_0):
     local_to_wind_reference_frame = np.array([
         [np.cos(phi_0), np.sin(phi_0)],
         [-np.sin(phi_0), np.cos(phi_0)]
-    ])
+        ])
 
     s =  local_to_wind_reference_frame.dot(x)
 

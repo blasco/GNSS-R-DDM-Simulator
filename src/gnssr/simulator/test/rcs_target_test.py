@@ -17,6 +17,8 @@ def rescale(ddm_original, n_row_res, n_col_res):
     n_row, n_col = ddm_original.shape 
     assert n_row > n_row_res, "Cannot rescale to a biger size"
     assert n_col > n_col_res, "Cannot rescale to a biger size"
+    assert n_col % n_col_res == 0, "low res should be a multiple"
+    assert n_row % n_row_res == 0, "low res should be a multiple"
     n_row_res = int(n_row/int(n_row/n_row_res))
     n_col_res = int(n_col/int(n_col/n_col_res))
     ddm_res = np.zeros((n_row_res, n_col_res))
@@ -47,10 +49,11 @@ def main():
 
     sim_config.doppler_increment_start = -50
     sim_config.doppler_increment_end = 50
-    sim_config.doppler_resolution = 0.5
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/20/3
     sim_config.delay_increment_start = -0.5*delay_chip
     sim_config.delay_increment_end = 2*delay_chip
-    sim_config.delay_resolution = 0.01*delay_chip
+    #sim_config.delay_resolution = 0.01*delay_chip
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/128/3
     sim_config.coherent_integration_time = 2e-2 # sec
 
     delay_increment_start = sim_config.delay_increment_start 

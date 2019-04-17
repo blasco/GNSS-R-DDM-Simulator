@@ -58,5 +58,5 @@ def simulate_ddm(sim_config):
 
     sigma_matrix = sigma(delay_grid_sigma, doppler_grid_sigma, sim_config)
     waf_matrix = woodward_ambiguity_function(delay_grid_waf, doppler_grid_waf, sim_config)**2
-    p = signal.convolve2d(sigma_matrix, waf_matrix, mode='same')
-    return p
+    ddm_matrix = signal.convolve2d(sigma_matrix, waf_matrix, mode='same')
+    return ddm_matrix

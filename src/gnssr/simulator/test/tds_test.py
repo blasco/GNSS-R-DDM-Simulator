@@ -34,10 +34,10 @@ def main():
     tds = tds_data(file_root_name, group, index)
 
     # Sea clutter estimation. 
-    p = target_processor();
-    for i in range(index - 30, index + 5):
-        ddm = tds.rootgrp.groups[group].variables['DDM'][i].data
-        p.process_ddm(ddm)
+    #p = target_processor();
+    #for i in range(index - 30, index + 5):
+    #    ddm = tds.rootgrp.groups[group].variables['DDM'][i].data
+    #    p.process_ddm(ddm)
 
     # Plot TDS DDM sea clutter
 

@@ -2,7 +2,8 @@
 
 import numpy as np
 
-from gnssr.simulator.jacobian.planar import *
+import gnssr.simulator.jacobian.planar as planar
+import gnssr.simulator.jacobian.spherical as spherical
 from gnssr.simulator.antenna.tds_antenna import *
 from gnssr.utils import *
 
@@ -27,44 +28,85 @@ def sigma(delay, doppler, sim_config):
     Returns:
         numpy.ndarray with  size(1,).
     """
-    r_t = sim_config.r_t
-    r_r = sim_config.r_r
-    v_t = sim_config.v_t
-    v_r = sim_config.v_r
-    elevation = sim_config.elevation
-    f_carrier = sim_config.f_carrier
-    h_r = sim_config.h_r
-    transmitting_power = sim_config.transmitting_power
-    coherent_integration_time = sim_config.coherent_integration_time
+    
+    if (sim_config.jacobian_type == 'planar'):
+        r_t = sim_config.r_t
+        r_r = sim_config.r_r
+        v_t = sim_config.v_t
+        v_r = sim_config.v_r
+        elevation = sim_config.elevation
+        f_carrier = sim_config.f_carrier
+        h_r = sim_config.h_r
+        transmitting_power = sim_config.transmitting_power
+        coherent_integration_time = sim_config.coherent_integration_time
 
-    x_1 = x_delay_doppler_1(delay, doppler, sim_config).real
-    y_1 = y_delay_doppler_1(delay, doppler, sim_config).real
-    r_1 = np.array([x_1,y_1,0])
+        x_1 = planar.x_delay_doppler_1(delay, doppler, sim_config).real
+        y_1 = planar.y_delay_doppler_1(delay, doppler, sim_config).real
+        r_1 = np.array([x_1,y_1,0])
 
-    x_2 = x_delay_doppler_2(delay, doppler, sim_config).real
-    y_2 = y_delay_doppler_2(delay, doppler, sim_config).real
-    r_2 = np.array([x_2,y_2,0])
+        x_2 = planar.x_delay_doppler_2(delay, doppler, sim_config).real
+        y_2 = planar.y_delay_doppler_2(delay, doppler, sim_config).real
+        r_2 = np.array([x_2,y_2,0])
 
-    radar_cross_section = sim_config.rcs
-    wavelength = light_speed/sim_config.f_carrier
+        radar_cross_section = sim_config.rcs
+        wavelength = light_speed/sim_config.f_carrier
 
-    p = transmitting_power*wavelength**2/(4*np.pi)**3 * ( \
-                radar_cross_section(r_1, sim_config)/( \
-                    np.linalg.norm(r_1-r_t)**2* \
-                    np.linalg.norm(r_r-r_1)**2 \
-                ) * \
-                delay_doppler_jacobian_1(delay, doppler, sim_config) * \
-                receiver_antenna_gain(r_1, sim_config) * \
-                transmitting_antenna_gain(r_1, sim_config) \
-                + 
-                radar_cross_section(r_2, sim_config)/( \
-                    np.linalg.norm(r_2-r_t)**2* \
-                    np.linalg.norm(r_r-r_2)**2 \
-                ) * \
-                delay_doppler_jacobian_2(delay, doppler, sim_config) * \
-                receiver_antenna_gain(r_2, sim_config) * \
-                transmitting_antenna_gain(r_2, sim_config) \
-            )*sim_config.doppler_resolution*sim_config.delay_resolution
+        p = transmitting_power*wavelength**2/(4*np.pi)**3 * ( \
+                    radar_cross_section(r_1, sim_config)/( \
+                        np.linalg.norm(r_1-r_t)**2* \
+                        np.linalg.norm(r_r-r_1)**2 \
+                    ) * \
+                    planar.delay_doppler_jacobian_1(delay, doppler, sim_config) * \
+                    receiver_antenna_gain(r_1, sim_config) * \
+                    transmitting_antenna_gain(r_1, sim_config) \
+                    + 
+                    radar_cross_section(r_2, sim_config)/( \
+                        np.linalg.norm(r_2-r_t)**2* \
+                        np.linalg.norm(r_r-r_2)**2 \
+                    ) * \
+                    planar.delay_doppler_jacobian_2(delay, doppler, sim_config) * \
+                    receiver_antenna_gain(r_2, sim_config) * \
+                    transmitting_antenna_gain(r_2, sim_config) \
+                )*sim_config.doppler_resolution*sim_config.delay_resolution
+
+    if (sim_config.jacobian_type == 'spherical'):
+        r_t = sim_config.r_t
+        r_r = sim_config.r_r
+        v_t = sim_config.v_t
+        v_r = sim_config.v_r
+        elevation = sim_config.elevation
+        f_carrier = sim_config.f_carrier
+        h_r = sim_config.h_r
+        transmitting_power = sim_config.transmitting_power
+        coherent_integration_time = sim_config.coherent_integration_time
+
+        r_1, r_2 = spherical.delay_doppler_to_local_surface(delay, doppler, sim_config)
+
+        r_1 = np.array([r_1[0].real,r_1[1].real,r_1[2].real,0])[0:3]
+        r_2 = np.array([r_2[0].real,r_2[1].real,r_2[2].real,0])[0:3]
+
+        j1, j2 = spherical.delay_doppler_jacobian(delay, doppler, sim_config)
+
+        radar_cross_section = sim_config.rcs
+        wavelength = light_speed/sim_config.f_carrier
+
+        p = transmitting_power*wavelength**2/(4*np.pi)**3 * ( \
+                    radar_cross_section(r_1, sim_config)/( \
+                        np.linalg.norm(r_1-r_t)**2* \
+                        np.linalg.norm(r_r-r_1)**2 \
+                    ) * \
+                    j1 * \
+                    receiver_antenna_gain(r_1, sim_config) * \
+                    transmitting_antenna_gain(r_1, sim_config) \
+                    + 
+                    radar_cross_section(r_2, sim_config)/( \
+                        np.linalg.norm(r_2-r_t)**2* \
+                        np.linalg.norm(r_r-r_2)**2 \
+                    ) * \
+                    j2 * \
+                    receiver_antenna_gain(r_2, sim_config) * \
+                    transmitting_antenna_gain(r_2, sim_config) \
+                )*sim_config.doppler_resolution*sim_config.delay_resolution
 
     # Plot
     #fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))
@@ -74,6 +116,5 @@ def sigma(delay, doppler, sim_config):
     #        )
 
     #noise = 0.01*np.max(p)*np.random.normal(0.02,0.05, p.shape)
-    noise = 0
-    return p  + noise
+    return p
      

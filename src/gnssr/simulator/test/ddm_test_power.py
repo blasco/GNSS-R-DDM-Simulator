@@ -14,6 +14,20 @@ from gnssr.utils import *
 
 import cv2
 
+def rescale(ddm_original, n_row_res, n_col_res):
+    n_row, n_col = ddm_original.shape 
+    assert n_row > n_row_res, "Cannot rescale to a biger size"
+    assert n_col > n_col_res, "Cannot rescale to a biger size"
+    n_row_res = int(n_row/int(n_row/n_row_res))
+    n_col_res = int(n_col/int(n_col/n_col_res))
+    ddm_res = np.zeros((n_row_res, n_col_res))
+    for row_i, row in enumerate(ddm_original):
+        for col_i, val in enumerate(row):
+            row_i_res = int(row_i/(n_row/n_row_res))
+            col_i_res = int(col_i/(n_col/n_col_res))
+            ddm_res[row_i_res,col_i_res] += val
+    return ddm_res
+
 def main():
 
     sim_config = simulation_configuration()
@@ -23,18 +37,18 @@ def main():
     #sim_config.phi_0 = 35*np.pi/180
     #sim_config.u_10 = 4
     #sim_config.phi_0 = 38*np.pi/180
-    sim_config.u_10 = 3.04
-    sim_config.phi_0 = -83*np.pi/180
+    sim_config.u_10 = 10.04
+    sim_config.phi_0 = 0*np.pi/180
 
     file_root_name = '2015-04-01-H00'
     target = targets['hibernia']
     group = '000095'
     index = 415
     
-    #file_root_name = '2017-03-12-H18'
-    #target = targets['hibernia']
-    #group = '000035'
-    #index = 675
+    file_root_name = '2017-03-12-H18'
+    target = targets['hibernia']
+    group = '000035'
+    index = 675
 
     tds = tds_data(file_root_name, group, index)
 

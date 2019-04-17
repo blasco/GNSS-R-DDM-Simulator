@@ -17,6 +17,7 @@ import cv2
 def main():
 
     sim_config = simulation_configuration()
+    #sim_config.jacobian_type = 'spherical'
 
     delay_chip = sim_config.delay_chip
     # Really good
@@ -27,7 +28,7 @@ def main():
     sim_config.u_10 = 3
     sim_config.phi_0 = -83*np.pi/180
 
-    file_root_name = 'raw/L1B/2015-04-01-H00'
+    file_root_name = '2015-04-01-H00'
     target = targets['hibernia']
     group = '000095'
     index = 415

@@ -16,7 +16,8 @@ def receiver_antenna_gain(r, sim_config):
     r_antenna = r[0:2] - sim_config.r_r[0:2] 
     elevation = np.arctan2(sim_config.h_r,np.sqrt(r_antenna[0]**2+r_antenna[1]**2))*180/np.pi
     azimuth = np.arctan2(-r_antenna[1],-r_antenna[0])*180/np.pi
-    return sim_antenna.gain(azimuth, elevation)
+    return sim_antenna.gain(azimuth*np.pi/180, elevation)
+    #return 12.589
 
 def transmitting_antenna_gain(r, sim_config):
     """

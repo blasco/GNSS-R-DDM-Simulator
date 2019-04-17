@@ -103,8 +103,8 @@ def main():
             cmap='jet', alpha = 0.8
             )
 
-    test_delay = np.array([3*delay_chip])
-    test_doppler = np.array([1000]) +  doppler_specular_point
+    test_delay = np.array([1*delay_chip])
+    test_doppler = np.array([500]) +  doppler_specular_point
 
     print('Finding intersection for d:{0}, f:{1}'.format(test_delay, test_delay))
 
@@ -114,9 +114,11 @@ def main():
     x_s_2 = planar.x_delay_doppler_2(test_delay, test_doppler, sim_config)
     y_s_2 = planar.y_delay_doppler_2(test_delay, test_doppler, sim_config)
     '''
-
-    x_s_1, y_s_1, x_s_2, y_s_2 =  spherical.compute_transformation(test_delay, test_doppler, sim_config)
-
+    r_1, r_2 = spherical.delay_doppler_to_local_surface(test_delay, test_doppler, sim_config)
+    x_s_1 = r_1[0]
+    y_s_1 = r_1[1]
+    x_s_2 = r_2[0]
+    y_s_2 = r_2[1]
     ax_isolines.scatter(x_s_1, y_s_1, s=70, marker=(5, 2), zorder=4)
     ax_isolines.scatter(x_s_2, y_s_2, s=70, marker=(5, 2), zorder=4)
 

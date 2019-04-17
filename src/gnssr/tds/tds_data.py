@@ -37,7 +37,9 @@ class tds_data:
 
     def get_wind(self):
         self.index_l2b = self.find_index_l2b()
-        return self.l2b.variables['WindSpeed'][self.index_l2b].data
+        if(self.index_l2b == None):
+            return None
+        return self.l2b.variables['WindSpeed'][self.index_l2b].data 
 
     def find_index_l2b(self):
         """
@@ -76,7 +78,7 @@ class tds_data:
         inputCableGainLin = 10**(-0.6/10);
 
         power = (ddmPeak - noiseEstimate)/systemGainLin/inputCableGainLin
-        print("power: {0}".format(power))
+        #print("power: {0}".format(power))
 
         return power
 
@@ -135,6 +137,7 @@ class tds_data:
             lon_sp (float)
                 Longitude of the specular point.
         """
+        # TODO: This doesn't always work!
         r_sp_estimate = self.r_sp_tds
         for it in range(4):
             r_center = np.array(r_sp_estimate)
