@@ -15,22 +15,6 @@ from gnssr.simulator.waf import *
 
 import cv2
 
-def rescale(ddm_original, n_row_res, n_col_res):
-    n_row, n_col = ddm_original.shape 
-    assert n_row > n_row_res, "Cannot rescale to a biger size"
-    assert n_col > n_col_res, "Cannot rescale to a biger size"
-    assert n_col % n_col_res == 0, "low res should be a multiple"
-    assert n_row % n_row_res == 0, "low res should be a multiple"
-    n_row_res = int(n_row/int(n_row/n_row_res))
-    n_col_res = int(n_col/int(n_col/n_col_res))
-    ddm_res = np.zeros((n_row_res, n_col_res))
-    for row_i, row in enumerate(ddm_original):
-        for col_i, val in enumerate(row):
-            row_i_res = int(row_i/(n_row/n_row_res))
-            col_i_res = int(col_i/(n_col/n_col_res))
-            ddm_res[row_i_res,col_i_res] += val
-    return ddm_res
-
 def main():
 
     sim_config = simulation_configuration()
@@ -158,7 +142,7 @@ def main():
     waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
     waf_matrix = woodward_ambiguity_function(waf_delay_grid, waf_doppler_grid, sim_config)**2
 
-    T_noise_receiver = 200
+    T_noise_receiver = 225
     k_b = 1.38e-23 # J/K
     y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
 

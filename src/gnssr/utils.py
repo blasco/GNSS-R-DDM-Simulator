@@ -34,3 +34,20 @@ def datenum_to_pytime(matlab_datenum):
     python_datetime = datetime.fromordinal(int(matlab_datenum)) + timedelta(days=matlab_datenum%1) - timedelta(days = 366)
     return str(python_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]) + 'Z'
     #return python_datetime
+
+def rescale(ddm_original, n_row_res, n_col_res):
+    n_row, n_col = ddm_original.shape 
+    assert n_row >= n_row_res, "Cannot rescale to a biger size"
+    assert n_col >= n_col_res, "Cannot rescale to a biger size"
+    assert n_col % n_col_res == 0, "low res should be a multiple"
+    assert n_row % n_row_res == 0, "low res should be a multiple"
+    n_row_res = int(n_row/int(n_row/n_row_res))
+    n_col_res = int(n_col/int(n_col/n_col_res))
+    ddm_res = np.zeros((n_row_res, n_col_res))
+    for row_i, row in enumerate(ddm_original):
+        for col_i, val in enumerate(row):
+            row_i_res = int(row_i/(n_row/n_row_res))
+            col_i_res = int(col_i/(n_col/n_col_res))
+            ddm_res[row_i_res,col_i_res] += val
+    return ddm_res
+

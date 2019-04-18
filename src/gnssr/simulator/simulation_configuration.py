@@ -3,6 +3,7 @@
 import numpy as np
 from gnssr.utils import *
 from gnssr.simulator.rcs.sea_rcs import *
+import gnssr.simulator.antenna.tds_antenna as tds_antenna
 
 class simulation_configuration:
 
@@ -43,6 +44,10 @@ class simulation_configuration:
         self.rcs = radar_cross_section
 
         self.jacobian_type = 'planar'
+
+        self.receiver_antenna_gain = tds_antenna.receiver_antenna_gain
+        self.transmitting_antenna_gain = tds_antenna.transmitting_antenna_gain
+
 
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m

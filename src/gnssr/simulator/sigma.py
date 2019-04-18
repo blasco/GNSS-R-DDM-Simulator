@@ -4,7 +4,6 @@ import numpy as np
 
 import gnssr.simulator.jacobian.planar as planar
 import gnssr.simulator.jacobian.spherical as spherical
-from gnssr.simulator.antenna.tds_antenna import *
 from gnssr.utils import *
 
 def sigma(delay, doppler, sim_config):
@@ -57,16 +56,16 @@ def sigma(delay, doppler, sim_config):
                         np.linalg.norm(r_r-r_1)**2 \
                     ) * \
                     planar.delay_doppler_jacobian_1(delay, doppler, sim_config) * \
-                    receiver_antenna_gain(r_1, sim_config) * \
-                    transmitting_antenna_gain(r_1, sim_config) \
+                    sim_config.receiver_antenna_gain(r_1, sim_config) * \
+                    sim_config.transmitting_antenna_gain(r_1, sim_config) \
                     + 
                     radar_cross_section(r_2, sim_config)/( \
                         np.linalg.norm(r_2-r_t)**2* \
                         np.linalg.norm(r_r-r_2)**2 \
                     ) * \
                     planar.delay_doppler_jacobian_2(delay, doppler, sim_config) * \
-                    receiver_antenna_gain(r_2, sim_config) * \
-                    transmitting_antenna_gain(r_2, sim_config) \
+                    sim_config.receiver_antenna_gain(r_2, sim_config) * \
+                    sim_config.transmitting_antenna_gain(r_2, sim_config) \
                 )*sim_config.doppler_resolution*sim_config.delay_resolution
 
     if (sim_config.jacobian_type == 'spherical'):
@@ -96,16 +95,16 @@ def sigma(delay, doppler, sim_config):
                         np.linalg.norm(r_r-r_1)**2 \
                     ) * \
                     j1 * \
-                    receiver_antenna_gain(r_1, sim_config) * \
-                    transmitting_antenna_gain(r_1, sim_config) \
+                    sim_config.receiver_antenna_gain(r_1, sim_config) * \
+                    sim_config.transmitting_antenna_gain(r_1, sim_config) \
                     + 
                     radar_cross_section(r_2, sim_config)/( \
                         np.linalg.norm(r_2-r_t)**2* \
                         np.linalg.norm(r_r-r_2)**2 \
                     ) * \
                     j2 * \
-                    receiver_antenna_gain(r_2, sim_config) * \
-                    transmitting_antenna_gain(r_2, sim_config) \
+                    sim_config.receiver_antenna_gain(r_2, sim_config) * \
+                    sim_config.transmitting_antenna_gain(r_2, sim_config) \
                 )*sim_config.doppler_resolution*sim_config.delay_resolution
 
     # Plot
