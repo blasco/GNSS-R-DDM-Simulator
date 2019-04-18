@@ -36,10 +36,13 @@ class tds_data:
                 break
 
     def get_wind(self):
-        self.index_l2b = self.find_index_l2b()
-        if(self.index_l2b == None):
+        try:
+            self.index_l2b = self.find_index_l2b()
+            if(self.index_l2b == None):
+                return None
+            return self.l2b.variables['WindSpeed'][self.index_l2b].data 
+        except:
             return None
-        return self.l2b.variables['WindSpeed'][self.index_l2b].data 
 
     def find_index_l2b(self):
         """

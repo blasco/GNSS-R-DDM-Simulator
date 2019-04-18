@@ -38,11 +38,10 @@ def main():
 
     delay_chip = sim_config.delay_chip
 
-    # Decent noise results
-    file_root_name = '2017-03-12-H18'
+    file_root_name = '2017-05-31-H18'
     target = targets['hibernia']
-    group = '000035'
-    index = 675-15
+    group = '000095'
+    index = 100
 
     tds = tds_data(file_root_name, group, index)
 
@@ -62,8 +61,8 @@ def main():
     ddm_tds = np.copy(p.sea_clutter)
     print("mean wind: {0}".format(mean_wind))
 
-    sim_config.u_10 = 15
-    sim_config.phi_0 = -200*np.pi/180
+    sim_config.u_10 = 3.5 
+    sim_config.phi_0 = -120*np.pi/180
 
     # Plot TDS DDM sea clutter
     tds.set_group_index(group, index)
@@ -159,12 +158,12 @@ def main():
     waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
     waf_matrix = woodward_ambiguity_function(waf_delay_grid, waf_doppler_grid, sim_config)**2
 
-    T_noise_receiver = 215
+    T_noise_receiver = 200
     k_b = 1.38e-23 # J/K
     y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
 
     p1 = target_processor_power();
-    n = 300
+    n = 100 
     p1.n = n
     p1.tau = 0.08
     ddm_noise = np.zeros(ddm_rescaled.shape)
@@ -189,9 +188,18 @@ def main():
     ddm_diff = np.copy(ddm_rescaled)
     for row_i, row in enumerate(ddm_diff):
         for col_i, val in enumerate(row):
-            val_tds = ddm_tds[row_i,col_i]
+            col_i_shift = col_i
+            shift = + 1
+            if (col_i + shift) >= 0 and (col_i + shift) < 128:
+                col_i_shift += shift
+            val_tds = ddm_tds[row_i,col_i_shift]
             val = ddm_rescaled[row_i,col_i]
-            ddm_diff[row_i,col_i] = np.abs((val-val_tds)/val_tds)
+            if row_i == 0 :
+                ddm_diff[row_i,col_i] = 0
+            elif col_i == 0:
+                ddm_diff[row_i,col_i] = 0
+            else:
+                ddm_diff[row_i,col_i] = np.abs((val-val_tds)/val_tds)
     #np.place(ddm_diff, ddm_diff < 0, np.nan)
 
     im = ax_diff.imshow(ddm_diff, cmap='jet', 

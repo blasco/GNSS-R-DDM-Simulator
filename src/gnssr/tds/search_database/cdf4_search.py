@@ -7,7 +7,7 @@ from gnssr.targets import *
 
 # Example usage
 def main():
-    file_root_name = 'raw/L1B/2015-06-12-H00'
+    file_root_name = '2015-06-12-H00'
     target = targets['hibernia']
     # 0.5 deg error approx 55 km error
     search_error = 0.5
@@ -15,7 +15,7 @@ def main():
         file.write(cdf4_search(file_root_name, target, search_error))
 
 def cdf4_search(file_root_name, target, search_error):
-    filename = os.path.join(os.environ['TDS_ROOT'], file_root_name+'-metadata.nc')
+    filename = os.path.join(os.environ['TDS_ROOT'], 'raw/L1B/'+file_root_name+'-metadata.nc')
     metagrp = Dataset(filename, "r", format="NETCDF4")
     print(filename)
     search_output = filename + '\n' 

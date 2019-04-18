@@ -16,10 +16,15 @@ from gnssr.tds.search_database.cdf4_search import *
 
 def main():
 
-    file_root_name = 'raw/L1B/2018-03-31-H06'
-    target = targets['hibernia']
-    group = '000021'
-    index = 300 
+    #file_root_name = '2018-03-31-H06'
+    #target = targets['hibernia']
+    #group = '000021'
+    #index = 300 
+
+    file_root_name = '2015-12-04-H18'
+    target = targets['devils_tower']
+    group = '000066'
+    index =  385
 
     #File: /home/woowapdabug/projects/thesis/python/src/tds/raw/L1B_Catalogue/2018-03/31/H06/2018-03.31.H06.kmz
 
