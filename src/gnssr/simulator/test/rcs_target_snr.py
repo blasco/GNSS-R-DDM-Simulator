@@ -16,7 +16,7 @@ import cv2
 def main():
 
     sim_config = simulation_configuration()
-    #sim_config.jacobian_type = 'spherical'
+    sim_config.jacobian_type = 'spherical'
 
     sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
 

@@ -32,7 +32,7 @@ def main():
 
     mean_wind = tds.get_wind()
     p = target_processor_power();
-    n = 30
+    n = 1
     p.n = n
     for i in range(index - n, index + 2):
         tds.set_group_index(group, i)
@@ -129,6 +129,11 @@ def main():
 
     ddm_rescaled = rescale(ddm_sim, tds_number_of_doppler_pixels, tds_number_of_delay_pixels) 
 
+    ddm_rescaled[0,:] = ddm_rescaled[2,:]
+    ddm_rescaled[1,:] = ddm_rescaled[2,:]
+    ddm_rescaled[:,0] = ddm_rescaled[:,2]
+    ddm_rescaled[:,1] = ddm_rescaled[:,2]
+
     # Noise
     waf_delay_increment_values = list(np.arange(
         -tds_delay_end*delay_chip, 
@@ -148,13 +153,13 @@ def main():
     y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
 
     p1 = target_processor_power();
-    n = 300
+    n = 500
     p1.n = n
     p1.tau = 0.08
     ddm_noise = np.zeros(ddm_rescaled.shape)
     for i in range(n+1):
         print("i: {0}".format(i))
-        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1])-0.5)
+        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1]))
         ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
         p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
     ddm_rescaled = p1.sea_clutter

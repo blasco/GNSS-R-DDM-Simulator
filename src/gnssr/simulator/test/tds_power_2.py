@@ -37,7 +37,7 @@ def main():
 
     mean_wind = tds.get_wind()
     p = target_processor_power();
-    n = 30
+    n = 1
     p.n = n
     for i in range(index - n, index + 2):
         tds.set_group_index(group, i)
@@ -159,10 +159,15 @@ def main():
     ddm_noise = np.zeros(ddm_rescaled.shape)
     for i in range(n+1):
         print("i: {0}".format(i))
-        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1])-0.5)
+        noise_i = 2*y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1])-0.5)
         ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
         p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
     ddm_rescaled = p1.sea_clutter
+
+    ddm_rescaled[0,:] = ddm_rescaled[2,:]
+    ddm_rescaled[1,:] = ddm_rescaled[2,:]
+    ddm_rescaled[:,0] = ddm_rescaled[:,2]
+    ddm_rescaled[:,1] = ddm_rescaled[:,2]
 
     contour_res = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
             extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
@@ -201,6 +206,19 @@ def main():
             aspect=(tds_number_of_doppler_pixels/tds_number_of_delay_pixels)/np.abs(tds_doppler_start/tds_delay_start)
             )
     cbar = fig_diff.colorbar(im, label='Normalized Power', shrink=0.35)
+
+    fig_snr, ax_snr = plt.subplots(1,figsize=(10, 4))
+    plt.title('SNR')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+
+    ddm_rescaled_snr = rescale(ddm_sim, tds_number_of_doppler_pixels, tds_number_of_delay_pixels) 
+    ddm_snr = np.copy(10*np.log10(np.abs(ddm_rescaled_snr)/y_noise))
+    contour_snr = ax_snr.imshow(ddm_snr, cmap='jet', 
+            extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
+            aspect=(tds_number_of_doppler_pixels/tds_number_of_delay_pixels)/np.abs(tds_doppler_start/tds_delay_start)
+            )
+    cbar = fig_snr.colorbar(contour_snr, label='dB', shrink=0.35)
 
     plt.show()
 
