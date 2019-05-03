@@ -31,13 +31,12 @@ def main():
     file_root_name = '2015-12-04-H18'
     target = targets['devils_tower']
     group = '000066'
-    index =  385
+    index =  385 - 10
 
     tds = tds_data(file_root_name, group, index)
 
-    mean_wind = tds.get_wind()
+    '''
     p = target_processor_power();
-    n = 1
     p.n = n
     for i in range(index - n, index + 2):
         tds.set_group_index(group, i)
@@ -50,9 +49,30 @@ def main():
             mean_wind /= 2
     ddm_tds = np.copy(p.sea_clutter)
     print("mean wind: {0}".format(mean_wind))
+    '''
 
-    sim_config.u_10 = 2.2 
+    n_tds = 1 
+    n = n_tds 
+    ddm_tds = np.zeros(tds.rootgrp.groups[group].variables['DDM'][index].data.shape)
+    mean_wind = 0;
+    n_wind = 0;
+    for i in range(n):
+        print("i: {0}".format(i))
+        tds.set_group_index(group, index + i)
+        ddm_i = normalize(tds.rootgrp.groups[group].variables['DDM'][index + i].data)*tds.peak_power()
+        ddm_tds += ddm_i
+        wind = tds.get_wind() 
+        if (wind != None):
+            print("wind: {0}".format(wind))
+            mean_wind += wind
+            n_wind += 1
+    mean_wind /= n_wind
+    ddm_tds /= n
+    print("mean wind: {0}".format(mean_wind))
+
+    sim_config.u_10 = 2.28
     sim_config.phi_0 = -160*np.pi/180
+    #sim_config.phi_0 = 0*np.pi/180
 
     # Plot TDS DDM sea clutter
     tds.set_group_index(group, index)
@@ -148,21 +168,27 @@ def main():
     waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
     waf_matrix = woodward_ambiguity_function(waf_delay_grid, waf_doppler_grid, sim_config)**2
 
-    T_noise_receiver = 225
+    T_noise_receiver = 225.7
     k_b = 1.38e-23 # J/K
     y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
 
-    p1 = target_processor_power();
-    n = 1000 
-    p1.n = n
-    p1.tau = 0.08
+    print("expected noise floor: {0}".format(y_noise/100))
+
+    #p1 = target_processor_power();
+    #p1.n = n
+    #p1.tau = 0.08
+    n = n_tds*1000 
     ddm_noise = np.zeros(ddm_rescaled.shape)
-    for i in range(n+1):
-        print("i: {0}".format(i))
-        noise_i = 2*y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1])-0.5)
-        ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
-        p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
-    ddm_rescaled = p1.sea_clutter
+    # TODO: put this into the target processor or do the right average to the 
+    #tds data (even better)
+    for i in range(n):
+        #print("i: {0}".format(i))
+        #ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
+        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1]))
+        ddm_noise += (noise_i + ddm_rescaled)
+        #p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
+    #ddm_rescaled = p1.sea_clutter
+    ddm_rescaled = ddm_noise/n
 
     ddm_rescaled[0,:] = ddm_rescaled[2,:]
     ddm_rescaled[1,:] = ddm_rescaled[2,:]
@@ -181,6 +207,8 @@ def main():
     plt.ylabel('Hz')
 
     ddm_diff = np.copy(ddm_rescaled)
+    #ddm_diff = np.abs(ddm_rescaled - ddm_tds)
+
     for row_i, row in enumerate(ddm_diff):
         for col_i, val in enumerate(row):
             col_i_shift = col_i
@@ -198,7 +226,8 @@ def main():
             elif col_i == 0:
                 ddm_diff[row_i,col_i] = 0
             else:
-                ddm_diff[row_i,col_i] = np.abs((val-val_tds)/val_tds)
+                rel = np.abs((val-val_tds)/val_tds)
+                ddm_diff[row_i,col_i] = rel
     #np.place(ddm_diff, ddm_diff < 0, np.nan)
 
     im = ax_diff.imshow(ddm_diff, cmap='jet', 

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import numpy as np
 
 def woodward_ambiguity_function(delay, doppler, sim_config): 

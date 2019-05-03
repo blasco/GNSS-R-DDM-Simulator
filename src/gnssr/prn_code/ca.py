@@ -114,6 +114,22 @@ plt.title('ca auto')
 ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/chip/1023))
 ax_auto.xaxis.set_major_formatter(ticks_x)
 
+fig_auto_t, ax_auto_t = plt.subplots(1,figsize=(10, 4))
+n = 8000
+delay = np.zeros(n)
+for i in range(0,n):
+    delay[i] = i*1023*chip/n
+
+auto_delay =  np.where(np.abs(delay-1023/2*chip) <= chip, 
+        1023 - 1023*np.abs(delay-1023/2*chip)/(chip), 
+        0)
+y = np.interp(delay/chip/1023, t/chip/1023, ca_auto)
+plt.plot(delay/chip-0.5*1023,y/np.max(y))
+plt.plot(delay/chip-0.5*1023,auto_delay/np.max(auto_delay))
+plt.title('Autocorrelation approximation')
+plt.xlabel('C/A chip')
+plt.xlim(-80,80)
+
 fig_cross, ax_cross = plt.subplots(1,figsize=(10, 4))
 ca_cross = np.correlate(ca_24, ca_23, 'same')
 plt.plot(t,ca_cross)
@@ -123,6 +139,5 @@ plt.ylim(-200,200)
 
 ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/chip/1023))
 ax_cross.xaxis.set_major_formatter(ticks_x)
-
 
 plt.show()
