@@ -2,6 +2,7 @@
 
 from netCDF4 import Dataset
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 import os
 from gnssr.utils import *
@@ -17,7 +18,7 @@ def main():
     h_t = 13.82e6 # m
     h_r = 20e3  # m
     k_b = 1.38e-23 # J/K
-    T_r = 225.7 # K
+    T_r = 2*260 # K
     T_i = 1e-3 # s
     sigma_target = 12
 
@@ -42,14 +43,32 @@ def main():
                     ))
 
     x = np.zeros((len(delay_values),len(delay_values)))
+    '''
     for i, col in enumerate(x):
         for j, val in enumerate(col):
-            x[i,j] = np.power((2/1e-3*2*k_b*T_r*waf_delay(delay_values[j] - delay_values[i], sim_config)),2)
+            x[i,j] = (2/1e-3*2*k_b*T_r*waf_delay(delay_values[j] - delay_values[i], sim_config))
+    '''
+
+    for i, col in enumerate(x):
+        x[i,:] =  (2/1e-3*2*k_b*T_r*waf_delay(delay_values - delay_values[i], sim_config))
 
     fig_covar, ax_covar = plt.subplots(1,figsize=(10, 4))
-    contour_ddm = ax_covar.imshow(x, cmap='jet', 
+    contour_covar = ax_covar.imshow(x, cmap='jet', 
+            extent=[
+                delay_values[0]/delay_chip, delay_values[-1]/delay_chip, 
+                delay_values[0]/delay_chip, delay_values[-1]/delay_chip
+                ],
             aspect="auto"
             )
+
+    #ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(delax_values[pos]/delax_chip))
+    #ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(delay_values[pos]/delay_chip))
+    #ax_covar.xaxis.set_major_formatter(ticks_x)
+    #ax_covar.yaxis.set_major_formatter(ticks_y)
+    fig_covar.colorbar(contour_covar, label='[Watts]')
+    plt.xlabel('C/A chips')
+    plt.ylabel('C/A chips')
+
 
     '''
     ddm_noise = np.zeros((40, len(delay_values)))
@@ -60,15 +79,33 @@ def main():
 
     fig_ddm_noise, ax_ddm_noise = plt.subplots(1,figsize=(10, 4))
     ddm_noise = np.zeros((50,len(delay_values)))
-    n = 1000
-    for i in range(n):
-        print("i: {0}".format(i))
-        ddm_noise_i = np.abs(np.random.multivariate_normal(np.zeros(len(delay_values)),x, (50)))
-        ddm_noise += ddm_noise_i
+    ddm_noise_integrated = np.copy(ddm_noise)
+    n_int = 1
+    for i in range(n_int):
+        n = 1000
+        for i in range(n):
+            print("i: {0}".format(i))
+            ddm_noise_i = np.power(np.random.multivariate_normal(np.zeros(len(delay_values)),x, (50)),2)
+            ddm_noise += ddm_noise_i
+        ddm_noise /= n
+        ddm_noise -= np.mean(ddm_noise)
+        ddm_noise = np.abs(ddm_noise)
 
-    ddm_noise /= n
+        ddm_noise_integrated += ddm_noise
+    ddm_noise_integrated /= n_int 
 
-    contour_ddm = ax_ddm_noise.imshow(ddm_noise, cmap='jet', 
+    print("mean cleaned noise expected: {}".format(2/1e-3*2*k_b*T_r/np.sqrt(n)))
+    print("mean cleaned noise: {}".format(np.mean(ddm_noise_integrated)))
+
+
+    contour_ddm = ax_ddm_noise.imshow(ddm_noise_integrated, cmap='jet', 
+            aspect="auto"
+            )
+
+    fig_ddm_noise_i, ax_ddm_noise_i = plt.subplots(1,figsize=(10, 4))
+    ddm_noise_i = np.power(np.random.multivariate_normal(np.zeros(len(delay_values)),x, (50)),2)
+    contour_ddm = ax_ddm_noise_i.imshow(ddm_noise_integrated - 
+            ddm_noise_i/np.sqrt(n), cmap='jet', 
             aspect="auto"
             )
 

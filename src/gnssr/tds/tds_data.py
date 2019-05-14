@@ -81,9 +81,9 @@ class tds_data:
         inputCableGainLin = 10**(-0.6/10);
 
         power = (ddmPeak - noiseEstimate)/systemGainLin/inputCableGainLin
-        #print("power: {0}".format(power))
+        noise = (noiseEstimate)/systemGainLin/inputCableGainLin
 
-        return power
+        return power, noise
 
     def set_group_index(self, group, index):
         """

@@ -12,6 +12,7 @@ from gnssr.tds.tds_data import *
 from gnssr.tds.detection.find_targets import *
 from gnssr.utils import *
 from gnssr.simulator.waf import *
+from gnssr.simulator.noise import *
 
 import cv2
 
@@ -51,26 +52,45 @@ def main():
     print("mean wind: {0}".format(mean_wind))
     '''
 
-    n_tds = 1 
+    n_tds = 15 
     n = n_tds 
     ddm_tds = np.zeros(tds.rootgrp.groups[group].variables['DDM'][index].data.shape)
-    mean_wind = 0;
-    n_wind = 0;
+    mean_wind = 0
+    n_wind = 0
+    noise_antenna_mean = 0
     for i in range(n):
         print("i: {0}".format(i))
+
         tds.set_group_index(group, index + i)
-        ddm_i = normalize(tds.rootgrp.groups[group].variables['DDM'][index + i].data)*tds.peak_power()
+        power_i, noise_i = tds.peak_power()
+        ddm_i = normalize(tds.rootgrp.groups[group].variables['DDM'][index + i].data)*power_i
+        print("noise power estimate: {0}".format(noise_i))
         ddm_tds += ddm_i
+
         wind = tds.get_wind() 
+
+        noise_antenna_mean_i = tds.metagrp.groups[group].variables['AntennaTemperature'][tds.index].data
+        if(np.isnan(noise_antenna_mean_i)):
+            noise_antenna_mean_i = 225.7
+
+        noise_antenna_mean += noise_antenna_mean_i
+        print("noise antenna : {}".format(noise_antenna_mean_i))
+
         if (wind != None):
             print("wind: {0}".format(wind))
             mean_wind += wind
             n_wind += 1
+
     mean_wind /= n_wind
     ddm_tds /= n
+    noise_antenna_mean /= n 
+    noise_rx_mean = 246.103067695338
+
+    print("noise_antenna_mean: {0}".format(noise_antenna_mean))
+    print("noise_rx_mean: {0}".format(noise_rx_mean))
     print("mean wind: {0}".format(mean_wind))
 
-    sim_config.u_10 = 2.28
+    sim_config.u_10 = 2.34
     sim_config.phi_0 = -160*np.pi/180
     #sim_config.phi_0 = 0*np.pi/180
 
@@ -168,32 +188,8 @@ def main():
     waf_delay_grid, waf_doppler_grid = np.meshgrid(waf_delay_increment_values, waf_doppler_increment_values)
     waf_matrix = woodward_ambiguity_function(waf_delay_grid, waf_doppler_grid, sim_config)**2
 
-    T_noise_receiver = 225.7
-    k_b = 1.38e-23 # J/K
-    y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
-
-    print("expected noise floor: {0}".format(y_noise/100))
-
-    #p1 = target_processor_power();
-    #p1.n = n
-    #p1.tau = 0.08
-    n = n_tds*1000 
-    ddm_noise = np.zeros(ddm_rescaled.shape)
-    # TODO: put this into the target processor or do the right average to the 
-    #tds data (even better)
-    for i in range(n):
-        #print("i: {0}".format(i))
-        #ddm_noise_i = np.abs(signal.convolve2d(noise_i, waf_matrix, mode='same'))
-        noise_i = y_noise*(np.random.rand(ddm_rescaled.shape[0], ddm_rescaled.shape[1]))
-        ddm_noise += (noise_i + ddm_rescaled)
-        #p1.process_ddm(np.abs(ddm_rescaled + ddm_noise_i))
-    #ddm_rescaled = p1.sea_clutter
-    ddm_rescaled = ddm_noise/n
-
-    ddm_rescaled[0,:] = ddm_rescaled[2,:]
-    ddm_rescaled[1,:] = ddm_rescaled[2,:]
-    ddm_rescaled[:,0] = ddm_rescaled[:,2]
-    ddm_rescaled[:,1] = ddm_rescaled[:,2]
+    noise_temperature = noise_antenna_mean + noise_rx_mean
+    ddm_rescaled = add_thermal_noise(tds_number_of_doppler_pixels, tds_number_of_delay_pixels, 1*1000, noise_temperature, ddm_rescaled, sim_config)
 
     contour_res = ax_ddm_rescaled.imshow(ddm_rescaled, cmap='jet', 
             extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
@@ -240,6 +236,10 @@ def main():
     plt.title('SNR')
     plt.xlabel('C/A chips')
     plt.ylabel('Hz')
+
+    T_noise_receiver = 225.7
+    k_b = 1.38e-23 # J/K
+    y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
 
     ddm_rescaled_snr = rescale(ddm_sim, tds_number_of_doppler_pixels, tds_number_of_delay_pixels) 
     ddm_snr = np.copy(10*np.log10(np.abs(ddm_rescaled_snr)/y_noise))
