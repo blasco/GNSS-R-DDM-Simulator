@@ -17,11 +17,11 @@ class simulation_configuration:
         and Voronovich 2000.
         """
 
-        #self.fresnel_coefficient = 0.65
-        self.fresnel_coefficient = 1
+        self.fresnel_coefficient = 0.65
+        #self.fresnel_coefficient = 1
 
-        self.transmitting_power = np.power(10, 14.25/10)
         """From Coulson, “The GPS at GTO Experiment.” 1996."""
+        self.transmitting_power = np.power(10, 14.25/10)
 
         self.coherent_integration_time = 1e-3 # seconds
         self.delay_chip =  1/gps_ca_chips_per_second # seconds

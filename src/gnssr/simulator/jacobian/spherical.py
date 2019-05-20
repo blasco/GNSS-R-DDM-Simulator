@@ -107,7 +107,7 @@ def delay_doppler_to_local_surface(delay, f_doppler, sim_config):
     rel_err_z1 = np.inf;
     rel_err_z2 = np.inf;
     iter = 1;
-    max_num_iter = 10;
+    max_num_iter = 20;
     step_tol = 0.1;
 
     x1 = x0_1

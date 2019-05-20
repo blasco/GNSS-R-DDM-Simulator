@@ -14,7 +14,11 @@ def normalize(mat):
     return (mat - np.min(mat))/(np.max(mat)-np.min(mat))
 
 def unit_vector(r):
-    return r/np.linalg.norm(r)
+    norm = np.linalg.norm(r)
+    r[0] /= norm
+    r[1] /= norm
+    r[2] /= norm
+    return r
 
 def angle_between(v1, v2):
     """ 

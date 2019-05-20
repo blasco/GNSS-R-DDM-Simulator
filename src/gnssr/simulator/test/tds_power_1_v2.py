@@ -29,10 +29,10 @@ def main():
     #group = '000035'
     #index = 675
 
-    file_root_name = '2015-12-04-H18'
-    target = targets['devils_tower']
-    group = '000066'
-    index =  385 - 10
+    file_root_name = '2017-03-12-H18'
+    target = targets['hibernia']
+    group = '000035'
+    index = 675-35
 
     tds = tds_data(file_root_name, group, index)
 
@@ -52,7 +52,7 @@ def main():
     print("mean wind: {0}".format(mean_wind))
     '''
 
-    n_tds = 20
+    n_tds = 20 
     n = n_tds 
     ddm_tds = np.zeros(tds.rootgrp.groups[group].variables['DDM'][index].data.shape)
     mean_wind = 0
@@ -70,19 +70,19 @@ def main():
 
         wind = tds.get_wind() 
 
-        noise_antenna_mean_i = tds.metagrp.groups[group].variables['AntennaTemperature'][tds.index].data
-        if(np.isnan(noise_antenna_mean_i)):
-            noise_antenna_mean_i = tds.metagrp.groups[group].variables['AntennaTemperatureExtRef'][tds.index].data
-            if(np.isnan(noise_antenna_mean_i)):
-                noise_antenna_mean_i = 225.7
+        #noise_antenna_mean_i = tds.metagrp.groups[group].variables['AntennaTemperature'][tds.index].data
+        #if(np.isnan(noise_antenna_mean_i)):
+        #    noise_antenna_mean_i = tds.metagrp.groups[group].variables['AntennaTemperatureExtRef'][tds.index].data
+        #    if(np.isnan(noise_antenna_mean_i)):
+        #        noise_antenna_mean_i = 246.85
 
-        noise_rx_mean_i = tds.metagrp.variables['RxTemperature'][tds.index_meta].data
-        if(np.isnan(noise_rx_mean_i)):
-            noise_rx_mean_i = 232.09
+        #noise_rx_mean_i = tds.metagrp.variables['RxTemperature'][tds.index_meta].data
+        #if(np.isnan(noise_rx_mean_i)):
+        #    noise_rx_mean_i = 232.09
 
-        noise_antenna_mean += noise_antenna_mean_i
-        noise_rx_mean += noise_rx_mean_i
-        print("noise antenna : {}".format(noise_antenna_mean_i))
+        #noise_antenna_mean += noise_antenna_mean_i
+        #noise_rx_mean += noise_rx_mean_i
+        #print("noise antenna : {}".format(noise_antenna_mean_i))
 
         if (wind != None):
             print("wind: {0}".format(wind))
@@ -91,19 +91,19 @@ def main():
 
     mean_wind /= n_wind
     ddm_tds /= n
-    noise_antenna_mean /= n 
-    noise_rx_mean /= n
+    #noise_antenna_mean /= n 
+    #noise_rx_mean /= n
 
     noise_antenna_mean = 246.85
-    noise_rx_mean = 252.09
+    noise_rx_mean = 232.09
 
     print("noise_antenna_mean: {0}".format(noise_antenna_mean))
     print("noise_rx_mean: {0}".format(noise_rx_mean))
     print("mean wind: {0}".format(mean_wind))
 
-    sim_config.u_10 = 2.35
-    #sim_config.phi_0 = 130*np.pi/180 # 0.547
-    sim_config.phi_0 = 80*np.pi/180 # max power diff: 0.58
+    sim_config.u_10 = 11 
+    sim_config.phi_0 = 90*np.pi/180 # max diff: 0.64
+    #sim_config.phi_0 = 0*np.pi/180 # max diff:   0.62
 
     # Plot TDS DDM sea clutter
     tds.set_group_index(group, index)
@@ -150,17 +150,13 @@ def main():
     v_ry = np.dot(tds.v_r, n_y)
     v_rz = np.dot(tds.v_r, n_z)
 
+
     h_r = np.dot((tds.r_r - tds.r_sp_tds), n_z)
     h_t = np.dot((tds.r_t - tds.r_sp_tds), n_z)
     elevation = angle_between(n_y, tds.r_t-tds.r_sp_tds)
     v_t = np.array([v_tx,v_ty,v_tz])
     v_r = np.array([v_rx,v_ry,v_rz])
 
-    print("h_r: {}".format(h_r))
-    print("h_t: {}".format(h_t))
-    print("elevation: {}".format(elevation))
-    print("v_r: {}".format(np.linalg.norm(v_r)))
-    print("v_t: {}".format(np.linalg.norm(v_t)))
 
     sim_config.set_scenario_local_ref(
         h_r = np.dot((tds.r_r - tds.r_sp_tds), n_z),
@@ -235,8 +231,8 @@ def main():
         for col_i, val in enumerate(row):
             col_i_shift = col_i
             row_i_shift = row_i
-            col_shift = 1 
-            row_shift = 0 
+            col_shift = 0 
+            row_shift = 1 
             if (col_i + col_shift) >= 0 and (col_i + col_shift) < 128:
                 col_i_shift += col_shift
             if (row_i + row_shift) >= 0 and (row_i + row_shift) < 20:
@@ -253,15 +249,6 @@ def main():
     ddm_diff[:,-1] = 0
     ddm_diff[0,0] = 0
     ddm_diff[0,1] = 1
-
-    print(file_root_name)
-    print("h_r: {}".format(h_r))
-    print("h_t: {}".format(h_t))
-    print("elevation: {}".format(elevation*180/np.pi))
-    print("v_r: {}".format(np.linalg.norm(v_r)))
-    print("v_t: {}".format(np.linalg.norm(v_t)))
-    print("max diff: {}".format(np.max(ddm_diff[1:,1:])))
-
 
     im = ax_diff.imshow(ddm_diff, cmap='jet', 
             extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
@@ -289,6 +276,14 @@ def main():
             aspect='auto'
             )
     cbar = fig_snr.colorbar(contour_snr, label='dB' )
+
+    print(file_root_name)
+    print("h_r: {}".format(h_r))
+    print("h_t: {}".format(h_t))
+    print("elevation: {}".format(elevation*180/np.pi))
+    print("v_r: {}".format(np.linalg.norm(v_r)))
+    print("v_t: {}".format(np.linalg.norm(v_t)))
+    print("max diff: {}".format(np.max(ddm_diff[1:,1:])))
 
     plt.show()
 

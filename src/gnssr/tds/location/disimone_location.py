@@ -1,5 +1,9 @@
 #!/usr/bin/env python
+from gnssr.utils import *
+from gnssr.simulator.isolines import *
+import gnssr.simulator.jacobian.spherical as spherical
 
+from gnssr.simulator.simulation_configuration import *
 import numpy as np
 import os
 from shapely import geometry
@@ -16,7 +20,7 @@ from gnssr.tds.search_database.cdf4_search import *
 
 def main():
     # Di Simone
-    file_root_name = 'raw/L1B/2015-04-01-H00'
+    file_root_name = '2015-04-01-H00'
     target = targets['hibernia']
     group = '000095'
     index = 525
@@ -185,6 +189,37 @@ def main():
 
     except TypeError as te:
         print ('No intersections')
+
+    
+    n_z = unit_vector(ellip_norm(tds.r_sp_tds))
+    n_x = unit_vector(np.cross(n_z, tds.r_sp_tds-tds.r_t))
+    n_y = unit_vector(np.cross(n_z, n_x))
+
+    v_tx = np.dot(tds.v_t, n_x)
+    v_ty = np.dot(tds.v_t, n_y)
+    v_tz = np.dot(tds.v_t, n_z)
+
+    v_rx = np.dot(tds.v_r, n_x)
+    v_ry = np.dot(tds.v_r, n_y)
+    v_rz = np.dot(tds.v_r, n_z)
+
+    sim_config = simulation_configuration()
+    sim_config.set_scenario_local_ref(
+        h_r = np.dot((tds.r_r - tds.r_sp_tds), n_z),
+        h_t = np.dot((tds.r_t - tds.r_sp_tds), n_z),
+        elevation = angle_between(n_y, tds.r_t-tds.r_sp_tds),
+        v_t = np.array([v_tx,v_ty,v_tz]),
+        v_r = np.array([v_rx,v_ry,v_rz])
+        )
+
+    doppler_specular_point =  eq_doppler_absolute_shift(np.array([0,0,0]), sim_config)
+    delay = np.array([4*delay_chip])
+    f_doppler = np.array([doppler_specular_point + 1800])
+    r_1, r_2 = spherical.delay_doppler_to_local_surface(delay, f_doppler, sim_config)
+    print(r_1)
+    print(r_2)
+    ax_surface.scatter(r_1[0], r_1[1], s=70, zorder=4, color='blue')
+    ax_surface.scatter(r_2[0], r_2[1], s=70, zorder=4, color='blue')
 
     plt.show(block=False)
 

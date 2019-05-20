@@ -40,10 +40,13 @@ def main():
             v_r = np.array([25, 25, 25]) # m/s
             )
 
-    sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 0, y)
+    #sim_config.jacobian_type = 'spherical'
+    sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
+    sim_config.rcs = lambda x,y: target_rcs.radar_cross_section_military(x, 0, y)
     sim_config.u_10 = 5.0 # m/s
 
-    sim_config.delay_chip = 1/10.23e6 # s
+    #sim_config.delay_chip = 1/10.23e6 # s
+    sim_config.delay_chip = 1/gps_ca_chips_per_second/10 # seconds
     delay_chip = sim_config.delay_chip
 
     sim_config.doppler_increment_start = -70
@@ -52,7 +55,7 @@ def main():
     sim_config.delay_increment_start = -0.2*delay_chip
     sim_config.delay_increment_end = 8*delay_chip
     sim_config.delay_resolution = 0.05*delay_chip
-    sim_config.coherent_integration_time = 100e-2 # sec
+    sim_config.coherent_integration_time = 2e-2 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -148,7 +151,7 @@ def main():
 
     # DDM
     ddm_sim = simulate_ddm(sim_config) 
-    #sim_config.rcs = lambda x,y: target_rcs.radar_cross_section(x, 0.5, y)
+    #sim_config.rcs = lambda x,y: target_rcs.radar_cross_section_military(x, 0.5, y)
     sim_config.rcs = sea_rcs.radar_cross_section
     sim_config.u_10 = 5.0
     ddm_sim_1 = simulate_ddm(sim_config) 
@@ -178,28 +181,41 @@ def main():
             )
     fig_ddm.colorbar(contour_sim)
 
-    # Image downscaling to desired resolution:
-    # TODO: This is just an average of the pixels around the area
-    # This is not valid, summation i srequired:
-    # Di Simone > From a physical viewpoint, 
-    # such an approach should call for summation instead of averaging
-    # https://stackoverflow.com/questions/48121916/numpy-resize-rescale-image
+
     fig_ddm_rescaled, ax_ddm_rescaled = plt.subplots(1,figsize=(10, 4))
     plt.title('Rescaled Diff')
     plt.xlabel('chips')
     plt.ylabel('Hz')
-    number_of_delay_pixels = 128
-    number_of_doppler_pixels = 20
+    number_of_delay_pixels = 128 - 50
+    number_of_doppler_pixels = 20 + 50
     ddm_sim_res = rescale(ddm_sim, number_of_doppler_pixels, number_of_delay_pixels)
     ddm_sim_1_res = rescale(ddm_sim_1, number_of_doppler_pixels, number_of_delay_pixels)
     ddm_diff_res = np.abs((ddm_sim_res) - (ddm_sim_1_res))
 
-    im = ax_ddm_rescaled.imshow(ddm_diff_res, cmap='jet', 
+    contour_rescaled = ax_ddm_rescaled.imshow(ddm_sim_res, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
                 doppler_increment_end, doppler_increment_start), 
             aspect='auto'
             )
+
+    fig_ddm_rescaled.colorbar(contour_rescaled)
+
+    fig_ddm_rescaled_diff, ax_ddm_rescaled_diff = plt.subplots(1,figsize=(10, 4))
+    plt.title('Rescaled Diff')
+    plt.xlabel('chips')
+    plt.ylabel('Hz')
+    number_of_delay_pixels = 128
+    number_of_doppler_pixels = 20
+
+    contour_rescaled_diff = ax_ddm_rescaled_diff.imshow(ddm_diff_res, cmap='jet', 
+            extent=(
+                delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
+                doppler_increment_end, doppler_increment_start), 
+            aspect='auto'
+            )
+
+    fig_ddm_rescaled_diff.colorbar(contour_rescaled_diff)
 
     plt.show()
 

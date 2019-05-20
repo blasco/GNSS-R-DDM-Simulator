@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import numpy as np
+from gnssr.utils import *
 
 def scattering_vector(r, sim_config):
     """
@@ -14,11 +15,8 @@ def scattering_vector(r, sim_config):
     Returns:
         numpy.ndarray with size(3,).
     """
-    scattering_vector = (scattered_direction(r, sim_config) - incident_direction(r, sim_config))
-    scattering_vector_norm = np.linalg.norm(scattering_vector)
-    scattering_vector[0] /= scattering_vector_norm
-    scattering_vector[1] /= scattering_vector_norm
-    scattering_vector[2] /= scattering_vector_norm
+    scattering_vector = 2*np.pi/light_speed*sim_config.f_carrier*(scattered_direction(r, sim_config) - incident_direction(r, sim_config))
+
     return scattering_vector
 
 def scattered_direction(r, sim_config):
