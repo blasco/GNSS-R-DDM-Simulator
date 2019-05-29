@@ -31,12 +31,20 @@ def rescale(ddm_original, n_row_res, n_col_res):
 
 def main():
 
+
     sim_config = simulation_configuration()
+
+    r_r = np.array([-234.70871771457/7001.750277972634*(6378+20), -6228.08116030199/7001.750277972634*(6378+20),  3190.67764489145/7001.750277972634*(6378+20)])
+    v_r = np.array( [-1.81026021466/7.634773594281256*0.3333, -3.34106759379/7.634773594281256*0.3333, -6.62193273334/7.634773594281256*0.3333] )
+    r_t = np.array([ 12358.55471437918, -17563.81054639165, 15556.92168039879])
+    v_t = np.array([ -0.02542167132, 2.00025789591, 2.24948177924])
+
+
 
     sim_config.set_scenario_local_ref(
             h_t = 13.82e6, # m
             h_r = 20e3, # meters
-            elevation = 70.0*np.pi/180,
+            elevation = 50.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([20, 20, 20]) # m/s
             )
@@ -44,24 +52,22 @@ def main():
     #sim_config.jacobian_type = 'spherical'
     sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 10.00
+    sim_config.u_10 = 10.0
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
 
     number_of_delay_pixels = 128 - 50
     number_of_doppler_pixels = 20 + 50
-    #number_of_delay_pixels = (128 - 50)*2
-    #number_of_doppler_pixels = (20 + 50)*2
 
-    sim_config.doppler_increment_start = -70
-    sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/5
+    sim_config.doppler_increment_start = -90
+    sim_config.doppler_increment_end = 90
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/4
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/5
-    sim_config.coherent_integration_time = 20e-3 # sec
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
+    sim_config.coherent_integration_time = 1e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -125,8 +131,11 @@ def main():
     #fig_rcs.colorbar(contour_doppler, label='Hz')
     fig_rcs.colorbar(contour_rcs, label='Radar Cross Section')
 
-    target_delay = 2.1
-    target_doppler = 29
+    target_delay_increment = 0.54
+    target_doppler_increment = 17.35
+
+    target_delay = 1.76
+    #target_doppler = 12.5
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_delay_chip, 
             #[target_delay_increment-0.1],
             [target_delay - rescaled_delay_resolution_chips],
@@ -141,6 +150,7 @@ def main():
             linewidths = 2.5,
             linestyles='dashed',
             )
+    '''
     target_iso_delay = ax_rcs.contour(x_grid, y_grid, z_grid_doppler_increment, 
             #[target_doppler_increment-0.5],
             [target_doppler - rescaled_doppler_resolution],
@@ -155,6 +165,7 @@ def main():
             linewidths = 2.5,
             linestyles='dashed',
             )
+            '''
 
     ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
     ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
@@ -166,7 +177,7 @@ def main():
     ddm_sim = np.copy(simulate_ddm(sim_config))
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 10.00 # m/s
+    #sim_config.u_10 = 3.0 # m/s
     ddm_sim_1 = np.copy(simulate_ddm(sim_config))
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
@@ -244,9 +255,9 @@ def main():
     fig_ddm_rescaled.colorbar(contour_rescaled, label='Correlated Power [Watts]')
 
     # DDM Noise
-    T_noise_receiver = 232.09 + 246.85
+    T_noise_receiver = 225
     k_b = 1.38e-23 # J/K
-    y_noise = 2/sim_config.coherent_integration_time*k_b*T_noise_receiver
+    y_noise = 1/sim_config.coherent_integration_time*k_b*T_noise_receiver
     print("expected SNR: {}".format(y_noise))
 
     fig_snr, ax_snr = plt.subplots(1,figsize=(10, 4))
@@ -255,7 +266,7 @@ def main():
     plt.ylabel('Hz')
 
     ddm_snr = 10*np.log10(np.abs(ddm_diff_res)/y_noise)
-    np.place(ddm_snr, ddm_snr < -5.2, np.nan)
+    np.place(ddm_snr, ddm_snr < -30, np.nan)
     contour_snr = ax_snr.imshow(ddm_snr, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 

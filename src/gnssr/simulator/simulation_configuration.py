@@ -48,6 +48,9 @@ class simulation_configuration:
         self.receiver_antenna_gain = tds_antenna.receiver_antenna_gain
         self.transmitting_antenna_gain = tds_antenna.transmitting_antenna_gain
 
+        self.v_x = 25 # m/s
+        self.target_x = 5e3 #m
+        self.target_y = 0.5e3 #m
 
     def set_scenario_local_ref(self,
             h_t = 13.82e6, # m

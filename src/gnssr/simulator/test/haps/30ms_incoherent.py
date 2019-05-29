@@ -36,7 +36,7 @@ def main():
     sim_config.set_scenario_local_ref(
             h_t = 13.82e6, # m
             h_r = 20e3, # meters
-            elevation = 70.0*np.pi/180,
+            elevation = 80.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([20, 20, 20]) # m/s
             )
@@ -44,9 +44,12 @@ def main():
     #sim_config.jacobian_type = 'spherical'
     sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 10.00
+    sim_config.target_x = 2e3;
+    sim_config.target_y = 0.5e3;
+    u_10 = 5
+    sim_config.u_10 = u_10
 
-    #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
+    sim_config.delay_chip /= 10
     delay_chip = sim_config.delay_chip
 
     number_of_delay_pixels = 128 - 50
@@ -58,10 +61,10 @@ def main():
     sim_config.doppler_increment_end = 70
     sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/5
     sim_config.delay_increment_start = -1*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 30*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
     sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/5
-    sim_config.coherent_integration_time = 20e-3 # sec
+    sim_config.coherent_integration_time = 30e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -166,7 +169,7 @@ def main():
     ddm_sim = np.copy(simulate_ddm(sim_config))
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 10.00 # m/s
+    sim_config.u_10 = u_10*1.01
     ddm_sim_1 = np.copy(simulate_ddm(sim_config))
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 

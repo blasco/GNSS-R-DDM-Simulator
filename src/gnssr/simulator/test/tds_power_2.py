@@ -156,6 +156,7 @@ def main():
     v_t = np.array([v_tx,v_ty,v_tz])
     v_r = np.array([v_rx,v_ry,v_rz])
 
+    import pdb; pdb.set_trace() # break
     print("h_r: {}".format(h_r))
     print("h_t: {}".format(h_t))
     print("elevation: {}".format(elevation))
