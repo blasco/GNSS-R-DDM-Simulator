@@ -11,23 +11,7 @@ from gnssr.simulator.isolines import *
 from gnssr.simulator.simulation_configuration import *
 from gnssr.simulator.ddm import *
 
-import cv2
-
-def rescale(ddm_original, n_row_res, n_col_res):
-    n_row, n_col = ddm_original.shape 
-    assert n_row > n_row_res, "Cannot rescale to a biger size"
-    assert n_col > n_col_res, "Cannot rescale to a biger size"
-    assert n_col % n_col_res == 0, "low res should be a multiple"
-    assert n_row % n_row_res == 0, "low res should be a multiple"
-    n_row_res = int(n_row/int(n_row/n_row_res))
-    n_col_res = int(n_col/int(n_col/n_col_res))
-    ddm_res = np.zeros((n_row_res, n_col_res))
-    for row_i, row in enumerate(ddm_original):
-        for col_i, val in enumerate(row):
-            row_i_res = int(row_i/(n_row/n_row_res))
-            col_i_res = int(col_i/(n_col/n_col_res))
-            ddm_res[row_i_res,col_i_res] += val
-    return ddm_res
+from gnssr.utils import *
 
 def main():
 
@@ -56,11 +40,11 @@ def main():
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/5
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/4
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/5
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -264,6 +248,7 @@ def main():
             )
     fig_snr.colorbar(contour_snr, label='Correlated Power [Watts]')
 
+    print("max: {}".format(np.max(ddm_diff_res)))
 
     plt.show()
 
