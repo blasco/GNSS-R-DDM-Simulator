@@ -41,10 +41,11 @@ def main():
             v_r = np.array([20, 20, 20]) # m/s
             )
 
+    #sim_config.jacobian_type = 'spherical'
     sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.target_x = -3e3;
-    sim_config.target_y = -1e3;
+    sim_config.target_x = -5e3;
+    sim_config.target_y = -5e3;
     u_10 = 5.0
     sim_config.u_10 = u_10
 
@@ -60,7 +61,7 @@ def main():
     sim_config.doppler_increment_end = 70
     sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/6
     sim_config.delay_increment_start = -1*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 30*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
     sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/6
     sim_config.coherent_integration_time = 30e-3 # sec
@@ -83,11 +84,11 @@ def main():
 
     # Surface mesh
     x_0 = 0
-    x_1 = 6e3 # meters
+    x_1 = 8e3 # meters
     n_x = 800
 
     y_0 = -1e3
-    y_1 = 6e3 # meters
+    y_1 = 8e3 # meters
     n_y = 800
 
     x_grid, y_grid = np.meshgrid(
@@ -168,7 +169,7 @@ def main():
     ddm_sim = np.copy(simulate_ddm(sim_config))
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 5.25
+    sim_config.u_10 = 5.1
     ddm_sim_1 = np.copy(simulate_ddm(sim_config))
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
@@ -245,11 +246,14 @@ def main():
             )
     fig_ddm_rescaled.colorbar(contour_rescaled, label='Correlated Power [Watts]')
 
-    # DDM Noise
+    # SNR
     T_noise_receiver = 232.09 + 246.85
     k_b = 1.38e-23 # J/K
     y_noise = 2/sim_config.coherent_integration_time*k_b*T_noise_receiver
     print("expected SNR: {}".format(y_noise))
+
+    from ptpython.repl import embed
+    embed(globals(), locals())
 
     fig_snr, ax_snr = plt.subplots(1,figsize=(10, 4))
     plt.title('SNR')
@@ -265,7 +269,6 @@ def main():
             aspect='auto'
             )
     fig_snr.colorbar(contour_snr, label='Correlated Power [Watts]')
-
 
     plt.show()
 

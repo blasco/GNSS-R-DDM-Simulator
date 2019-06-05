@@ -89,7 +89,6 @@ def sigma(delay, doppler, sim_config):
         radar_cross_section = sim_config.rcs
         wavelength = light_speed/sim_config.f_carrier
 
-        '''
         p = transmitting_power*wavelength**2/(4*np.pi)**3 * ( \
                     radar_cross_section(r_1, sim_config)/( \
                         np.linalg.norm(r_1-r_t)**2* \
@@ -107,9 +106,6 @@ def sigma(delay, doppler, sim_config):
                     sim_config.receiver_antenna_gain(r_2, sim_config) * \
                     sim_config.transmitting_antenna_gain(r_2, sim_config) \
                 )*sim_config.doppler_resolution*sim_config.delay_resolution
-                '''
-
-        p = 10*np.log10((radar_cross_section(r_1, sim_config) + radar_cross_section(r_2, sim_config)))
 
     # Plot
     #fig_sigma, ax_sigma = plt.subplots(1,figsize=(10, 4))

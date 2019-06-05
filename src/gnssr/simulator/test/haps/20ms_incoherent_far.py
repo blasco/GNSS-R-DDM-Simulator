@@ -11,23 +11,7 @@ from gnssr.simulator.isolines import *
 from gnssr.simulator.simulation_configuration import *
 from gnssr.simulator.ddm import *
 
-import cv2
-
-def rescale(ddm_original, n_row_res, n_col_res):
-    n_row, n_col = ddm_original.shape 
-    assert n_row > n_row_res, "Cannot rescale to a biger size"
-    assert n_col > n_col_res, "Cannot rescale to a biger size"
-    assert n_col % n_col_res == 0, "low res should be a multiple"
-    assert n_row % n_row_res == 0, "low res should be a multiple"
-    n_row_res = int(n_row/int(n_row/n_row_res))
-    n_col_res = int(n_col/int(n_col/n_col_res))
-    ddm_res = np.zeros((n_row_res, n_col_res))
-    for row_i, row in enumerate(ddm_original):
-        for col_i, val in enumerate(row):
-            row_i_res = int(row_i/(n_row/n_row_res))
-            col_i_res = int(col_i/(n_col/n_col_res))
-            ddm_res[row_i_res,col_i_res] += val
-    return ddm_res
+from gnssr.utils import *
 
 def main():
 
@@ -36,34 +20,35 @@ def main():
     sim_config.set_scenario_local_ref(
             h_t = 13.82e6, # m
             h_r = 20e3, # meters
-            elevation = 80.0*np.pi/180,
+            elevation = 70.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
             v_r = np.array([20, 20, 20]) # m/s
             )
 
+    #sim_config.jacobian_type = 'spherical'
     sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.target_x = -3e3;
-    sim_config.target_y = -1e3;
-    u_10 = 5.0
-    sim_config.u_10 = u_10
+    sim_config.u_10 = 10.00
 
-    sim_config.delay_chip /= 10
+    #sim_config.target_x = 5e3;
+    #sim_config.target_y = 0.5e3;
+    sim_config.target_x = 4e3;
+    sim_config.target_y = -4e3;
+
+    #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
 
     number_of_delay_pixels = 128 - 50
     number_of_doppler_pixels = 20 + 50
-    #number_of_delay_pixels = (128 - 50)*2
-    #number_of_doppler_pixels = (20 + 50)*2
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/6
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/5
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/6
-    sim_config.coherent_integration_time = 30e-3 # sec
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/5
+    sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
     delay_increment_end = sim_config.delay_increment_end 
@@ -82,12 +67,12 @@ def main():
     print("delay res: {0}".format(rescaled_delay_resolution_chips))
 
     # Surface mesh
-    x_0 = 0
-    x_1 = 6e3 # meters
+    x_0 = -1e3 # meters
+    x_1 = 10e3 # meters
     n_x = 800
 
-    y_0 = -1e3
-    y_1 = 6e3 # meters
+    y_0 = -10e3 # meters
+    y_1 = 1e3 # meters
     n_y = 800
 
     x_grid, y_grid = np.meshgrid(
@@ -168,7 +153,7 @@ def main():
     ddm_sim = np.copy(simulate_ddm(sim_config))
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 5.25
+    sim_config.u_10 = 10.01 # m/s
     ddm_sim_1 = np.copy(simulate_ddm(sim_config))
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
@@ -266,6 +251,7 @@ def main():
             )
     fig_snr.colorbar(contour_snr, label='Correlated Power [Watts]')
 
+    print("max: {}".format(np.max(ddm_diff_res)))
 
     plt.show()
 
