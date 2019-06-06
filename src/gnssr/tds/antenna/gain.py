@@ -89,6 +89,8 @@ def main():
     ax_gain.set_title('Gain Map')
     ax_gain.contourf(A, E, Z_gain_elev_azi, 25, cmap='jet')
 
+    print("antenna max gain: {0}".format(np.amax(Z_gain_elev_azi)))
+
     plt.show()
 
 if __name__ == '__main__':

@@ -23,18 +23,14 @@ def main():
 
     delay_chip = sim_config.delay_chip
 
-    # Decent noise results
-    #file_root_name = '2017-03-12-H18'
-    #target = targets['hibernia']
-    #group = '000035'
-    #index = 675
-
     file_root_name = '2015-12-04-H18'
     target = targets['devils_tower']
     group = '000066'
     index =  385 - 10
 
     tds = tds_data(file_root_name, group, index)
+
+    #sim_config.receiver_antenna_gain = lambda p1,p2: 12
 
     '''
     p = target_processor_power();
@@ -51,6 +47,8 @@ def main():
     ddm_tds = np.copy(p.sea_clutter)
     print("mean wind: {0}".format(mean_wind))
     '''
+
+    sim_config.fresnel_coefficient = 0.65
 
     n_tds = 20
     n = n_tds 
@@ -91,6 +89,7 @@ def main():
 
     mean_wind /= n_wind
     ddm_tds /= n
+    #np.flip(ddm_tds)
     noise_antenna_mean /= n 
     noise_rx_mean /= n
 
@@ -103,7 +102,7 @@ def main():
 
     sim_config.u_10 = 2.35
     #sim_config.phi_0 = 130*np.pi/180 # 0.547
-    sim_config.phi_0 = 80*np.pi/180 # max power diff: 0.58
+    sim_config.phi_0 = 45*np.pi/180 # max power diff: 0.58
 
     # Plot TDS DDM sea clutter
     tds.set_group_index(group, index)
@@ -156,7 +155,6 @@ def main():
     v_t = np.array([v_tx,v_ty,v_tz])
     v_r = np.array([v_rx,v_ry,v_rz])
 
-    import pdb; pdb.set_trace() # break
     print("h_r: {}".format(h_r))
     print("h_t: {}".format(h_t))
     print("elevation: {}".format(elevation))
@@ -174,10 +172,10 @@ def main():
     # DDM
     sim_config.delay_increment_start = tds_delay_start*delay_chip
     sim_config.delay_increment_end = tds_delay_end*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/tds_number_of_delay_pixels/3
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/tds_number_of_delay_pixels/4
     sim_config.doppler_increment_start = tds_doppler_start
     sim_config.doppler_increment_end = tds_doppler_end + tds_doppler_resolution
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/tds_number_of_doppler_pixels/3
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/tds_number_of_doppler_pixels/4
 
     ddm_sim = (simulate_ddm(sim_config))
 
@@ -225,6 +223,9 @@ def main():
 
     # Difference
 
+    from ptpython.repl import embed # console
+    embed(globals(), locals())
+
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('Difference')
     plt.xlabel('C/A chips')
@@ -254,6 +255,8 @@ def main():
     ddm_diff[:,-1] = 0
     ddm_diff[0,0] = 0
     ddm_diff[0,1] = 1
+
+    np.place(ddm_diff, np.abs(ddm_diff) > 2, 0.1)
 
     print(file_root_name)
     print("h_r: {}".format(h_r))

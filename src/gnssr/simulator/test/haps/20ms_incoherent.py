@@ -22,13 +22,17 @@ def main():
             h_r = 20e3, # meters
             elevation = 70.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
-            v_r = np.array([20, 20, 20]) # m/s
+            v_r = np.array([33, 0, 0]) # m/s
             )
 
+    sim_config.target_x = 0e3 #m
+    sim_config.target_y = -6e3 #m
+
     #sim_config.jacobian_type = 'spherical'
-    sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
+    sim_config.receiver_antenna_gain = lambda p1,p2: 25*2
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00
+    sim_config.fresnel = 1
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
@@ -40,11 +44,11 @@ def main():
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/4
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/12
     sim_config.delay_increment_start = -1*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 5*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/8
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -64,12 +68,12 @@ def main():
     print("delay res: {0}".format(rescaled_delay_resolution_chips))
 
     # Surface mesh
-    x_0 = 0
-    x_1 = 6e3 # meters
+    x_0 = -8e3 
+    x_1 = 8e3 # meters
     n_x = 800
 
-    y_0 = -1e3
-    y_1 = 6e3 # meters
+    y_0 = -8e3
+    y_1 = 8e3 # meters
     n_y = 800
 
     x_grid, y_grid = np.meshgrid(
@@ -92,14 +96,29 @@ def main():
 
     #contour_delay_chip = ax_rcs.contour(
     #        x_grid, y_grid, z_grid_delay_chip, 
-    #        np.arange(0, 2, 0.1), 
-    #        cmap='winter', alpha = 0.3
+    #        np.arange(0, 10, delay_resolution/delay_chip), 
+    #        cmap='jet', alpha = 0.3
     #        )
     #contour_doppler = ax_rcs.contour(
     #        x_grid, y_grid, z_grid_doppler_increment, 
-    #        np.arange(-50, 50, 1), 
+    #        np.arange(-70, 70, doppler_resolution), 
     #        cmap='jet', alpha = 0.3
     #        )
+
+    contour_delay_chip = ax_rcs.contour(
+            x_grid, y_grid, z_grid_delay_chip, 
+            np.arange(0, 10, 1), 
+            cmap='winter', alpha = 0.4,
+            linewidths = 2.5,
+            linestyles='dashed',
+            )
+    contour_doppler = ax_rcs.contour(
+            x_grid, y_grid, z_grid_doppler_increment, 
+            np.arange(-70, 70, 1), 
+            cmap='jet', alpha = 0.4,
+            linewidths = 2.5,
+            linestyles='dashed',
+            )
     contour_rcs = ax_rcs.contourf(x_grid, y_grid, z_rcs, 55, cmap='jet', alpha = 0.8)
 
     ax_rcs.set_title('RCS')
@@ -239,7 +258,7 @@ def main():
     plt.ylabel('Hz')
 
     ddm_snr = 10*np.log10(np.abs(ddm_diff_res)/y_noise)
-    np.place(ddm_snr, ddm_snr < -5.2, np.nan)
+    np.place(ddm_snr, ddm_snr < -18, np.nan)
     contour_snr = ax_snr.imshow(ddm_snr, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 

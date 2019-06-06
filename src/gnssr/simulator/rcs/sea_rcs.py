@@ -61,24 +61,35 @@ def slope_probability_density_function(x, u_10, phi_0):
         [0, rms_c**2]
     ])
 
+    chi = s[0]/rms_u;
+    nu = s[1]/rms_c;
+
+    c_21 = 0.45*(0.01 - 0.0086*f_u_10(u_10))
+    c_30 = 0.45*(0.04 - 0.033*f_u_10(u_10))
+    c_04 = 0.45*(0.4)
+    c_22 = 0.45*(0.12)
+    c_40 = 0.45*(0.23)
+
     hermite_coeficients = np.zeros((5,5))
     hermite_coeficients[0,0] = 1
-    #hermite_coeficients[2,2] = (0.01 - 0.0086*f_u_10(u_10))
-    #hermite_coeficients[3,0] = (0.04 -0.033*f_u_10(u_10))
-    #hermite_coeficients[0,4] = (0.4)
-    #hermite_coeficients[2,2] = (0.12)
-    #hermite_coeficients[4,0] = (0.23)
+    hermite_coeficients[1,2] = c_21
+    hermite_coeficients[3,0] = c_30
+    hermite_coeficients[0,4] = c_04
+    hermite_coeficients[2,2] = c_22
+    hermite_coeficients[4,0] = c_40
 
     result = 1/(2*np.pi*rms_u*rms_c) * \
             np.exp(
                 -1/2*( \
                         (s[0]/rms_u)**2 + (s[1]/rms_c)**2 \
                      ) \
-            ) * \
-            np.polynomial.hermite.hermval2d(s[0]/rms_u, s[1]/rms_c, hermite_coeficients)
-
-
-    #import pdb; pdb.set_trace() # break
+            ) \
+            #* ( \
+            #    1.0 - 0.5*c_21*(chi**2-1.0)*nu - 1.0/6.0*c_30*(nu**3-3.0*nu) + \
+            #    1.0/24.0*c_04*(chi**4-6.0*chi**2+3.0) + \
+            #    1.0/4.0*c_22*(chi**2-1.0)*(nu**2-1.0) + \
+            #    1.0/24.0*c_40*(nu**4-6.0*nu**2+3.0) \
+            #)
 
     np.place(result, result < 0, 0)
     return result
