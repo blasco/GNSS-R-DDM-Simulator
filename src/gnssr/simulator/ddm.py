@@ -60,6 +60,11 @@ def simulate_ddm(sim_config):
     sigma_matrix = sigma_matrix.real
     waf_matrix = woodward_ambiguity_function(delay_grid_waf, doppler_grid_waf, sim_config)**2
     waf_matrix = waf_matrix.real
-    #ddm_matrix = signal.convolve2d(sigma_matrix, waf_matrix, mode='same')
-    ddm_matrix = np.fft.irfft2(np.fft.rfft2(sigma_matrix) * np.fft.rfft2(np.fft.ifftshift(waf_matrix), (sigma_matrix.shape)))
+
+    ddm_matrix = np.zeros(waf_matrix.shape)
+    if (sim_config.convolve_type == 'fft'):
+        ddm_matrix = np.fft.irfft2(np.fft.rfft2(sigma_matrix) * np.fft.rfft2(np.fft.ifftshift(waf_matrix), (sigma_matrix.shape)))
+    elif (sim_config.convolve_type == 'convolve'):
+        ddm_matrix = signal.convolve2d(sigma_matrix, waf_matrix, mode='same')
+
     return ddm_matrix

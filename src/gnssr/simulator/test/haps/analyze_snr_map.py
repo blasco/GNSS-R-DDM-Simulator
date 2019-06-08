@@ -31,6 +31,13 @@ with open('results_snr_map.pkl', 'rb') as f:
                 ),
             aspect = "auto"
             )
-    fig_snr_grid.colorbar(contour)
+    plt.xlabel("[km]")
+    plt.ylabel("[km]")
+    fig_snr_grid.colorbar(contour, label="SNR [dB]")
+
+    ticks_y = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y/1000))
+    ticks_x = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x/1000))
+    ax_snr_grid.xaxis.set_major_formatter(ticks_x)
+    ax_snr_grid.yaxis.set_major_formatter(ticks_y)
 
     plt.show()

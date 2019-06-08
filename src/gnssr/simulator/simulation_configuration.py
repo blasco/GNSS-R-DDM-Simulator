@@ -44,6 +44,7 @@ class simulation_configuration:
         self.rcs = radar_cross_section
 
         self.jacobian_type = 'planar'
+        self.convolve_type = 'convolve'
 
         self.receiver_antenna_gain = tds_antenna.receiver_antenna_gain
         self.transmitting_antenna_gain = tds_antenna.transmitting_antenna_gain

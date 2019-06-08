@@ -20,19 +20,20 @@ def main():
     sim_config.set_scenario_local_ref(
             h_t = 13.82e6, # m
             h_r = 20e3, # meters
-            elevation = 80.0*np.pi/180,
+            elevation = 70.0*np.pi/180,
             v_t = np.array([-2684.911, 1183.799, -671.829]), # m/s
-            v_r = np.array([-33, 0, 0]) # m/s
+            v_r = np.array([33, 0, 0]) # m/s
             )
 
-    sim_config.receiver_antenna_gain = lambda p1,p2: 50
+    sim_config.receiver_antenna_gain = lambda p1,p2: 1
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.target_x = 0e3;
-    sim_config.target_y = -3e3;
+    sim_config.target_x = 5e3;
+    sim_config.target_y = 0.5e3;
 
-    sim_config.fresnel = 1;
+    sim_config.fresnel = 0.65;
+    sim_config.convolve_type = 'fft'
 
-    u_10 = 5.0
+    u_10 = 10.0
     sim_config.u_10 = u_10
 
     sim_config.delay_chip /= 10
@@ -45,11 +46,11 @@ def main():
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/14
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/8
     sim_config.delay_increment_start = -1*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 40*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/5
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -171,7 +172,7 @@ def main():
     ddm_sim = np.copy(simulate_ddm(sim_config))
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 5.25
+    sim_config.u_10 = 10.8
     ddm_sim_1 = np.copy(simulate_ddm(sim_config))
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
 
@@ -260,7 +261,7 @@ def main():
     plt.ylabel('Hz')
 
     ddm_snr = 10*np.log10(np.abs(ddm_diff_res)/y_noise)
-    np.place(ddm_snr, ddm_snr < -10, np.nan)
+    np.place(ddm_snr, ddm_snr < -30, np.nan)
     contour_snr = ax_snr.imshow(ddm_snr, cmap='jet', 
             extent=(
                 delay_increment_start/delay_chip, delay_increment_end/delay_chip, 

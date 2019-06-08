@@ -20,13 +20,13 @@ import pickle
 def main():
 
     # Surface mesh
-    x_0 = -7e3 
-    x_1 = 7e3 # meters
-    n_x = 50
+    x_0 = -8e3 
+    x_1 = 8e3 # meters
+    n_x = 20
 
-    y_0 = -7e3
-    y_1 = 7e3 # meters
-    n_y = 50 
+    y_0 = -8e3
+    y_1 = 8e3 # meters
+    n_y = 20
 
     x_grid, y_grid = np.meshgrid(
        np.linspace(x_0, x_1, n_x), 
@@ -45,7 +45,7 @@ def main():
                 ])
 
     with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
-        for results in executor.map(compute_snr, parallel_grid, chunksize=1):
+        for results in executor.map(compute_snr, parallel_grid, chunksize=5):
             x_pos, y_pos, z_val = results
             z_grid[x_pos][y_pos] = z_val
 
@@ -68,7 +68,8 @@ def compute_snr(parallel_input):
             )
 
     #sim_config.jacobian_type = 'spherical'
-    sim_config.receiver_antenna_gain = lambda p1,p2: 12.589
+    sim_config.convolve_type = 'fft'
+    sim_config.receiver_antenna_gain = lambda p1,p2: 1
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00
 
@@ -79,10 +80,10 @@ def compute_snr(parallel_input):
     number_of_doppler_pixels = 20 + 50
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/3
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/8
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/3
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
