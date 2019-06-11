@@ -21,6 +21,8 @@ import pickle
 with open('results_snr_map.pkl', 'rb') as f:
     x_grid, y_grid, z_grid = pickle.load(f)
 
+    np.place(z_grid, z_grid < -30, -30)
+
     fig_snr_grid, ax_snr_grid = plt.subplots(1,figsize=(10, 4))
     #contour = plt.contourf(x_grid, y_grid, z_grid, cmap="jet")
     contour = ax_snr_grid.imshow(z_grid, cmap="jet",

@@ -22,11 +22,11 @@ def main():
     # Surface mesh
     x_0 = -8e3 
     x_1 = 8e3 # meters
-    n_x = 20
+    n_x = 50
 
     y_0 = -8e3
     y_1 = 8e3 # meters
-    n_y = 20
+    n_y = 50
 
     x_grid, y_grid = np.meshgrid(
        np.linspace(x_0, x_1, n_x), 
@@ -72,6 +72,7 @@ def compute_snr(parallel_input):
     sim_config.receiver_antenna_gain = lambda p1,p2: 1
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00
+    sim_config.fresnel = 0.65 
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip

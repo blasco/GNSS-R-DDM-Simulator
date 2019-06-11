@@ -33,7 +33,7 @@ def main():
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00
     sim_config.fresnel = 0.65 
-    sim_config.convolve_type = 'fft'
+    #sim_config.convolve_type = 'fft' # SNR -18.7
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
