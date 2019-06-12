@@ -33,7 +33,7 @@ def main():
     sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00
     sim_config.fresnel = 0.65 
-    #sim_config.convolve_type = 'fft' # SNR -18.7
+    sim_config.convolve_type = 'fft' # SNR -18.7
 
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
@@ -45,11 +45,11 @@ def main():
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/4
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/15
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/4
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/8
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -95,16 +95,16 @@ def main():
     # Plot
     fig_rcs, ax_rcs = plt.subplots(1,figsize=(10, 4))
 
-    #contour_delay_chip = ax_rcs.contour(
-    #        x_grid, y_grid, z_grid_delay_chip, 
-    #        np.arange(0, 10, delay_resolution/delay_chip), 
-    #        cmap='jet', alpha = 0.3
-    #        )
-    #contour_doppler = ax_rcs.contour(
-    #        x_grid, y_grid, z_grid_doppler_increment, 
-    #        np.arange(-70, 70, doppler_resolution), 
-    #        cmap='jet', alpha = 0.3
-    #        )
+    contour_delay_chip = ax_rcs.contour(
+            x_grid, y_grid, z_grid_delay_chip, 
+            np.arange(0, 10, delay_resolution/delay_chip), 
+            cmap='jet', alpha = 0.3
+            )
+    contour_doppler = ax_rcs.contour(
+            x_grid, y_grid, z_grid_doppler_increment, 
+            np.arange(-70, 70, doppler_resolution), 
+            cmap='jet', alpha = 0.3
+            )
 
     #contour_delay_chip = ax_rcs.contour(
     #        x_grid, y_grid, z_grid_delay_chip, 
