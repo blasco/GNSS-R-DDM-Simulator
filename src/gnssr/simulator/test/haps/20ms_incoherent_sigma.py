@@ -38,18 +38,18 @@ def main():
     #sim_config.delay_chip = 1/gps_ca_chips_per_second # seconds
     delay_chip = sim_config.delay_chip
 
-    number_of_delay_pixels = 128 - 50
-    number_of_doppler_pixels = 20 + 50
-    #number_of_delay_pixels = (128 - 50)*2
-    #number_of_doppler_pixels = (20 + 50)*2
+    #number_of_delay_pixels = 128 - 50
+    #number_of_doppler_pixels = 20 + 50
+    number_of_delay_pixels = (128 - 50)*2
+    number_of_doppler_pixels = (20 + 50)*2
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
     sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/15
     sim_config.delay_increment_start = -1*delay_chip
-    sim_config.delay_increment_end = 10*delay_chip
+    sim_config.delay_increment_end = 7*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/8
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/15
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -167,12 +167,25 @@ def main():
 
     # DDM
 
-    ddm_sim, ddm_waf = simulate_ddm_waf(sim_config)
+    ddm_sim, ddm_waf, ddm_sigma = simulate_ddm_waf(sim_config)
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
-    sim_config.u_10 = 10.00 # m/s
-    ddm_sim_1 = np.copy(simulate_ddm(sim_config))
+    sim_config.u_10 = 10.5 # m/s
+    ddm_sim_1, _, ddm_sigma_1 = simulate_ddm_waf(sim_config)
     ddm_diff = np.abs(ddm_sim - ddm_sim_1)
+    ddm_diff_sigma = np.abs(ddm_sigma - ddm_sigma_1)
+
+    fig_diff_sigma, ax_diff_sigma = plt.subplots(1,figsize=(10, 4))
+    plt.title('DDM diff Sigma simulation')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+    contour_diff = ax_diff_sigma.imshow(ddm_diff_sigma, cmap='jet', 
+            extent=(
+                delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
+                doppler_increment_end, doppler_increment_start), 
+            aspect="auto"
+            )
+    fig_diff_sigma.colorbar(contour_diff, label='Correlated Power [Watts]')
 
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('DDM diff simulation')
@@ -223,9 +236,24 @@ def main():
     #ddm_rescaled = rescale(ddm_diff, number_of_doppler_pixels, number_of_delay_pixels)
 
     ddm_sim_res = rescale(ddm_sim, number_of_doppler_pixels, number_of_delay_pixels)
+    ddm_sigma_res = rescale(ddm_sigma, number_of_doppler_pixels, number_of_delay_pixels)
     ddm_sim_1_res = rescale(ddm_sim_1, number_of_doppler_pixels, number_of_delay_pixels)
+    ddm_sigma_1_res = rescale(ddm_sigma_1, number_of_doppler_pixels, number_of_delay_pixels)
     ddm_waf_res = rescale(ddm_waf, number_of_doppler_pixels, number_of_delay_pixels)
     ddm_diff_res = np.abs(ddm_sim_res - ddm_sim_1_res)
+    ddm_diff_sigma_res = np.abs(ddm_sigma_res - ddm_sigma_1_res)
+
+    fig_ddm_diff_sigma_res, ax_ddm_diff_sigma_res = plt.subplots(1,figsize=(10, 4))
+    plt.title('Deconv')
+    plt.xlabel('C/A chips')
+    plt.ylabel('Hz')
+    contour_rescaled = ax_ddm_diff_sigma_res.imshow(ddm_diff_sigma_res, cmap='jet', 
+            extent=(
+                delay_increment_start/delay_chip, delay_increment_end/delay_chip, 
+                doppler_increment_end, doppler_increment_start), 
+            aspect='auto'
+            )
+    fig_ddm_diff_sigma_res.colorbar(contour_rescaled, label='Correlated Power [Watts]')
 
     ddm_deconv = np.fft.irfft2(np.fft.rfft2(ddm_sim) / np.fft.rfft2(np.fft.ifftshift(ddm_waf)))
 
