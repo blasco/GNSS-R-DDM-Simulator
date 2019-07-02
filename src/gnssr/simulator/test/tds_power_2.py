@@ -48,7 +48,7 @@ def main():
     print("mean wind: {0}".format(mean_wind))
     '''
 
-    sim_config.fresnel_coefficient = 0.65
+    sim_config.fresnel_coefficient = 0.8
 
     n_tds = 20
     n = n_tds 
@@ -223,9 +223,6 @@ def main():
 
     # Difference
 
-    from ptpython.repl import embed # console
-    embed(globals(), locals())
-
     fig_diff, ax_diff = plt.subplots(1,figsize=(10, 4))
     plt.title('Difference')
     plt.xlabel('C/A chips')
@@ -265,7 +262,6 @@ def main():
     print("v_r: {}".format(np.linalg.norm(v_r)))
     print("v_t: {}".format(np.linalg.norm(v_t)))
     print("max diff: {}".format(np.max(ddm_diff[1:,1:])))
-
 
     im = ax_diff.imshow(ddm_diff, cmap='jet', 
             extent=(tds_delay_start, tds_delay_end, tds_doppler_end, tds_doppler_start), 
