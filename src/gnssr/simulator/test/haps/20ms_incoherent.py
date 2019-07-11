@@ -45,11 +45,11 @@ def main():
 
     sim_config.doppler_increment_start = -70
     sim_config.doppler_increment_end = 70
-    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/15
+    sim_config.doppler_resolution = (sim_config.doppler_increment_end - sim_config.doppler_increment_start)/number_of_doppler_pixels/3
     sim_config.delay_increment_start = -1*delay_chip
     sim_config.delay_increment_end = 10*delay_chip
     #sim_config.delay_resolution = 0.01*delay_chip
-    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/8
+    sim_config.delay_resolution = (sim_config.delay_increment_end - sim_config.delay_increment_start)/number_of_delay_pixels/3
     sim_config.coherent_integration_time = 20e-3 # sec
 
     delay_increment_start = sim_config.delay_increment_start 
@@ -95,31 +95,31 @@ def main():
     # Plot
     fig_rcs, ax_rcs = plt.subplots(1,figsize=(10, 4))
 
-    contour_delay_chip = ax_rcs.contour(
-            x_grid, y_grid, z_grid_delay_chip, 
-            np.arange(0, 10, delay_resolution/delay_chip), 
-            cmap='jet', alpha = 0.3
-            )
-    contour_doppler = ax_rcs.contour(
-            x_grid, y_grid, z_grid_doppler_increment, 
-            np.arange(-70, 70, doppler_resolution), 
-            cmap='jet', alpha = 0.3
-            )
-
     #contour_delay_chip = ax_rcs.contour(
     #        x_grid, y_grid, z_grid_delay_chip, 
-    #        np.arange(0, 10, 1), 
-    #        cmap='winter', alpha = 0.4,
-    #        linewidths = 2.5,
-    #        linestyles='dashed',
+    #        np.arange(0, 10, delay_resolution/delay_chip), 
+    #        cmap='jet', alpha = 0.3
     #        )
     #contour_doppler = ax_rcs.contour(
     #        x_grid, y_grid, z_grid_doppler_increment, 
-    #        np.arange(-70, 70, 1), 
-    #        cmap='jet', alpha = 0.4,
-    #        linewidths = 2.5,
-    #        linestyles='dashed',
+    #        np.arange(-70, 70, doppler_resolution), 
+    #        cmap='jet', alpha = 0.3
     #        )
+
+    contour_delay_chip = ax_rcs.contour(
+            x_grid, y_grid, z_grid_delay_chip, 
+            np.arange(0, 10, 0.1), 
+            cmap='winter', alpha = 0.4,
+            linewidths = 2.5,
+            linestyles='dashed',
+            )
+    contour_doppler = ax_rcs.contour(
+            x_grid, y_grid, z_grid_doppler_increment, 
+            np.arange(-70, 70, 1), 
+            cmap='jet', alpha = 0.4,
+            linewidths = 2.5,
+            linestyles='dashed',
+            )
     contour_rcs = ax_rcs.contourf(x_grid, y_grid, z_rcs, 55, cmap='jet', alpha = 0.8)
 
     ax_rcs.set_title('RCS')
@@ -167,7 +167,7 @@ def main():
 
     # DDM
 
-    ddm_sim, ddm_waf = simulate_ddm_waf(sim_config)
+    ddm_sim, ddm_waf, ddm_sigma = simulate_ddm_waf(sim_config)
     sim_config.rcs = sea_rcs.radar_cross_section
     #sim_config.rcs = lambda p1,p2: target_rcs.radar_cross_section(p1, 0, p2)
     sim_config.u_10 = 10.00 # m/s
